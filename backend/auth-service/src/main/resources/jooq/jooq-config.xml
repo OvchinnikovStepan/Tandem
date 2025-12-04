@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns="http://www.jooq.org/xsd/jooq-codegen-3.19.0.xsd">
+
+    <jdbc>
+        <driver>org.postgresql.Driver</driver>
+        <url>jdbc:postgresql://postgres:5432/auth_db</url>
+        <user>auth_user</user>
+        <password>auth_pass</password>
+    </jdbc>
+
+    <generator>
+        <database>
+            <name>org.jooq.meta.postgres.PostgresDatabase</name>
+
+            <!-- Путь к миграциям -->
+            <properties>
+                <property>
+                    <key>locations</key>
+                    <value>filesystem:src/main/resources/db/migration</value>
+                </property>
+            </properties>
+
+            <inputSchema>public</inputSchema>
+        </database>
+
+        <target>
+            <packageName>com.tandem.jooq</packageName>
+            <directory>src/main/java</directory>
+        </target>
+    </generator>
+
+</configuration>
