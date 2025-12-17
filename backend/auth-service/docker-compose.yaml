@@ -2,7 +2,7 @@ services:
 
   postgres:
     image: postgres:16
-    container_name: postgres
+    container_name: auth_postgres
     environment:
       POSTGRES_DB: auth_db
       POSTGRES_USER: auth_user
@@ -13,27 +13,21 @@ services:
       test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
       interval: 5s
       retries: 10
-
-  maven:
-    image: maven:3.9.9-eclipse-temurin-21
-    container_name: auth_maven
-    working_dir: /app
     volumes:
-      - ./:/app
       - postgres_data:/var/lib/postgresql/data
+
+  auth-service:
+    build: .
+    container_name: auth_service
     depends_on:
       postgres:
         condition: service_healthy
-    command: bash -c "
-      mvn flyway:migrate \
-      -Dflyway.url=jdbc:postgresql://postgres:5432/auth_db \
-      -Dflyway.user=auth_user \
-      -Dflyway.password=auth_pass \
-      -Dflyway.locations=filesystem:src/main/resources/db/migration &&
-      mvn jooq-codegen:generate
-      "
-
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: auth_user
+      SPRING_DATASOURCE_PASSWORD: auth_pass
 
 volumes:
   postgres_data:
-
