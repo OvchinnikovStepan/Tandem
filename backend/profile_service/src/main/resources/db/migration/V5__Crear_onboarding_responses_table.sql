@@ -6,7 +6,8 @@ CREATE TABLE onboarding_responses (
     answer_text TEXT,
     answer_array TEXT[], -- For multiselect
     created_at TIMESTAMP NOT NULL,
-    UNIQUE(user_id, poll_id, question_id),
-    INDEX idx_user_id (user_id),
-    INDEX idx_poll_id (poll_id)
+    UNIQUE (user_id, poll_id, question_id)
 );
+
+CREATE INDEX idx_onboarding_responses_user_id ON onboarding_responses (user_id);
+CREATE INDEX idx_onboarding_responses_poll_id ON onboarding_responses (poll_id);

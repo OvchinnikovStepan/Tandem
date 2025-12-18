@@ -9,6 +9,8 @@ CREATE TABLE questions (
     validation_rules JSONB,
     options JSONB, -- For select/multiselect types
     created_at TIMESTAMP NOT NULL,
-    UNIQUE(poll_id, question_order),
-    INDEX idx_poll_id (poll_id)
+    profile_field VARCHAR(50), -- Maps to profiles table column (e.g., 'name', 'surname', 'city')
+    UNIQUE (poll_id, question_order)
 );
+
+CREATE INDEX idx_questions_poll_id ON questions (poll_id);

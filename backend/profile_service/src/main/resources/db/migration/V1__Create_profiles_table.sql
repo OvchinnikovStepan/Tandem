@@ -1,8 +1,8 @@
 CREATE TABLE profiles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL UNIQUE,
-    name VARCHAR(100) NOT NULL,
-    surname VARCHAR(100) NOT NULL,
+    name VARCHAR(100),
+    surname VARCHAR(100),
     phone_number VARCHAR(20),
     email VARCHAR(255),
     status VARCHAR(100),

@@ -34,6 +34,8 @@ public class Question {
 
     private List<String> options; // Для select/multiselect
 
+    private String profileField;
+
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 

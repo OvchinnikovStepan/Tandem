@@ -168,23 +168,4 @@ public class ProfileController {
                     .body(UpdateResponse.failure());
         }
     }
-
-    /**
-     * POST /api/profile/me/complete-onboarding
-     * Отмечает процесс онбординга пользователя как завершенный.
-     */
-    @PostMapping("/profile/me/complete-onboarding")
-    public ResponseEntity<UpdateResponse> completeMyOnboarding() {
-
-        UUID currentUserId = getCurrentUserId();
-
-        try {
-            Profile updatedProfile = profileService.completeOnboarding(currentUserId);
-            ProfileResponse profileResponse = ProfileResponse.forOwner(updatedProfile);
-            return ResponseEntity.ok(UpdateResponse.success(profileResponse));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(UpdateResponse.failure());
-        }
-    }
 }
