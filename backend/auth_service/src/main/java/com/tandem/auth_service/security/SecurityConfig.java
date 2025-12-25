@@ -1,4 +1,4 @@
-package com.tandem.auth_service.config;
+package com.tandem.auth_service.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

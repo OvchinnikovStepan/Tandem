@@ -29,6 +29,7 @@ import com.tandem.auth_service.api.dto.response.RefreshTokenResponse;
 import com.tandem.auth_service.api.dto.response.RegisterEmailResponse;
 import com.tandem.auth_service.api.dto.response.RegisterPhoneResponse;
 import com.tandem.auth_service.api.dto.response.VerifyPhoneResponse;
+import com.tandem.auth_service.service.registration.RegistrationService;
 
 import jakarta.validation.Valid;
 
@@ -36,29 +37,43 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private final RegistrationService registrationService;
+
+    public AuthController(RegistrationService registrationService) {
+        this.registrationService = registrationService;
+    }
+
     @PostMapping("/register/phone")
     public RegisterPhoneResponse registerPhone(
-        @Valid @RequestBody RegisterPhoneRequest request
-    ) {
-        return new RegisterPhoneResponse("stub-verification-id");
+                @Valid @RequestBody RegisterPhoneRequest request
+        ) {
+            UUID verificationId =
+                registrationService.startPhoneRegistration(request.phoneNumber());
+
+            return new RegisterPhoneResponse(verificationId.toString());
     }
 
     @PostMapping("/register/verify")
     public VerifyPhoneResponse verifyPhone(
             @Valid @RequestBody VerifyPhoneRequest request
     ) {
+        registrationService.verifyPhone(
+            request.verificationId(),
+            request.code()
+        );
+
         return new VerifyPhoneResponse(true);
     }
+
 
     @PostMapping("/register/email")
     public RegisterEmailResponse registerEmail(
             @Valid @RequestBody RegisterEmailRequest request
     ) {
-        return new RegisterEmailResponse(
-                "user-id",
-                "access-token",
-                "refresh-token",
-                PasswordStrength.GOOD
+        return registrationService.completeRegistration(
+                request.verificationId(),
+                request.email(),
+                request.password()
         );
     }
 
@@ -103,7 +118,6 @@ public class AuthController {
                         "+79990000000",
                         true,
                         true,
-                        "ACTIVE",
                         LocalDateTime.now(),
                         null
                 )

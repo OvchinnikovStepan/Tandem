@@ -1,9 +1,11 @@
 package com.tandem.auth_service.api.dto.response;
 
+import java.util.UUID;
+
 import com.tandem.auth_service.api.dto.PasswordStrength;
 
 public record RegisterEmailResponse(
-        String userId,
+        UUID userId,
         String accessToken,
         String refreshToken,
         PasswordStrength passwordStrength

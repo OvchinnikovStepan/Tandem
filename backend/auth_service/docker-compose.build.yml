@@ -23,19 +23,5 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: >
-      bash -c "
-        apt-get update && \
-        apt-get install -y postgresql-client netcat-openbsd && \
-        echo 'Waiting for Postgres to be ready...'; \
-        until pg_isready -h postgres -U auth_user -d auth_db; do \
-          sleep 2; \
-        done; \
-        echo 'Postgres is ready, running migrations...'; \
-        mvn flyway:migrate -Dflyway.url=jdbc:postgresql://postgres:5432/auth_db -Dflyway.user=auth_user -Dflyway.password=auth_pass
-        echo 'Running jOOQ code generation...'; \
-        mvn jooq-codegen:generate && \
-        echo 'Building project package...'; \
-        mvn clean package -DskipTests
-      "
+    command: ["bash", "/app/build.sh"]
 

@@ -9,7 +9,6 @@ public record UserDto(
         String phoneNumber,
         boolean emailVerified,
         boolean phoneVerified,
-        String status,
         LocalDateTime createdAt,
         LocalDateTime lastLoginAt
 ) {}

@@ -2,13 +2,12 @@ CREATE TABLE users (
     id UUID PRIMARY KEY,
     phone_number VARCHAR(20) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255),
     email_verified BOOLEAN DEFAULT FALSE,
     phone_verified BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    last_login_at TIMESTAMP,
-    status VARCHAR(20) DEFAULT 'ACTIVE'
+    last_login_at TIMESTAMP
 );
 
 CREATE TABLE sessions (
