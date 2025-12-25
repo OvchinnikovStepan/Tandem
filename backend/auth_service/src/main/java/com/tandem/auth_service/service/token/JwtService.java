@@ -6,4 +6,5 @@ public interface JwtService {
     String generateAccessToken(UUID userId, String email);
     boolean validateToken(String token);
     UUID extractUserId(String token);
+    String extractEmail(String token);
 }

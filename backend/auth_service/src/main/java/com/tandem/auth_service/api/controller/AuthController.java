@@ -1,6 +1,5 @@
 package com.tandem.auth_service.api.controller;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -12,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+
 
 import com.tandem.auth_service.api.dto.PasswordStrength;
 import com.tandem.auth_service.api.dto.SessionDto;
@@ -25,21 +26,28 @@ import com.tandem.auth_service.api.dto.request.VerifyPhoneRequest;
 import com.tandem.auth_service.api.dto.response.CheckPasswordStrengthResponse;
 import com.tandem.auth_service.api.dto.response.LoginResponse;
 import com.tandem.auth_service.api.dto.response.LogoutResponse;
+import com.tandem.auth_service.api.dto.response.MeResponse;
 import com.tandem.auth_service.api.dto.response.RefreshTokenResponse;
 import com.tandem.auth_service.api.dto.response.RegisterEmailResponse;
 import com.tandem.auth_service.api.dto.response.RegisterPhoneResponse;
 import com.tandem.auth_service.api.dto.response.VerifyPhoneResponse;
+import com.tandem.auth_service.security.AuthPrincipal;
+import com.tandem.auth_service.service.auth.AuthService;
 import com.tandem.auth_service.service.registration.RegistrationService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private final AuthService authService;
     private final RegistrationService registrationService;
 
-    public AuthController(RegistrationService registrationService) {
+    public AuthController(RegistrationService registrationService, AuthService authService) {
+        this.authService = authService;
         this.registrationService = registrationService;
     }
 
@@ -93,8 +101,12 @@ public class AuthController {
     public LoginResponse login(
             @Valid @RequestBody LoginRequest request
     ) {
-        return new LoginResponse("access-token", "refresh-token");
+        return authService.login(
+                request.email(),
+                request.password()
+        );
     }
+
 
     @PostMapping("/logout")
     public LogoutResponse logout() {
@@ -108,21 +120,18 @@ public class AuthController {
         return new RefreshTokenResponse("new-access-token");
     }
 
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/me")
-    public Map<String, UserDto> me() {
-        return Map.of(
-                "user",
-                new UserDto(
-                        UUID.randomUUID(),
-                        "test@example.com",
-                        "+79990000000",
-                        true,
-                        true,
-                        LocalDateTime.now(),
-                        null
-                )
-        );
+    public MeResponse me(Authentication authentication) {
+
+        AuthPrincipal principal =
+                (AuthPrincipal) authentication.getPrincipal();
+
+        UserDto user = authService.getCurrentUser(principal.userId());
+
+        return new MeResponse(user);
     }
+
 
     @GetMapping("/sessions")
     public Map<String, List<SessionDto>> sessions() {

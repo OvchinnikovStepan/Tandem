@@ -68,4 +68,15 @@ public class JwtServiceImpl implements JwtService {
             throw new IllegalStateException("Invalid token", e);
         }
     }
+
+    @Override
+    public String extractEmail(String token) {
+        try {
+            SignedJWT jwt = SignedJWT.parse(token);
+            return jwt.getJWTClaimsSet().getStringClaim("email");
+        } catch (Exception e) {
+            throw new IllegalStateException("Invalid token", e);
+        }
+    }
+
 }

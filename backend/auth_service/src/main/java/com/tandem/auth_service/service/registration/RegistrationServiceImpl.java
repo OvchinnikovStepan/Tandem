@@ -90,7 +90,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             user.setEmail(email);
             user.setPasswordHash(passwordEncoder.encode(rawPassword));
             user.setEmailVerified(true);
-
+            user.setLastLoginAt(LocalDateTime.now());
             userRepository.save(user);
 
             String accessToken = jwtService.generateAccessToken(

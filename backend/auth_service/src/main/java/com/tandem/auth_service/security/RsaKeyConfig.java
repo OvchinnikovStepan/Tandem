@@ -2,7 +2,6 @@ package com.tandem.auth_service.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 
 import org.springframework.beans.factory.annotation.Value;
 
@@ -19,10 +18,14 @@ public class RsaKeyConfig {
     @Value("${PRIVATE_KEY}")
     private String privateKeyContent;
 
+    @Value("${PUBLIC_KEY}")
+    private String publicKeyContent;
+
     @Bean
     public PrivateKey privateKey() throws Exception {
         // Убираем PEM-ограничители и пробелы
         String privateKeyPEM = privateKeyContent
+            .replace("\\n", "")
             .replace("-----BEGIN PRIVATE KEY-----", "")
             .replace("-----END PRIVATE KEY-----", "")
             .replaceAll("\\s", "");
@@ -36,21 +39,14 @@ public class RsaKeyConfig {
 
         @Bean
         public RSAPublicKey publicKey() throws Exception {
-        ClassPathResource resource = new ClassPathResource("keys/public.pem");
-
-        String key;
-        try (var is = resource.getInputStream()) {
-                key = new String(is.readAllBytes());
-        }
-
-        key = key
+        String pem = publicKeyContent
+                .replace("\\n", "")
                 .replace("-----BEGIN PUBLIC KEY-----", "")
                 .replace("-----END PUBLIC KEY-----", "")
                 .replaceAll("\\s", "");
 
-        byte[] decoded = Base64.getDecoder().decode(key);
-
+        byte[] decoded = Base64.getDecoder().decode(pem);
         return (RSAPublicKey) KeyFactory.getInstance("RSA")
                 .generatePublic(new X509EncodedKeySpec(decoded));
-        }
+    }
 }
