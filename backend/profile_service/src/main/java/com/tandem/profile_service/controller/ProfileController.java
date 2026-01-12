@@ -1,6 +1,7 @@
 package com.tandem.profile_service.controller;
 
 import com.tandem.profile_service.dto.*;
+import com.tandem.profile_service.kafka.ProfileEventPublisher;
 import com.tandem.profile_service.model.Profile;
 import com.tandem.profile_service.service.ProfileService;
 import jakarta.validation.Valid;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final ProfileEventPublisher profileEventPublisher;
 
     /**
      * Метод для извлечения userId из JWT токена
@@ -103,8 +106,15 @@ public class ProfileController {
             Profile updatedProfile = profileService.updateProfile(currentUserId, request);
             ProfileResponse profileResponse = ProfileResponse.forOwner(updatedProfile);
 
-            // TODO: Публикация события profile.updated
-            // kafkaTemplate.send("profile.updated", updatedProfile);
+            // Публикация события profile.updated
+            List<String> changedFields = profileService.getChangedFields(request);
+            if (!changedFields.isEmpty()) {
+                profileEventPublisher.publishProfileUpdated(
+                        currentUserId,
+                        updatedProfile.getId(),
+                        changedFields
+                );
+            }
 
             return ResponseEntity.ok(UpdateResponse.success(profileResponse));
 
@@ -127,8 +137,15 @@ public class ProfileController {
             Profile updatedProfile = profileService.patchProfile(currentUserId, request);
             ProfileResponse profileResponse = ProfileResponse.forOwner(updatedProfile);
 
-            // TODO: Публикация события profile.updated
-            // kafkaTemplate.send("profile.updated", updatedProfile);
+            // Публикация события profile.updated
+            List<String> changedFields = profileService.getChangedFields(request);
+            if (!changedFields.isEmpty()) {
+                profileEventPublisher.publishProfileUpdated(
+                        currentUserId,
+                        updatedProfile.getId(),
+                        changedFields
+                );
+            }
 
             return ResponseEntity.ok(UpdateResponse.success(profileResponse));
 

@@ -81,4 +81,43 @@ public class ProfileRepository extends GeneralRepository<Profile> {
 
         return profile;
     }
+
+    public Profile createNewUserProfile(UUID userId, String phoneNumber, String email) {
+        UUID profileId = UUID.randomUUID();
+        LocalDateTime now = LocalDateTime.now();
+
+        String sql = """
+            INSERT INTO profiles (
+                id, 
+                user_id, 
+                phone_number,
+                email,
+                onboarding_completed, 
+                onboarding_completed_at, 
+                created_at, 
+                updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """;
+
+        jdbcTemplate.update(sql,
+                profileId,
+                userId,
+                phoneNumber,
+                email,
+                false,
+                null,
+                now,
+                now);
+
+        return Profile.builder()
+                .id(profileId)
+                .userId(userId)
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .onboardingCompleted(false)
+                .onboardingCompletedAt(null)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+    }
 }

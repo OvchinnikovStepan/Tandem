@@ -2,6 +2,7 @@ package com.tandem.profile_service.service;
 
 import com.tandem.profile_service.dto.OnboardingCompleteRequest;
 import com.tandem.profile_service.dto.OnboardingCompleteResponse;
+import com.tandem.profile_service.dto.OnboardingEventData;
 import com.tandem.profile_service.dto.OnboardingQuestionsResponse;
 import com.tandem.profile_service.model.OnboardingResponse;
 import com.tandem.profile_service.model.Poll;
@@ -12,6 +13,7 @@ import com.tandem.profile_service.repository.PollRepository;
 import com.tandem.profile_service.repository.ProfileRepository;
 import com.tandem.profile_service.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class OnboardingService {
 
     private final QuestionRepository questionRepository;
@@ -40,6 +43,7 @@ public class OnboardingService {
                 .orElseThrow(() -> new RuntimeException("Profile not found for user: " + userId));
 
         if (profile.isOnboardingCompleted()) {
+            log.warn("Onboarding already completed for userId={}", userId);
             throw new RuntimeException("Onboarding already completed");
         }
 
@@ -49,6 +53,7 @@ public class OnboardingService {
         UUID pollId = poll.getId();
 
         List<Question> questions = questionRepository.findByPollId(pollId);
+        log.info("Retrieved {} questions for pollId={}", questions.size(), pollId);
 
         List<OnboardingQuestionsResponse.QuestionDto> questionDtos = questions.stream()
                 .map(q -> OnboardingQuestionsResponse.QuestionDto.builder()
@@ -82,6 +87,7 @@ public class OnboardingService {
 
         List<Question> questions = questionRepository.findByPollId(pollId);
         if (questions.isEmpty()) {
+            log.error("Onboarding poll {} has no questions", pollId);
             throw new RuntimeException("Onboarding poll has no questions");
         }
 
@@ -94,6 +100,7 @@ public class OnboardingService {
 
         markOnboardingCompleted(profile);
 
+        log.info("Onboarding completed successfully for userId={}", userId);
         return OnboardingCompleteResponse.builder()
                 .profile(profile)
                 .onboardingCompleted(profile.isOnboardingCompleted())
@@ -119,6 +126,7 @@ public class OnboardingService {
                 throw new RuntimeException("Required question not answered: " + rq.getId());
             }
         }
+        log.debug("All required questions are answered");
     }
 
     /**
@@ -150,6 +158,7 @@ public class OnboardingService {
 
             applyAnswerToProfile(profile, question, answer);
         }
+        log.info("All responses saved and profile updated for userId={}", userId);
     }
 
     /**
@@ -162,6 +171,7 @@ public class OnboardingService {
         }
         profile.setUpdatedAt(LocalDateTime.now());
         profileRepository.save(profile);
+        log.info("Profile saved with onboarding completed status");
     }
 
     /**
@@ -169,11 +179,13 @@ public class OnboardingService {
      */
     private void applyAnswerToProfile(Profile profile, Question question, Object answer) {
         if (answer == null) {
+            log.debug("Answer is null, skipping profile update");
             return;
         }
 
         String profileField = question.getProfileField();
         if (profileField == null || profileField.isBlank()) {
+            log.debug("ProfileField not set for question {}, skipping profile update", question.getId());
             return;
         }
 
@@ -202,11 +214,12 @@ public class OnboardingService {
 
             if (converted != null) {
                 field.set(profile, converted);
+                log.debug("Set field {} = {}", profileField, value);
             }
         } catch (NoSuchFieldException e) {
-            // поля с таким именем нет в Profile
+            log.warn("Field {} not found in Profile class", profileField);
         } catch (IllegalAccessException e) {
-            // проблемы доступа
+            log.error("Cannot access field {} in Profile class", profileField, e);
         }
     }
 
@@ -218,5 +231,37 @@ public class OnboardingService {
             return value;
         }
         return null;
+    }
+
+    /**
+     * Создает OnboardingEventData для публикации события в Kafka
+     */
+    public OnboardingEventData buildOnboardingEventData(UUID userId, OnboardingCompleteResponse response) {
+        Profile profile = response.getProfile();
+
+        List<String> interests = extractInterestsFromProfile(profile);
+
+        log.info("Extracted {} interests for userId={}: {}", interests.size(), userId, interests);
+        return OnboardingEventData.from(userId, response, interests);
+    }
+
+    /**
+     * Извлекает интересы из поля personalInterests профиля
+     */
+    private List<String> extractInterestsFromProfile(Profile profile) {
+        List<String> interests = new ArrayList<>();
+
+        if (profile.getPersonalInterests() == null || profile.getPersonalInterests().isBlank()) {
+            return interests;
+        }
+
+        String[] parts = profile.getPersonalInterests().split(",");
+        for (String part : parts) {
+            String trimmed = part.trim();
+            if (!trimmed.isBlank()) {
+                interests.add(trimmed);
+            }
+        }
+        return interests;
     }
 }

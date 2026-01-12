@@ -2,7 +2,9 @@ package com.tandem.profile_service.controller;
 
 import com.tandem.profile_service.dto.OnboardingCompleteRequest;
 import com.tandem.profile_service.dto.OnboardingCompleteResponse;
+import com.tandem.profile_service.dto.OnboardingEventData;
 import com.tandem.profile_service.dto.OnboardingQuestionsResponse;
+import com.tandem.profile_service.kafka.ProfileEventPublisher;
 import com.tandem.profile_service.service.OnboardingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import java.util.UUID;
 public class OnboardingController {
 
     private final OnboardingService onboardingService;
+    private final ProfileEventPublisher profileEventPublisher;
 
     /**
      * Метод для извлечения userId из JWT токена
@@ -48,17 +51,30 @@ public class OnboardingController {
      * POST /api/profile/onboarding/complete
      */
     @PostMapping("/complete")
-    public ResponseEntity<OnboardingCompleteResponse> completeOnboarding(@RequestBody OnboardingCompleteRequest request) {
+    public ResponseEntity<OnboardingCompleteResponse> completeOnboarding(
+            @RequestBody OnboardingCompleteRequest request) {
 
         UUID currentUserId = getCurrentUserId();
 
         try {
             OnboardingCompleteResponse response =
                     onboardingService.completeOnboarding(currentUserId, request);
-            // TODO: publish event profile.onboarding.completed, триггер interest-service
+
+            OnboardingEventData eventData =
+                    onboardingService.buildOnboardingEventData(currentUserId, response);
+
+            profileEventPublisher.publishOnboardingCompleted(
+                    eventData.getUserId(),
+                    eventData.getProfileId(),
+                    eventData.getName(),
+                    eventData.getSurname(),
+                    eventData.getInterests()
+            );
+
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
     }
+
 }

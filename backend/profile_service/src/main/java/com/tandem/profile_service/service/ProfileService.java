@@ -1,12 +1,14 @@
 package com.tandem.profile_service.service;
 
 import com.tandem.profile_service.dto.PrivacySettingsDto;
+import com.tandem.profile_service.dto.ProfileEventDto;
 import com.tandem.profile_service.dto.ProfileRequest;
 import com.tandem.profile_service.dto.ProfileResponse;
 import com.tandem.profile_service.model.Profile;
 import com.tandem.profile_service.repository.PrivacySettingsRepository;
 import com.tandem.profile_service.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -19,6 +21,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
@@ -29,6 +32,7 @@ public class ProfileService {
      */
     @Transactional
     public List<Profile> getAllProfiles() {
+        log.info("All profiles have been extracted");
         return profileRepository.findAll("created_at DESC");
     }
 
@@ -52,6 +56,7 @@ public class ProfileService {
         existingProfile.setPersonalInterests(request.getPersonalInterests());
         existingProfile.setUpdatedAt(LocalDateTime.now());
 
+        log.info("Profile successfully updated for userId={}", userId);
         return profileRepository.save(existingProfile);
     }
 
@@ -67,6 +72,7 @@ public class ProfileService {
         BeanUtils.copyProperties(request, existingProfile, getNullPropertyNames(request));
         existingProfile.setUpdatedAt(LocalDateTime.now());
 
+        log.info("Profile successfully patched for userId={}", userId);
         return profileRepository.save(existingProfile);
     }
 
@@ -93,11 +99,11 @@ public class ProfileService {
 
         profileRepository.deleteByUserId(userId);
         privacySettingsRepository.deleteByUserId(userId);
+        log.info("Profile and privacy settings successfully deleted for userId={}", userId);
     }
 
     /**
      * Получить настройки приватности пользователя
-     * @throws RuntimeException если настройки не найдены (не должно происходить в нормальных условиях)
      */
     public PrivacySettingsDto getPrivacySettings(UUID userId) {
         return privacySettingsRepository.findByUserId(userId)
@@ -138,9 +144,11 @@ public class ProfileService {
                             // Если настроек нет - создаем новые
                             privacySettingsRepository.saveDefaultSettings(userId);
                             // И обновляем их
+
                             updatePrivacySettings(userId, request);
                         }
                 );
+        log.info("Privacy settings successfully updated for userId={}", userId);
     }
 
     /**
@@ -178,6 +186,7 @@ public class ProfileService {
 
         ProfileResponse.BioDto bio = bioBuilder.build();
 
+        log.info("Profile response built for viewerId={} viewing targetUserId={}", viewerId, targetUserId);
         return builder
                 .phoneNumber(privacy.isShowPhoneNumber() ? profile.getPhoneNumber() : null)
                 .email(privacy.isShowEmail() ? profile.getEmail() : null)
@@ -187,23 +196,73 @@ public class ProfileService {
                 .build();
     }
 
-
     /**
-     * Завершить процесс онбординга
+     Создает новый профиль
      */
     @Transactional
-    public Profile completeOnboarding(UUID userId) {
-        Profile profile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Profile not found for user: " + userId));
+    public Profile createProfileFromRegistrationEvent(ProfileEventDto event) {
+        try {
+            UUID userId = UUID.fromString(event.getUserId());
 
-        if (!profile.isOnboardingCompleted()) {
-            profile.setOnboardingCompleted(true);
-            profile.setOnboardingCompletedAt(LocalDateTime.now());
-            profile.setUpdatedAt(LocalDateTime.now());
+            if (profileRepository.findByUserId(userId).isPresent()) {
+                return profileRepository.findByUserId(userId).get();
+            }
 
-            profile = profileRepository.save(profile);
+            String phoneNumber = null;
+            String email = null;
+
+            if (event.getMetadata() != null) {
+                phoneNumber = (String) event.getMetadata().get("phoneNumber");
+                email = (String) event.getMetadata().get("email");
+            }
+
+            Profile createdProfile = profileRepository.createNewUserProfile(userId, phoneNumber, email);
+
+            privacySettingsRepository.saveDefaultSettings(userId);
+
+            log.info("Profile successfully created from registration event for userId={}", userId);
+            return createdProfile;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create profile: " + e.getMessage(), e);
+        }
+    }
+
+    public List<String> getChangedFields(ProfileRequest request) {
+        List<String> changedFields = new ArrayList<>();
+
+        if (request.getName() != null) {
+            changedFields.add("name");
+        }
+        if (request.getSurname() != null) {
+            changedFields.add("surname");
+        }
+        if (request.getPhoneNumber() != null) {
+            changedFields.add("phoneNumber");
+        }
+        if (request.getEmail() != null) {
+            changedFields.add("email");
+        }
+        if (request.getStatus() != null) {
+            changedFields.add("status");
+        }
+        if (request.getBirthday() != null) {
+            changedFields.add("birthday");
+        }
+        if (request.getCity() != null) {
+            changedFields.add("city");
+        }
+        if (request.getPlaceOfWork() != null) {
+            changedFields.add("placeOfWork");
+        }
+        if (request.getJobTitle() != null) {
+            changedFields.add("jobTitle");
+        }
+        if (request.getPersonalInterests() != null) {
+            changedFields.add("personalInterests");
         }
 
-        return profile;
+        log.info("Found {} changed fields: {}", changedFields.size(), changedFields);
+        return changedFields;
     }
 }
