@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.tandem.auth_service.service.session.SessionService;
 import com.tandem.auth_service.service.token.JwtService;
 
 import jakarta.servlet.FilterChain;
@@ -22,9 +23,11 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final SessionService sessionService;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, SessionService sessionService) {
         this.jwtService = jwtService;
+        this.sessionService=sessionService;
     }
 
    @Override
@@ -55,9 +58,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             UUID userId = jwtService.extractUserId(token);
-            String email = jwtService.extractEmail(token);
+            UUID sessionId = jwtService.extractSessionId(token);
+            AuthPrincipal principal = new AuthPrincipal(userId, sessionId);
 
-            AuthPrincipal principal = new AuthPrincipal(userId, email);
+            if (!sessionService.isSessionActive(sessionId)) {
+                SecurityContextHolder.clearContext();
+                filterChain.doFilter(request, response);
+            }
 
             Authentication authentication =
                     new UsernamePasswordAuthenticationToken(

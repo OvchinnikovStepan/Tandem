@@ -3,8 +3,8 @@ package com.tandem.auth_service.service.token;
 import java.util.UUID;
 
 public interface JwtService {
-    String generateAccessToken(UUID userId, String email);
+    String generateAccessToken(UUID userId, UUID sessionId);
     boolean validateToken(String token);
     UUID extractUserId(String token);
-    String extractEmail(String token);
+    UUID extractSessionId(String token);
 }

@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 
 
 import com.tandem.auth_service.api.dto.PasswordStrength;
+import com.tandem.auth_service.api.dto.RefreshResultDto;
 import com.tandem.auth_service.api.dto.SessionDto;
 import com.tandem.auth_service.api.dto.UserDto;
 import com.tandem.auth_service.api.dto.request.CheckPasswordStrengthRequest;
@@ -34,8 +35,10 @@ import com.tandem.auth_service.api.dto.response.VerifyPhoneResponse;
 import com.tandem.auth_service.security.AuthPrincipal;
 import com.tandem.auth_service.service.auth.AuthService;
 import com.tandem.auth_service.service.registration.RegistrationService;
+import com.tandem.auth_service.service.session.SessionService;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 
@@ -45,10 +48,12 @@ public class AuthController {
 
     private final AuthService authService;
     private final RegistrationService registrationService;
+    private final SessionService sessionService;
 
-    public AuthController(RegistrationService registrationService, AuthService authService) {
+    public AuthController(RegistrationService registrationService, AuthService authService,SessionService sessionService) {
         this.authService = authService;
         this.registrationService = registrationService;
+        this.sessionService=sessionService;
     }
 
     @PostMapping("/register/phone")
@@ -76,9 +81,11 @@ public class AuthController {
 
     @PostMapping("/register/email")
     public RegisterEmailResponse registerEmail(
-            @Valid @RequestBody RegisterEmailRequest request
+            @Valid @RequestBody RegisterEmailRequest request,
+            HttpServletRequest httpRequest
     ) {
         return registrationService.completeRegistration(
+                httpRequest,
                 request.verificationId(),
                 request.email(),
                 request.password()
@@ -99,17 +106,25 @@ public class AuthController {
 
     @PostMapping("/login")
     public LoginResponse login(
-            @Valid @RequestBody LoginRequest request
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest
     ) {
         return authService.login(
+                httpRequest,
                 request.email(),
                 request.password()
         );
     }
 
-
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/logout")
-    public LogoutResponse logout() {
+    public LogoutResponse logout(
+        Authentication authentication
+    ) {
+        AuthPrincipal principal =
+            (AuthPrincipal) authentication.getPrincipal();
+
+        sessionService.logout(principal.sessionId());
         return new LogoutResponse(true);
     }
 
@@ -117,7 +132,8 @@ public class AuthController {
     public RefreshTokenResponse refresh(
             @Valid @RequestBody RefreshTokenRequest request
     ) {
-        return new RefreshTokenResponse("new-access-token");
+        RefreshResultDto refreshResult = sessionService.refresh(request.refreshToken());
+        return new RefreshTokenResponse(refreshResult.accessToken(),refreshResult.refreshToken());
     }
 
     @SecurityRequirement(name = "bearerAuth")
@@ -132,16 +148,24 @@ public class AuthController {
         return new MeResponse(user);
     }
 
-
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/sessions")
-    public Map<String, List<SessionDto>> sessions() {
-        return Map.of("sessions", List.of());
+    public Map<String, List<SessionDto>> sessions(Authentication auth) {
+    AuthPrincipal principal = (AuthPrincipal) auth.getPrincipal();
+    return Map.of(
+        "sessions",
+        sessionService.getActiveSessions(principal.userId())
+    );
     }
 
+    @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/sessions/{sessionId}")
     public LogoutResponse terminateSession(
-            @Valid @PathVariable UUID sessionId
+            @Valid @PathVariable UUID sessionId,
+            Authentication auth
     ) {
+        AuthPrincipal principal = (AuthPrincipal) auth.getPrincipal();
+        sessionService.terminateSession(principal.userId(), sessionId);
         return new LogoutResponse(true);
     }
 }

@@ -25,11 +25,11 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateAccessToken(UUID userId, String email) {
+    public String generateAccessToken(UUID userId, UUID sessionId) {
         try {
             JWTClaimsSet claims = new JWTClaimsSet.Builder()
                     .subject(userId.toString())
-                    .claim("email", email)
+                    .claim("sid", sessionId.toString())
                     .claim("type", "access")
                     .issueTime(new Date())
                     .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
@@ -70,10 +70,12 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String extractEmail(String token) {
+    public UUID extractSessionId(String token) {
         try {
             SignedJWT jwt = SignedJWT.parse(token);
-            return jwt.getJWTClaimsSet().getStringClaim("email");
+            return UUID.fromString(
+                jwt.getJWTClaimsSet().getStringClaim("sid")
+            );
         } catch (Exception e) {
             throw new IllegalStateException("Invalid token", e);
         }

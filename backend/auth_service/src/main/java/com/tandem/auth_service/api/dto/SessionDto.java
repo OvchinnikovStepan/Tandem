@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public record SessionDto(
         UUID id,
+        UUID userId,
         String deviceInfo,
         String ipAddress,
         LocalDateTime createdAt,

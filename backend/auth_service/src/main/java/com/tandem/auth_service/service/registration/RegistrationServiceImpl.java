@@ -5,8 +5,13 @@ import com.tandem.auth_service.api.dto.response.RegisterEmailResponse;
 import com.tandem.auth_service.api.error.exceptions.VerificationCodeInvalidException;
 import com.tandem.auth_service.model.User;
 import com.tandem.auth_service.repository.UserRepository;
+import com.tandem.auth_service.service.session.SessionService;
 import com.tandem.auth_service.service.token.JwtService;
 import com.tandem.auth_service.service.token.RefreshTokenService;
+import com.tandem.auth_service.utils.IpExtractor;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 
@@ -25,6 +30,8 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final PasswordStrengthService passwordStrengthService;
+    private final IpExtractor ipExtractor;
+    private final SessionService sessionService;
 
     @Override
     public UUID startPhoneRegistration(String phoneNumber) {
@@ -72,6 +79,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         @Override
         public RegisterEmailResponse completeRegistration(
+                HttpServletRequest httpRequest,
                 UUID userId,
                 String email,
                 String rawPassword
@@ -87,20 +95,35 @@ public class RegistrationServiceImpl implements RegistrationService {
                 throw new IllegalStateException("User already registered");
             }
 
+
             user.setEmail(email);
             user.setPasswordHash(passwordEncoder.encode(rawPassword));
             user.setEmailVerified(true);
             user.setLastLoginAt(LocalDateTime.now());
             userRepository.save(user);
 
+            UUID sessionId = UUID.randomUUID();
+
             String accessToken = jwtService.generateAccessToken(
                     user.getId(),
-                    user.getEmail()
+                    sessionId
             );
 
             String refreshToken = refreshTokenService.generateRefreshToken(user.getId());
 
             PasswordStrength strength = passwordStrengthService.evaluate(rawPassword);
+
+            String ipAddress = ipExtractor.extractIp(httpRequest);
+            String deviceInfo = httpRequest.getHeader("User-Agent");
+
+            sessionService.createSession(
+                sessionId,
+                user.getId(),
+                accessToken,
+                refreshToken,
+                deviceInfo,
+                ipAddress
+            );
 
             return new RegisterEmailResponse(
                     user.getId(),
