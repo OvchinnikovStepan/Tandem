@@ -43,11 +43,8 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User save(User user) {
-        boolean exists = dsl.fetchExists(
-            dsl.selectOne().from(USERS).where(USERS.ID.eq(user.getId()))
-        );
-        if (!exists) {
-            var record = dsl.insertInto(USERS)
+
+        var record = dsl.insertInto(USERS)
                 .set(USERS.ID, user.getId())
                 .set(USERS.EMAIL, user.getEmail())
                 .set(USERS.PHONE_NUMBER, user.getPhoneNumber())
@@ -59,10 +56,15 @@ public class UserRepositoryImpl implements UserRepository {
                 .returning(USERS.ID)
                 .fetchOne();
 
-            user.setId(record.getId());
-        } else {
-            // Обновляем существующего пользователя
-            dsl.update(USERS)
+        user.setId(record.getId());
+
+        return user;
+    }
+    
+    @Override
+    public User update(User user) {
+
+        dsl.update(USERS)
                 .set(USERS.EMAIL, user.getEmail())
                 .set(USERS.PHONE_NUMBER, user.getPhoneNumber())
                 .set(USERS.PASSWORD_HASH, user.getPasswordHash())
@@ -72,10 +74,9 @@ public class UserRepositoryImpl implements UserRepository {
                 .set(USERS.LAST_LOGIN_AT, user.getLastLoginAt())
                 .where(USERS.ID.eq(user.getId()))
                 .execute();
-        }
+
         return user;
     }
-
     private User mapToUser(org.jooq.Record record) {
         return User.builder()
             .id(record.get(USERS.ID))

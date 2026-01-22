@@ -37,17 +37,19 @@ public class SessionServiceImpl implements SessionService {
             String ipAddress,
             String deviceInfo
     ) {
-        Session session = new Session(
-            sessionId,
-            userId,
-            TokenHashUtil.sha256(accessToken),
-            TokenHashUtil.sha256(refreshToken),
-            deviceInfo,
-            ipAddress,
-            LocalDateTime.now(),
-            LocalDateTime.now().plusDays(30),
-            null
-        );
+        
+        Session session = Session.builder()
+            .id(sessionId)
+            .userId(userId)
+            .accessTokenHash(TokenHashUtil.sha256(accessToken))
+            .refreshTokenHash(TokenHashUtil.sha256(refreshToken))
+            .deviceInfo(deviceInfo)
+            .ipAddress(ipAddress)
+            .createdAt(LocalDateTime.now())
+            .expiresAt(LocalDateTime.now().plusDays(30))
+            .revokedAt(null)
+            .build();
+
 
         sessionRepository.save(session);
     }

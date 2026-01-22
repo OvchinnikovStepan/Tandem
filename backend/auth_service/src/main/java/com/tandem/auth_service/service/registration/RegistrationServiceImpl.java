@@ -7,7 +7,6 @@ import com.tandem.auth_service.model.User;
 import com.tandem.auth_service.repository.UserRepository;
 import com.tandem.auth_service.service.session.SessionService;
 import com.tandem.auth_service.service.token.JwtService;
-import com.tandem.auth_service.service.token.RefreshTokenService;
 import com.tandem.auth_service.utils.IpExtractor;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +27,6 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final JwtService jwtService;
-    private final RefreshTokenService refreshTokenService;
     private final PasswordStrengthService passwordStrengthService;
     private final IpExtractor ipExtractor;
     private final SessionService sessionService;
@@ -74,7 +72,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .orElseThrow(() -> new VerificationCodeInvalidException("Invalid verification code"));
 
             user.setPhoneVerified(true);
-            userRepository.save(user);
+            userRepository.update(user);
         }
 
         @Override
@@ -100,7 +98,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             user.setPasswordHash(passwordEncoder.encode(rawPassword));
             user.setEmailVerified(true);
             user.setLastLoginAt(LocalDateTime.now());
-            userRepository.save(user);
+            userRepository.update(user);
 
             UUID sessionId = UUID.randomUUID();
 
@@ -109,7 +107,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                     sessionId
             );
 
-            String refreshToken = refreshTokenService.generateRefreshToken(user.getId());
+            String refreshToken = UUID.randomUUID().toString();
 
             PasswordStrength strength = passwordStrengthService.evaluate(rawPassword);
 
@@ -121,8 +119,8 @@ public class RegistrationServiceImpl implements RegistrationService {
                 user.getId(),
                 accessToken,
                 refreshToken,
-                deviceInfo,
-                ipAddress
+                ipAddress,
+                deviceInfo
             );
 
             return new RegisterEmailResponse(

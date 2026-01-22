@@ -12,7 +12,6 @@ import com.tandem.auth_service.model.User;
 import com.tandem.auth_service.repository.UserRepository;
 import com.tandem.auth_service.service.session.SessionService;
 import com.tandem.auth_service.service.token.JwtService;
-import com.tandem.auth_service.service.token.RefreshTokenService;
 import com.tandem.auth_service.utils.IpExtractor;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +24,6 @@ public class AuthServiceImpl implements AuthService {
     private final SessionService sessionService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final RefreshTokenService refreshTokenService;
     private final IpExtractor ipExtractor;
     @Override
     public LoginResponse login(HttpServletRequest httpRequest, String email, String rawPassword) {
@@ -45,10 +43,10 @@ public class AuthServiceImpl implements AuthService {
                 sessionId
         );
 
-        String refreshToken = refreshTokenService.generateRefreshToken(user.getId());
+        String refreshToken = UUID.randomUUID().toString();
         
         user.setLastLoginAt(LocalDateTime.now());
-        userRepository.save(user);
+        userRepository.update(user);
 
         String ipAddress = ipExtractor.extractIp(httpRequest);
         String deviceInfo = httpRequest.getHeader("User-Agent");
@@ -58,8 +56,8 @@ public class AuthServiceImpl implements AuthService {
             user.getId(),
             accessToken,
             refreshToken,
-            deviceInfo,
-            ipAddress
+            ipAddress,
+            deviceInfo
         );
 
         return new LoginResponse(accessToken, refreshToken);

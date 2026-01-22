@@ -61,17 +61,18 @@ public class SessionRepositoryImpl implements SessionRepository {
     }
 
     private Session mapToSession(org.jooq.Record record) {
-        return new Session(
-            record.get(SESSIONS.ID),
-            record.get(SESSIONS.USER_ID),
-            record.get(SESSIONS.ACCESS_TOKEN_HASH),
-            record.get(SESSIONS.REFRESH_TOKEN_HASH),
-            record.get(SESSIONS.DEVICE_INFO),
-            record.get(SESSIONS.IP_ADDRESS),
-            record.get(SESSIONS.CREATED_AT),
-            record.get(SESSIONS.EXPIRES_AT),
-            record.get(SESSIONS.REVOKED_AT)
-        );
+        
+        return Session.builder()
+            .id(record.get(SESSIONS.ID))
+            .userId(record.get(SESSIONS.USER_ID))
+            .accessTokenHash(record.get(SESSIONS.ACCESS_TOKEN_HASH))
+            .refreshTokenHash(record.get(SESSIONS.REFRESH_TOKEN_HASH))
+            .deviceInfo(record.get(SESSIONS.DEVICE_INFO))
+            .ipAddress(record.get(SESSIONS.IP_ADDRESS))
+            .createdAt(record.get(SESSIONS.CREATED_AT))
+            .expiresAt(record.get(SESSIONS.EXPIRES_AT))
+            .revokedAt(record.get(SESSIONS.REVOKED_AT))
+            .build();
     }
 
     @Override
