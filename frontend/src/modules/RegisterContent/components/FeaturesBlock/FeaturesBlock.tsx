@@ -29,9 +29,10 @@ export default function FeaturesBlock({ register, errors, onNext }: FeaturesBloc
           <Input
             id="firstName"
             type="text"
+            variant="form"
+            leftIcon
             placeholder="John"
             {...register("firstName")}
-            className="pl-12 h-12 bg-gray-50 border-gray-200 text-black placeholder:text-gray-400 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
         {errors.firstName && (
@@ -48,9 +49,10 @@ export default function FeaturesBlock({ register, errors, onNext }: FeaturesBloc
           <Input
             id="lastName"
             type="text"
+            variant="form"
+            leftIcon
             placeholder="Doe"
             {...register("lastName")}
-            className="pl-12 h-12 bg-gray-50 border-gray-200 text-black placeholder:text-gray-400 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
         {errors.lastName && (
@@ -67,9 +69,10 @@ export default function FeaturesBlock({ register, errors, onNext }: FeaturesBloc
           <Input
             id="email"
             type="email"
+            variant="form"
+            leftIcon
             placeholder="john@company.com"
             {...register("email")}
-            className="pl-12 h-12 bg-gray-50 border-gray-200 text-black placeholder:text-gray-400 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
         {errors.email && (
@@ -79,8 +82,9 @@ export default function FeaturesBlock({ register, errors, onNext }: FeaturesBloc
 
       <Button
         type="button"
+        variant="primary"
+        size="xl"
         onClick={onNext}
-        className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-black font-bold text-lg rounded-xl transition-all duration-200 transform hover:scale-[0.98] active:scale-95 shadow-md hover:shadow-lg"
       >
         Далее
       </Button>

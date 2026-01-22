@@ -6,6 +6,7 @@ import { z } from "zod";
 import { FeaturesBlock, QuestionBlock } from "@/modules/RegisterContent";
 import HeroBlock from "@/components/HeroBlock";
 import Header from "@/components/Header";
+import { LinkButton } from "@/ui/link-button";
 
 const formSchema = z
   .object({
@@ -105,12 +106,12 @@ export default function Register() {
             <div className="mt-8 text-center">
               <p className="text-gray-600">
                 Уже есть аккаунт?{" "}
-                <button
+                <LinkButton
                   onClick={() => navigate("/login")}
-                  className="text-blue-600 hover:text-blue-700 font-bold transition-colors"
+                  className="font-bold"
                 >
                   Войти
-                </button>
+                </LinkButton>
               </p>
             </div>
           </div>

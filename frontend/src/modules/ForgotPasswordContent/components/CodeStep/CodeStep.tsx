@@ -1,4 +1,5 @@
 import { Button } from "@/ui/button";
+import { LinkButton } from "@/ui/link-button";
 import { useRef, useState, useEffect } from "react";
 import { UseFormSetValue, FieldErrors } from "react-hook-form";
 
@@ -87,8 +88,9 @@ export default function CodeStep({ setValue, errors, isSubmitting, email, onRese
 
       <Button
         type="submit"
+        variant="primary"
+        size="xl"
         disabled={isSubmitting}
-        className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 disabled:cursor-not-allowed text-black font-bold text-lg rounded-xl transition-all duration-200 transform hover:scale-[0.98] active:scale-95 shadow-md hover:shadow-lg"
       >
         {isSubmitting ? "Проверка..." : "Подтвердить код"}
       </Button>
@@ -96,13 +98,9 @@ export default function CodeStep({ setValue, errors, isSubmitting, email, onRese
       <div className="text-center">
         <p className="text-sm text-gray-600">
           Не получили код?{" "}
-          <button
-            type="button"
-            onClick={onResendCode}
-            className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-          >
+          <LinkButton onClick={onResendCode}>
             Отправить повторно
-          </button>
+          </LinkButton>
         </p>
       </div>
     </div>

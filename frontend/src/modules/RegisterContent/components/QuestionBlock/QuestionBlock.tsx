@@ -34,9 +34,10 @@ export default function QuestionBlock({
           <Input
             id="password"
             type="password"
+            variant="form"
+            leftIcon
             placeholder="Пароль"
             {...register("password")}
-            className="pl-12 h-12 bg-gray-50 border-gray-200 text-black placeholder:text-gray-400 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
         {errors.password && (
@@ -60,9 +61,10 @@ export default function QuestionBlock({
           <Input
             id="confirmPassword"
             type="password"
+            variant="form"
+            leftIcon
             placeholder="Повторите пароль"
             {...register("confirmPassword")}
-            className="pl-12 h-12 bg-gray-50 border-gray-200 text-black placeholder:text-gray-400 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
         {errors.confirmPassword && (
@@ -72,8 +74,9 @@ export default function QuestionBlock({
 
       <Button
         type="submit"
+        variant="primary"
+        size="xl"
         disabled={isSubmitting}
-        className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 disabled:cursor-not-allowed text-black font-bold text-lg rounded-xl transition-all duration-200 transform hover:scale-[0.98] active:scale-95 shadow-md hover:shadow-lg"
       >
         {isSubmitting ? "Регистрация..." : "Зарегистрироваться"}
       </Button>

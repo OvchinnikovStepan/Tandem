@@ -1,6 +1,7 @@
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import { Lock, Eye, EyeOff } from "lucide-react";
+import { PasswordToggle } from "@/ui/password-toggle";
+import { Lock } from "lucide-react";
 import { useState, useMemo } from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 
@@ -39,17 +40,16 @@ export default function NewPasswordStep({ register, errors, isSubmitting, passwo
           <Input
             id="password"
             type={showPassword ? "text" : "password"}
+            variant="form"
+            leftIcon
+            rightIcon
             placeholder="Пароль"
             {...register("password")}
-            className="pl-12 pr-12 h-12 bg-gray-50 border-gray-200 text-black placeholder:text-gray-400 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
-          <button
-            type="button"
+          <PasswordToggle
+            showPassword={showPassword}
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-          </button>
+          />
         </div>
         {errors.password && (
           <p className="text-xs text-red-600 mt-1">{errors.password.message}</p>
@@ -72,17 +72,16 @@ export default function NewPasswordStep({ register, errors, isSubmitting, passwo
           <Input
             id="confirmPassword"
             type={showConfirmPassword ? "text" : "password"}
+            variant="form"
+            leftIcon
+            rightIcon
             placeholder="Повторите пароль"
             {...register("confirmPassword")}
-            className="pl-12 pr-12 h-12 bg-gray-50 border-gray-200 text-black placeholder:text-gray-400 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
-          <button
-            type="button"
+          <PasswordToggle
+            showPassword={showConfirmPassword}
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-          </button>
+          />
         </div>
         {errors.confirmPassword && (
           <p className="text-xs text-red-600 mt-1">{errors.confirmPassword.message}</p>
@@ -91,8 +90,9 @@ export default function NewPasswordStep({ register, errors, isSubmitting, passwo
 
       <Button
         type="submit"
+        variant="primary"
+        size="xl"
         disabled={isSubmitting}
-        className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 disabled:cursor-not-allowed text-black font-bold text-lg rounded-xl transition-all duration-200 transform hover:scale-[0.98] active:scale-95 shadow-md hover:shadow-lg"
       >
         {isSubmitting ? "Сохранение..." : "Установить новый пароль"}
       </Button>
