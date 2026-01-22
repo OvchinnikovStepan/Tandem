@@ -1,4 +1,4 @@
-import { ArrowLeft, X } from "lucide-react";
+import { IconButton } from "@/ui/icon-button";
 import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
@@ -19,20 +19,10 @@ export default function Header({ onBack, closeUrl = "/", showClose = true }: Hea
         {(onBack || showClose) && (
           <div className="flex items-center gap-2">
             {onBack && (
-              <button
-                onClick={onBack}
-                className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5 text-gray-600" />
-              </button>
+              <IconButton icon="back" onClick={onBack} />
             )}
             {showClose && (
-              <button
-                onClick={() => navigate(closeUrl)}
-                className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
+              <IconButton icon="close" onClick={() => navigate(closeUrl)} />
             )}
           </div>
         )}
