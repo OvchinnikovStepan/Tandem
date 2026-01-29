@@ -1,6 +1,10 @@
 package com.tandem.profile_service.model;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;

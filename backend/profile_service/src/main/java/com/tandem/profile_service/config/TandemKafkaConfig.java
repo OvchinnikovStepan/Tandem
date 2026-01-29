@@ -1,10 +1,5 @@
 package com.tandem.profile_service.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -13,8 +8,6 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
@@ -40,7 +33,7 @@ public class TandemKafkaConfig {
     @Value("${spring.application.name}")
     private String applicationName;
 
-    public static final String TOPIC_USER_REGISTERED = "user-registered";
+    public static final String TOPIC_USER_REGISTERED = "user.registered";
     public static final String TOPIC_PROFILE_CREATED = "profile.created";
     public static final String TOPIC_PROFILE_UPDATED = "profile.updated";
     public static final String TOPIC_ONBOARDING_COMPLETED = "profile.onboarding.completed";
@@ -85,20 +78,5 @@ public class TandemKafkaConfig {
         factory.setConcurrency(3);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         return factory;
-    }
-
-    @Bean
-    @Primary
-    public ObjectMapper objectMapper() {
-        return Jackson2ObjectMapperBuilder.json()
-                .createXmlMapper(false)
-                .serializationInclusion(JsonInclude.Include.NON_EMPTY)
-                .featuresToDisable(
-                        SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
-                        SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS,
-                        DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
-                )
-                .featuresToEnable(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS.mappedFeature())
-                .build();
     }
 }

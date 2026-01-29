@@ -1,6 +1,9 @@
 package com.tandem.profile_service.controller;
 
-import com.tandem.profile_service.dto.*;
+import com.tandem.profile_service.dto.ProfileResponse;
+import com.tandem.profile_service.dto.UpdateResponse;
+import com.tandem.profile_service.dto.ProfileRequest;
+import com.tandem.profile_service.dto.PrivacySettingsDto;
 import com.tandem.profile_service.kafka.ProfileEventPublisher;
 import com.tandem.profile_service.model.Profile;
 import com.tandem.profile_service.service.ProfileService;
@@ -8,9 +11,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import java.util.List;
 import java.util.UUID;
 
