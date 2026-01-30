@@ -41,29 +41,9 @@ public class ProfileRepository extends GeneralRepository<Profile> {
     }
 
     public Profile save(Profile profile) {
-        if (profile.getId() == null) {
-            profile.setId(UUID.randomUUID());
-            profile.setCreatedAt(LocalDateTime.now());
-            profile.setUpdatedAt(LocalDateTime.now());
+        profile.setUpdatedAt(LocalDateTime.now());
 
-            String sql = """
-                INSERT INTO profiles (id, user_id, name, surname, phone_number, email, status, 
-                                    birthday, city, place_of_work, job_title, personal_interests, 
-                                    onboarding_completed, onboarding_completed_at, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """;
-
-            jdbcTemplate.update(sql,
-                    profile.getId(), profile.getUserId(), profile.getName(), profile.getSurname(),
-                    profile.getPhoneNumber(), profile.getEmail(), profile.getStatus(),
-                    profile.getBirthday(), profile.getCity(), profile.getPlaceOfWork(),
-                    profile.getJobTitle(), profile.getPersonalInterests(),
-                    profile.isOnboardingCompleted(), profile.getOnboardingCompletedAt(),
-                    profile.getCreatedAt(), profile.getUpdatedAt());
-        } else {
-            profile.setUpdatedAt(LocalDateTime.now());
-
-            String sql = """
+        String sql = """
                 UPDATE profiles SET 
                     name = ?, surname = ?, phone_number = ?, email = ?, status = ?,
                     birthday = ?, city = ?, place_of_work = ?, job_title = ?, personal_interests = ?,
@@ -71,14 +51,12 @@ public class ProfileRepository extends GeneralRepository<Profile> {
                 WHERE id = ?
                 """;
 
-            jdbcTemplate.update(sql,
-                    profile.getName(), profile.getSurname(), profile.getPhoneNumber(),
-                    profile.getEmail(), profile.getStatus(), profile.getBirthday(),
-                    profile.getCity(), profile.getPlaceOfWork(), profile.getJobTitle(),
-                    profile.getPersonalInterests(), profile.isOnboardingCompleted(),
-                    profile.getOnboardingCompletedAt(), profile.getUpdatedAt(), profile.getId());
-        }
-
+        jdbcTemplate.update(sql,
+                profile.getName(), profile.getSurname(), profile.getPhoneNumber(),
+                profile.getEmail(), profile.getStatus(), profile.getBirthday(),
+                profile.getCity(), profile.getPlaceOfWork(), profile.getJobTitle(),
+                profile.getPersonalInterests(), profile.isOnboardingCompleted(),
+                profile.getOnboardingCompletedAt(), profile.getUpdatedAt(), profile.getId());
         return profile;
     }
 
@@ -114,10 +92,6 @@ public class ProfileRepository extends GeneralRepository<Profile> {
                 .userId(userId)
                 .phoneNumber(phoneNumber)
                 .email(email)
-                .onboardingCompleted(false)
-                .onboardingCompletedAt(null)
-                .createdAt(now)
-                .updatedAt(now)
                 .build();
     }
 }

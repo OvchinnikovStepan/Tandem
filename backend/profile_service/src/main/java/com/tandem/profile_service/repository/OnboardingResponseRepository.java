@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.List;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 @Repository
 public class OnboardingResponseRepository extends GeneralRepository<OnboardingResponse> {
@@ -33,14 +32,13 @@ public class OnboardingResponseRepository extends GeneralRepository<OnboardingRe
             UUID questionId = rs.getString("question_id") != null
                     ? UUID.fromString(rs.getString("question_id"))
                     : null;
-
             String answerText = rs.getString("answer_text");
 
             List<String> answerArray = null;
             Array sqlArray = rs.getArray("answer_array");
             if (sqlArray != null) {
                 String[] arr = (String[]) sqlArray.getArray();
-                answerArray = Arrays.stream(arr).collect(Collectors.toList());
+                answerArray = Arrays.asList(arr);
             }
 
             return OnboardingResponse.builder()
@@ -56,29 +54,7 @@ public class OnboardingResponseRepository extends GeneralRepository<OnboardingRe
     }
 
     public OnboardingResponse save(OnboardingResponse response) {
-        LocalDateTime now = LocalDateTime.now();
-        if (response.getId() == null) {
-            response.setId(UUID.randomUUID());
-            response.setCreatedAt(now);
-
-            String sql = """
-                INSERT INTO onboarding_responses (
-                    id, user_id, poll_id, question_id,
-                    answer_text, answer_array, created_at
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """;
-
-            jdbcTemplate.update(sql,
-                    response.getId(),
-                    response.getUserId(),
-                    response.getPollId(),
-                    response.getQuestionId(),
-                    response.getAnswerText(),
-                    toSqlStringArray(response.getAnswerArray()),
-                    Timestamp.valueOf(response.getCreatedAt()));
-        } else {
-            String sql = """
+        String sql = """
                 UPDATE onboarding_responses SET
                     user_id = ?,
                     poll_id = ?,
@@ -88,14 +64,47 @@ public class OnboardingResponseRepository extends GeneralRepository<OnboardingRe
                 WHERE id = ?
                 """;
 
-            jdbcTemplate.update(sql,
-                    response.getUserId(),
-                    response.getPollId(),
-                    response.getQuestionId(),
-                    response.getAnswerText(),
-                    toSqlStringArray(response.getAnswerArray()),
-                    response.getId());
-        }
+        jdbcTemplate.update(sql,
+                response.getUserId(),
+                response.getPollId(),
+                response.getQuestionId(),
+                response.getAnswerText(),
+                toSqlStringArray(response.getAnswerArray()),
+                response.getId());
+        return response;
+    }
+
+    public OnboardingResponse createResponse(UUID userId, UUID pollId, UUID questionId, Object answer) {
+        UUID responseId = UUID.randomUUID();
+        LocalDateTime now = LocalDateTime.now();
+
+        OnboardingResponse response = OnboardingResponse.builder()
+                .id(responseId)
+                .userId(userId)
+                .pollId(pollId)
+                .questionId(questionId)
+                .createdAt(now)
+                .build();
+
+        response.setAnswer(answer);
+
+        String sql = """
+            INSERT INTO onboarding_responses (
+                id, user_id, poll_id, question_id,
+                answer_text, answer_array, created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """;
+
+        jdbcTemplate.update(sql,
+                responseId,
+                userId,
+                pollId,
+                questionId,
+                response.getAnswerText(),
+                toSqlStringArray(response.getAnswerArray()),
+                Timestamp.valueOf(now));
+
         return response;
     }
 

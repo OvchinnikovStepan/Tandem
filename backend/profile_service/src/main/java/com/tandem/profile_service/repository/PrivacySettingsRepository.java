@@ -36,28 +36,9 @@ public class PrivacySettingsRepository extends GeneralRepository<PrivacySettings
 
 
     public PrivacySettings save(PrivacySettings settings) {
-        if (settings.getId() == null) {
-            settings.setId(UUID.randomUUID());
-            settings.setCreatedAt(LocalDateTime.now());
-            settings.setUpdatedAt(LocalDateTime.now());
+        settings.setUpdatedAt(LocalDateTime.now());
 
-            String sql = """
-                INSERT INTO privacy_settings (id, user_id, show_phone_number, show_email, show_city, 
-                                            show_place_of_work, show_job_title, show_birthday, 
-                                            show_personal_interests, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """;
-
-            jdbcTemplate.update(sql,
-                    settings.getId(), settings.getUserId(), settings.isShowPhoneNumber(),
-                    settings.isShowEmail(), settings.isShowCity(), settings.isShowPlaceOfWork(),
-                    settings.isShowJobTitle(), settings.isShowBirthday(),
-                    settings.isShowPersonalInterests(),
-                    settings.getCreatedAt(), settings.getUpdatedAt());
-        } else {
-            settings.setUpdatedAt(LocalDateTime.now());
-
-            String sql = """
+        String sql = """
                 UPDATE privacy_settings SET 
                     show_phone_number = ?, show_email = ?, show_city = ?, 
                     show_place_of_work = ?, show_job_title = ?, show_birthday = ?, 
@@ -65,28 +46,55 @@ public class PrivacySettingsRepository extends GeneralRepository<PrivacySettings
                 WHERE id = ?
                 """;
 
-            jdbcTemplate.update(sql,
-                    settings.isShowPhoneNumber(), settings.isShowEmail(), settings.isShowCity(),
-                    settings.isShowPlaceOfWork(), settings.isShowJobTitle(), settings.isShowBirthday(),
-                    settings.isShowPersonalInterests(), settings.getUpdatedAt(), settings.getId());
-        }
-
+        jdbcTemplate.update(sql,
+                settings.isShowPhoneNumber(), settings.isShowEmail(), settings.isShowCity(),
+                settings.isShowPlaceOfWork(), settings.isShowJobTitle(), settings.isShowBirthday(),
+                settings.isShowPersonalInterests(), settings.getUpdatedAt(), settings.getId());
         return settings;
     }
 
 
-    public PrivacySettings saveDefaultSettings(UUID userId) {
+    public PrivacySettings createDefaultSettings(UUID userId) {
+        UUID settingsId = UUID.randomUUID();
+        LocalDateTime now = LocalDateTime.now();
+
+        String sql = """
+            INSERT INTO privacy_settings (
+                id, 
+                user_id, 
+                show_phone_number, 
+                show_email, 
+                show_city, 
+                show_place_of_work, 
+                show_job_title, 
+                show_birthday, 
+                show_personal_interests,
+                created_at, 
+                updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """;
+
         PrivacySettings defaultSettings = PrivacySettings.builder()
+                .id(settingsId)
                 .userId(userId)
-                .showPhoneNumber(false)
-                .showEmail(false)
-                .showCity(true)
-                .showPlaceOfWork(true)
-                .showJobTitle(true)
-                .showBirthday(false)
-                .showPersonalInterests(true)
+                .createdAt(now)
+                .updatedAt(now)
                 .build();
 
-        return save(defaultSettings);
+        jdbcTemplate.update(sql,
+                settingsId,
+                userId,
+                defaultSettings.isShowPhoneNumber(),
+                defaultSettings.isShowEmail(),
+                defaultSettings.isShowCity(),
+                defaultSettings.isShowPlaceOfWork(),
+                defaultSettings.isShowJobTitle(),
+                defaultSettings.isShowBirthday(),
+                defaultSettings.isShowPersonalInterests(),
+                now,
+                now
+        );
+
+        return defaultSettings;
     }
 }
