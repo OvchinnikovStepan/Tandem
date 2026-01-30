@@ -1,17 +1,16 @@
 package com.tandem.profile_service.model;
 
+import lombok.Setter;
+import lombok.Getter;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Setter
+@Getter
 @Builder
 public class OnboardingResponse {
 
@@ -31,13 +30,6 @@ public class OnboardingResponse {
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    public OnboardingResponse(UUID userId, UUID pollId, UUID questionId) {
-        this.userId = userId;
-        this.pollId = pollId;
-        this.questionId = questionId;
-        this.createdAt = LocalDateTime.now();
-    }
 
     public Object getAnswer() {
         if (answerText != null) {

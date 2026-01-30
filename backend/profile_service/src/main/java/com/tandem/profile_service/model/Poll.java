@@ -1,15 +1,14 @@
 package com.tandem.profile_service.model;
 
+import lombok.Setter;
+import lombok.Getter;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Setter
+@Getter
 @Builder
 public class Poll {
 
@@ -29,11 +28,4 @@ public class Poll {
 
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
-
-    public Poll(String name, int version) {
-        this.name = name;
-        this.version = version;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
 }

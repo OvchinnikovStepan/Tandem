@@ -1,15 +1,14 @@
 package com.tandem.profile_service.model;
 
+import lombok.Setter;
+import lombok.Getter;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Setter
+@Getter
 @Builder
 public class PrivacySettings {
     private UUID id;
@@ -17,6 +16,8 @@ public class PrivacySettings {
 
     @Builder.Default
     private boolean showPhoneNumber = false;
+
+    @Builder.Default
     private boolean showEmail = false;
 
     @Builder.Default
@@ -39,8 +40,4 @@ public class PrivacySettings {
 
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
-
-    public PrivacySettings(UUID userId) {
-        this.userId = userId;
-    }
 }

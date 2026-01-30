@@ -1,16 +1,15 @@
 package com.tandem.profile_service.model;
 
+import lombok.Setter;
+import lombok.Getter;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Setter
+@Getter
 @Builder
 public class Profile {
     private UUID id;
@@ -36,12 +35,4 @@ public class Profile {
 
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
-
-    public Profile(UUID userId, String name, String surname) {
-        this.userId = userId;
-        this.name = name;
-        this.surname = surname;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
 }

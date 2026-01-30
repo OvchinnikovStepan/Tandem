@@ -1,18 +1,18 @@
 package com.tandem.profile_service.model;
 
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+
+@Setter
+@Getter
 @Builder
 public class Question {
 
@@ -67,13 +67,5 @@ public class Question {
             }
             throw new IllegalArgumentException("Unknown question type: " + value);
         }
-    }
-
-    public Question(UUID pollId, int questionOrder, QuestionType questionType, String label) {
-        this.pollId = pollId;
-        this.questionOrder = questionOrder;
-        this.questionType = questionType;
-        this.label = label;
-        this.createdAt = LocalDateTime.now();
     }
 }
