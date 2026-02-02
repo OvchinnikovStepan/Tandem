@@ -2,9 +2,7 @@ package com.tandem.profile_service.controller;
 
 import com.tandem.profile_service.dto.OnboardingCompleteRequest;
 import com.tandem.profile_service.dto.OnboardingCompleteResponse;
-import com.tandem.profile_service.dto.OnboardingEventData;
 import com.tandem.profile_service.dto.OnboardingQuestionsResponse;
-import com.tandem.profile_service.kafka.ProfileEventPublisher;
 import com.tandem.profile_service.service.OnboardingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +19,7 @@ import java.util.UUID;
 public class OnboardingController {
 
     private final OnboardingService onboardingService;
-    private final ProfileEventPublisher profileEventPublisher;
+
 
     /**
      * Метод для извлечения userId из JWT токена
@@ -38,16 +36,9 @@ public class OnboardingController {
      */
     @GetMapping("/questions")
     public ResponseEntity<OnboardingQuestionsResponse> getOnboardingQuestions() {
-
         UUID currentUserId = getCurrentUserId();
-
-        try {
-            OnboardingQuestionsResponse response =
-                    onboardingService.getOnboardingQuestions(currentUserId);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        OnboardingQuestionsResponse response = onboardingService.getOnboardingQuestions(currentUserId);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -58,26 +49,7 @@ public class OnboardingController {
             @RequestBody OnboardingCompleteRequest request) {
 
         UUID currentUserId = getCurrentUserId();
-
-        try {
-            OnboardingCompleteResponse response =
-                    onboardingService.completeOnboarding(currentUserId, request);
-
-            OnboardingEventData eventData =
-                    onboardingService.buildOnboardingEventData(currentUserId, response);
-
-            profileEventPublisher.publishOnboardingCompleted(
-                    eventData.getUserId(),
-                    eventData.getProfileId(),
-                    eventData.getName(),
-                    eventData.getSurname(),
-                    eventData.getInterests()
-            );
-
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        OnboardingCompleteResponse response = onboardingService.completeOnboarding(currentUserId, request);
+        return ResponseEntity.ok(response);
     }
-
 }

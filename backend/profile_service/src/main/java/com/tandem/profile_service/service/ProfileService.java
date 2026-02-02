@@ -1,9 +1,12 @@
 package com.tandem.profile_service.service;
 
+import com.tandem.profile_service.dto.ProfileResponse;
+import com.tandem.profile_service.dto.UpdateResponse;
+import com.tandem.profile_service.dto.ProfileRequest;
 import com.tandem.profile_service.dto.PrivacySettingsDto;
 import com.tandem.profile_service.dto.ProfileEventDto;
-import com.tandem.profile_service.dto.ProfileRequest;
-import com.tandem.profile_service.dto.ProfileResponse;
+import com.tandem.profile_service.kafka.ProfileEventPublisher;
+import com.tandem.profile_service.model.PrivacySettings;
 import com.tandem.profile_service.model.Profile;
 import com.tandem.profile_service.repository.PrivacySettingsRepository;
 import com.tandem.profile_service.repository.ProfileRepository;
@@ -24,12 +27,12 @@ import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Slf4j
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
     private final PrivacySettingsRepository privacySettingsRepository;
+    private final ProfileEventPublisher profileEventPublisher;
 
     /**
      * Получить все профили (сортировка по дате создания)
@@ -44,7 +47,7 @@ public class ProfileService {
      * Полное обновление профиля (PUT)
      */
     @Transactional
-    public Profile updateProfile(UUID userId, ProfileRequest request) {
+    public UpdateResponse updateProfile(UUID userId, ProfileRequest request) {
         Profile existingProfile = profileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Profile not found for user: " + userId));
 
@@ -60,15 +63,22 @@ public class ProfileService {
         existingProfile.setPersonalInterests(request.getPersonalInterests());
         existingProfile.setUpdatedAt(LocalDateTime.now());
 
+        Profile updatedProfile = profileRepository.save(existingProfile);
+
+        publishProfileUpdatedEvent(userId, updatedProfile, request);
+
         log.info("Profile successfully updated for userId={}", userId);
-        return profileRepository.save(existingProfile);
+
+        ProfileResponse profileResponse = ProfileResponse.forOwner(updatedProfile);
+
+        return UpdateResponse.success(profileResponse);
     }
 
     /**
      * Частичное обновление профиля (PATCH)
      */
     @Transactional
-    public Profile patchProfile(UUID userId, ProfileRequest request) {
+    public UpdateResponse patchProfile(UUID userId, ProfileRequest request) {
         Profile existingProfile = profileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Profile not found for user: " + userId));
 
@@ -76,8 +86,15 @@ public class ProfileService {
         BeanUtils.copyProperties(request, existingProfile, getNullPropertyNames(request));
         existingProfile.setUpdatedAt(LocalDateTime.now());
 
+        Profile updatedProfile = profileRepository.save(existingProfile);
+
+        publishProfileUpdatedEvent(userId, updatedProfile, request);
+
         log.info("Profile successfully patched for userId={}", userId);
-        return profileRepository.save(existingProfile);
+
+        ProfileResponse profileResponse = ProfileResponse.forOwner(updatedProfile);
+
+        return UpdateResponse.success(profileResponse);
     }
 
     private String[] getNullPropertyNames(Object source) {
@@ -130,34 +147,30 @@ public class ProfileService {
      * Обновить настройки приватности
      */
     @Transactional
-    public void updatePrivacySettings(UUID userId, PrivacySettingsDto request) {
-        privacySettingsRepository.findByUserId(userId)
-                .ifPresentOrElse(
-                        settings -> {
-                            settings.setShowPhoneNumber(request.isShowPhoneNumber());
-                            settings.setShowEmail(request.isShowEmail());
-                            settings.setShowCity(request.isShowCity());
-                            settings.setShowPlaceOfWork(request.isShowPlaceOfWork());
-                            settings.setShowJobTitle(request.isShowJobTitle());
-                            settings.setShowBirthday(request.isShowBirthday());
-                            settings.setShowPersonalInterests(request.isShowPersonalInterests());
-                            settings.setUpdatedAt(LocalDateTime.now());
-                            privacySettingsRepository.save(settings);
-                        },
-                        () -> {
-                            // Если настроек нет - создаем новые
-                            privacySettingsRepository.saveDefaultSettings(userId);
-                            // И обновляем их
+    public UpdateResponse updatePrivacySettings(UUID userId, PrivacySettingsDto request) {
+        PrivacySettings settings = privacySettingsRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Privacy settings not found for userId= " + userId));
 
-                            updatePrivacySettings(userId, request);
-                        }
-                );
+        settings.setShowPhoneNumber(request.isShowPhoneNumber());
+        settings.setShowEmail(request.isShowEmail());
+        settings.setShowCity(request.isShowCity());
+        settings.setShowPlaceOfWork(request.isShowPlaceOfWork());
+        settings.setShowJobTitle(request.isShowJobTitle());
+        settings.setShowBirthday(request.isShowBirthday());
+        settings.setShowPersonalInterests(request.isShowPersonalInterests());
+        settings.setUpdatedAt(LocalDateTime.now());
+
+        privacySettingsRepository.save(settings);
+
         log.info("Privacy settings successfully updated for userId={}", userId);
+
+        return UpdateResponse.success(null);
     }
 
     /**
      * Получить профиль с учетом настроек приватности
      */
+    @Transactional
     public ProfileResponse getProfileWithPrivacy(UUID viewerId, UUID targetUserId) {
         Profile profile = profileRepository.findByUserId(targetUserId)
                 .orElseThrow(() -> new RuntimeException("Profile not found for user: " + targetUserId));
@@ -222,7 +235,7 @@ public class ProfileService {
 
             Profile createdProfile = profileRepository.createNewUserProfile(userId, phoneNumber, email);
 
-            privacySettingsRepository.saveDefaultSettings(userId);
+            privacySettingsRepository.createDefaultSettings(userId);
 
             log.info("Profile successfully created from registration event for userId={}", userId);
             return createdProfile;
@@ -268,5 +281,25 @@ public class ProfileService {
 
         log.info("Found {} changed fields: {}", changedFields.size(), changedFields);
         return changedFields;
+    }
+
+    /**
+     * Публикация события в kafka об обновлении профиля
+     */
+    private void publishProfileUpdatedEvent(UUID userId, Profile updatedProfile, ProfileRequest request) {
+        try {
+            List<String> changedFields = getChangedFields(request);
+            if (!changedFields.isEmpty()) {
+                profileEventPublisher.publishProfileUpdated(
+                        userId,
+                        updatedProfile.getId(),
+                        changedFields
+                );
+                log.info("Published profile updated event for userId={}, changedFields={}",
+                        userId, changedFields);
+            }
+        } catch (Exception e) {
+            log.error("Failed to publish profile updated event for userId={}", userId, e);
+        }
     }
 }

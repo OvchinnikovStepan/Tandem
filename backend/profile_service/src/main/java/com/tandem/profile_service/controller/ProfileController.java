@@ -4,12 +4,10 @@ import com.tandem.profile_service.dto.ProfileResponse;
 import com.tandem.profile_service.dto.UpdateResponse;
 import com.tandem.profile_service.dto.ProfileRequest;
 import com.tandem.profile_service.dto.PrivacySettingsDto;
-import com.tandem.profile_service.kafka.ProfileEventPublisher;
 import com.tandem.profile_service.model.Profile;
 import com.tandem.profile_service.service.ProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +27,7 @@ import java.util.UUID;
 public class ProfileController {
 
     private final ProfileService profileService;
-    private final ProfileEventPublisher profileEventPublisher;
+
 
     /**
      * Метод для извлечения userId из JWT токена
@@ -57,13 +55,8 @@ public class ProfileController {
     public ResponseEntity<ProfileResponse> getMyProfile() {
 
         UUID currentUserId = getCurrentUserId();
-
-        try {
-            ProfileResponse response = profileService.getProfileWithPrivacy(currentUserId, currentUserId);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        ProfileResponse response = profileService.getProfileWithPrivacy(currentUserId, currentUserId);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -74,13 +67,8 @@ public class ProfileController {
     public ResponseEntity<Void> deleteProfile() {
 
         UUID currentUserId = getCurrentUserId();
-
-        try {
-            profileService.deleteProfile(currentUserId);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        profileService.deleteProfile(currentUserId);
+        return ResponseEntity.noContent().build();
     }
 
     /**
@@ -91,13 +79,8 @@ public class ProfileController {
     public ResponseEntity<ProfileResponse> getProfileById(@PathVariable UUID userId) {
 
         UUID currentUserId = getCurrentUserId();
-
-        try {
-            ProfileResponse response = profileService.getProfileWithPrivacy(currentUserId, userId);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        ProfileResponse response = profileService.getProfileWithPrivacy(currentUserId, userId);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -111,26 +94,8 @@ public class ProfileController {
 
         UUID currentUserId = getCurrentUserId();
 
-        try {
-            Profile updatedProfile = profileService.updateProfile(currentUserId, request);
-            ProfileResponse profileResponse = ProfileResponse.forOwner(updatedProfile);
-
-            // Публикация события profile.updated
-            List<String> changedFields = profileService.getChangedFields(request);
-            if (!changedFields.isEmpty()) {
-                profileEventPublisher.publishProfileUpdated(
-                        currentUserId,
-                        updatedProfile.getId(),
-                        changedFields
-                );
-            }
-
-            return ResponseEntity.ok(UpdateResponse.success(profileResponse));
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(UpdateResponse.failure());
-        }
+        UpdateResponse response = profileService.updateProfile(currentUserId, request);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -142,26 +107,8 @@ public class ProfileController {
 
         UUID currentUserId = getCurrentUserId();
 
-        try {
-            Profile updatedProfile = profileService.patchProfile(currentUserId, request);
-            ProfileResponse profileResponse = ProfileResponse.forOwner(updatedProfile);
-
-            // Публикация события profile.updated
-            List<String> changedFields = profileService.getChangedFields(request);
-            if (!changedFields.isEmpty()) {
-                profileEventPublisher.publishProfileUpdated(
-                        currentUserId,
-                        updatedProfile.getId(),
-                        changedFields
-                );
-            }
-
-            return ResponseEntity.ok(UpdateResponse.success(profileResponse));
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(UpdateResponse.failure());
-        }
+        UpdateResponse response = profileService.patchProfile(currentUserId, request);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -186,12 +133,8 @@ public class ProfileController {
 
         UUID currentUserId = getCurrentUserId();
 
-        try {
-            profileService.updatePrivacySettings(currentUserId, request);
-            return ResponseEntity.ok(UpdateResponse.success(null));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(UpdateResponse.failure());
-        }
+        UpdateResponse response = profileService.updatePrivacySettings(currentUserId, request);
+        return ResponseEntity.ok(response);
+
     }
 }

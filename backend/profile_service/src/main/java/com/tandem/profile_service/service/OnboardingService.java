@@ -4,6 +4,7 @@ import com.tandem.profile_service.dto.OnboardingCompleteRequest;
 import com.tandem.profile_service.dto.OnboardingCompleteResponse;
 import com.tandem.profile_service.dto.OnboardingEventData;
 import com.tandem.profile_service.dto.OnboardingQuestionsResponse;
+import com.tandem.profile_service.kafka.ProfileEventPublisher;
 import com.tandem.profile_service.model.OnboardingResponse;
 import com.tandem.profile_service.model.Poll;
 import com.tandem.profile_service.model.Profile;
@@ -29,7 +30,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Slf4j
 public class OnboardingService {
 
@@ -37,11 +37,13 @@ public class OnboardingService {
     private final PollRepository pollRepository;
     private final OnboardingResponseRepository onboardingResponseRepository;
     private final ProfileRepository profileRepository;
+    private final ProfileEventPublisher profileEventPublisher;
 
     /**
      * Возвращает активный онбординг-опрос и список его вопросов.
      * Бросает RuntimeException, если профиль не найден/онбординг уже завершен/нет активного опроса.
      */
+    @Transactional
     public OnboardingQuestionsResponse getOnboardingQuestions(UUID userId) {
         Profile profile = profileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Profile not found for user: " + userId));
@@ -84,6 +86,11 @@ public class OnboardingService {
         Profile profile = profileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Profile not found for user: " + userId));
 
+        if (profile.isOnboardingCompleted()) {
+            log.warn("Attempt to complete already completed onboarding for userId={}", userId);
+            throw new RuntimeException("Onboarding already completed for user: " + userId);
+        }
+
         Poll poll = pollRepository.findLatestActive()
                 .orElseThrow(() -> new RuntimeException("No active onboarding poll"));
 
@@ -104,12 +111,12 @@ public class OnboardingService {
 
         markOnboardingCompleted(profile);
 
+        OnboardingCompleteResponse response = buildCompleteResponse(userId, profile);
+
+        publishOnboardingCompletedEvent(userId, response);
+
         log.info("Onboarding completed successfully for userId={}", userId);
-        return OnboardingCompleteResponse.builder()
-                .profile(profile)
-                .onboardingCompleted(profile.isOnboardingCompleted())
-                .userId(userId)
-                .build();
+        return response;
     }
 
     /**
@@ -136,6 +143,7 @@ public class OnboardingService {
     /**
      * Сохраняет ответы пользователя в таблицу onboarding_responses и обновляет профиль.
      */
+    @Transactional
     private void saveResponsesAndUpdateProfile(
             UUID userId,
             UUID pollId,
@@ -152,22 +160,26 @@ public class OnboardingService {
                 throw new RuntimeException("Unknown question: " + questionId);
             }
 
-            OnboardingResponse response = new OnboardingResponse(
+            OnboardingResponse response = onboardingResponseRepository.createResponse(
                     userId,
                     pollId,
-                    questionId
+                    questionId,
+                    answer
             );
-            response.setAnswer(answer);
-            onboardingResponseRepository.save(response);
 
             applyAnswerToProfile(profile, question, answer);
         }
+
+        profileRepository.save(profile);
+
         log.info("All responses saved and profile updated for userId={}", userId);
     }
+
 
     /**
      * Помечает онбординг завершенным.
      */
+    @Transactional
     private void markOnboardingCompleted(Profile profile) {
         if (!profile.isOnboardingCompleted()) {
             profile.setOnboardingCompleted(true);
@@ -267,5 +279,38 @@ public class OnboardingService {
             }
         }
         return interests;
+    }
+
+    /**
+     * Создание ответа для контроллера
+     */
+    private OnboardingCompleteResponse buildCompleteResponse(UUID userId, Profile profile) {
+        return OnboardingCompleteResponse.builder()
+                .profile(profile)
+                .onboardingCompleted(profile.isOnboardingCompleted())
+                .userId(userId)
+                .build();
+    }
+
+    /**
+     * Публикация события в kafka о завершении онбординга
+     */
+    @Transactional
+    public void publishOnboardingCompletedEvent(UUID userId, OnboardingCompleteResponse response) {
+        try {
+            OnboardingEventData eventData = buildOnboardingEventData(userId, response);
+
+            profileEventPublisher.publishOnboardingCompleted(
+                    eventData.getUserId(),
+                    eventData.getProfileId(),
+                    eventData.getName(),
+                    eventData.getSurname(),
+                    eventData.getInterests()
+            );
+
+            log.info("Successfully published onboarding completed event for userId={}", userId);
+        } catch (Exception e) {
+            log.error("Failed to publish onboarding completed event for userId={}", userId, e);
+        }
     }
 }
