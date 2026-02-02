@@ -3,7 +3,14 @@ package com.tandem.profile_service;
 import com.tandem.profile_service.dto.OnboardingCompleteRequest;
 import com.tandem.profile_service.dto.OnboardingCompleteResponse;
 import com.tandem.profile_service.dto.OnboardingQuestionsResponse;
-import com.tandem.profile_service.model.*;
+import com.tandem.profile_service.exception.ProfileNotFoundException;
+import com.tandem.profile_service.exception.OnboardingException;
+import com.tandem.profile_service.exception.ValidationException;
+import com.tandem.profile_service.exception.DataPersistenceException;
+import com.tandem.profile_service.kafka.ProfileEventPublisher;
+import com.tandem.profile_service.model.Question;
+import com.tandem.profile_service.model.Poll;
+import com.tandem.profile_service.model.Profile;
 import com.tandem.profile_service.repository.OnboardingResponseRepository;
 import com.tandem.profile_service.repository.PollRepository;
 import com.tandem.profile_service.repository.ProfileRepository;
@@ -25,9 +32,13 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.eq;
 
 @ExtendWith(MockitoExtension.class)
 class OnboardingServiceTest {
@@ -43,6 +54,9 @@ class OnboardingServiceTest {
 
     @Mock
     private ProfileRepository profileRepository;
+
+    @Mock
+    private ProfileEventPublisher profileEventPublisher;
 
     private OnboardingService onboardingService;
 
@@ -76,7 +90,8 @@ class OnboardingServiceTest {
                 questionRepository,
                 pollRepository,
                 onboardingResponseRepository,
-                profileRepository
+                profileRepository,
+                profileEventPublisher
         );
         initializeTestData();
     }
@@ -102,7 +117,6 @@ class OnboardingServiceTest {
                 .userId(userId1)
                 .email("john@example.com")
                 .phoneNumber("89991234567")
-                // остальные поля null
                 .name(null)
                 .surname(null)
                 .status(null)
@@ -258,9 +272,9 @@ class OnboardingServiceTest {
                 .build();
     }
 
-    // getOnboardingQuestions
     @Test
     void getOnboardingQuestions_Success() {
+        // Arrange
         List<Question> questions = Arrays.asList(
                 testQuestion1, testQuestion2, testQuestion3, testQuestion4,
                 testQuestion5, testQuestion6, testQuestion7
@@ -270,12 +284,16 @@ class OnboardingServiceTest {
         when(pollRepository.findLatestActive()).thenReturn(Optional.of(testPoll1));
         when(questionRepository.findByPollId(pollId1)).thenReturn(questions);
 
+        // Act
         OnboardingQuestionsResponse response = onboardingService.getOnboardingQuestions(userId1);
 
+        // Assert
         assertThat(response).isNotNull();
         assertThat(response.getPollId()).isEqualTo(pollId1);
         assertThat(response.getQuestions()).hasSize(7);
+        assertThat(response.getQuestions().get(0).getId()).isEqualTo(questionId1);
         assertThat(response.getQuestions().get(0).getLabel()).isEqualTo("name");
+        assertThat(response.getQuestions().get(0).isRequired()).isTrue();
         assertThat(response.getQuestions().get(3).getLabel()).isEqualTo("personal_interests");
         assertThat(response.getQuestions().get(3).getType()).isEqualTo("multiselect");
 
@@ -284,12 +302,27 @@ class OnboardingServiceTest {
         verify(questionRepository).findByPollId(pollId1);
     }
 
-    // getOnboardingQuestions - already completed
+    @Test
+    void getOnboardingQuestions_ProfileNotFound() {
+        // Arrange
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        ProfileNotFoundException exception = assertThrows(ProfileNotFoundException.class,
+                () -> onboardingService.getOnboardingQuestions(userId1));
+
+        assertThat(exception.getMessage()).contains("Profile not found for user");
+        verify(pollRepository, never()).findLatestActive();
+        verify(questionRepository, never()).findByPollId(any());
+    }
+
     @Test
     void getOnboardingQuestions_AlreadyCompleted() {
+        // Arrange
         when(profileRepository.findByUserId(userId2)).thenReturn(Optional.of(testProfile2));
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        // Act & Assert
+        OnboardingException exception = assertThrows(OnboardingException.class,
                 () -> onboardingService.getOnboardingQuestions(userId2));
 
         assertThat(exception.getMessage()).contains("Onboarding already completed");
@@ -297,9 +330,23 @@ class OnboardingServiceTest {
         verify(questionRepository, never()).findByPollId(any());
     }
 
-    // completeOnboarding
+    @Test
+    void getOnboardingQuestions_NoActivePoll() {
+        // Arrange
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.of(testProfile1));
+        when(pollRepository.findLatestActive()).thenReturn(Optional.empty());
+
+        // Act & Assert
+        OnboardingException exception = assertThrows(OnboardingException.class,
+                () -> onboardingService.getOnboardingQuestions(userId1));
+
+        assertThat(exception.getMessage()).contains("No active onboarding poll");
+        verify(questionRepository, never()).findByPollId(any());
+    }
+
     @Test
     void completeOnboarding_Success() {
+        // Arrange
         List<Question> questions = Arrays.asList(
                 testQuestion1, testQuestion2, testQuestion3, testQuestion4,
                 testQuestion5, testQuestion6, testQuestion7
@@ -310,8 +357,12 @@ class OnboardingServiceTest {
         when(questionRepository.findByPollId(pollId1)).thenReturn(questions);
         when(profileRepository.save(any(Profile.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
+        // Mock для createResponse - используем builder или просто возвращаем null
+        when(onboardingResponseRepository.createResponse(any(UUID.class), any(UUID.class), any(UUID.class), any()))
+                .thenReturn(null); // или OnboardingResponse.builder().build() если builder публичный
+
         OnboardingCompleteRequest request = new OnboardingCompleteRequest();
-        request.setResponses(Arrays.asList(
+        List<OnboardingCompleteRequest.ResponseItem> responses = Arrays.asList(
                 createResponseItem(questionId1, "John"),
                 createResponseItem(questionId2, "Doe"),
                 createResponseItem(questionId3, "Researcher in nanotechnology"),
@@ -319,26 +370,106 @@ class OnboardingServiceTest {
                 createResponseItem(questionId5, "Omsk"),
                 createResponseItem(questionId6, "NanoTech Corp"),
                 createResponseItem(questionId7, "Senior Researcher")
-        ));
+        );
+        request.setResponses(responses);
 
+        // Act
         OnboardingCompleteResponse response = onboardingService.completeOnboarding(userId1, request);
 
+        // Assert
         assertThat(response).isNotNull();
         assertThat(response.getProfile()).isNotNull();
         assertThat(response.isOnboardingCompleted()).isTrue();
         assertThat(response.getUserId()).isEqualTo(userId1);
 
-        verify(onboardingResponseRepository, times(7)).save(any(OnboardingResponse.class));
-        verify(profileRepository).save(testProfile1);
-
+        // Проверяем, что профиль обновлен
+        assertThat(testProfile1.getName()).isEqualTo("John");
+        assertThat(testProfile1.getSurname()).isEqualTo("Doe");
+        assertThat(testProfile1.getPersonalInterests()).isEqualTo("gaming, reading");
+        assertThat(testProfile1.getCity()).isEqualTo("Omsk");
+        assertThat(testProfile1.getPlaceOfWork()).isEqualTo("NanoTech Corp");
+        assertThat(testProfile1.getJobTitle()).isEqualTo("Senior Researcher");
         assertThat(testProfile1.isOnboardingCompleted()).isTrue();
         assertThat(testProfile1.getOnboardingCompletedAt()).isNotNull();
+
+        // Проверяем вызовы
+        verify(profileRepository).save(testProfile1);
+        verify(onboardingResponseRepository, times(7)).createResponse(any(), any(), any(), any());
+        verify(profileEventPublisher).publishOnboardingCompleted(any(), any(), any(), any(), any());
     }
 
+    @Test
+    void completeOnboarding_ProfileNotFound() {
+        // Arrange
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.empty());
 
-    // completeOnboarding - missing required question
+        OnboardingCompleteRequest request = new OnboardingCompleteRequest();
+        request.setResponses(Arrays.asList());
+
+        // Act & Assert
+        ProfileNotFoundException exception = assertThrows(ProfileNotFoundException.class,
+                () -> onboardingService.completeOnboarding(userId1, request));
+
+        assertThat(exception.getMessage()).contains("Profile not found for user");
+        verify(pollRepository, never()).findLatestActive();
+        verify(questionRepository, never()).findByPollId(any());
+    }
+
+    @Test
+    void completeOnboarding_AlreadyCompleted() {
+        // Arrange
+        when(profileRepository.findByUserId(userId2)).thenReturn(Optional.of(testProfile2));
+
+        OnboardingCompleteRequest request = new OnboardingCompleteRequest();
+        request.setResponses(Arrays.asList());
+
+        // Act & Assert
+        OnboardingException exception = assertThrows(OnboardingException.class,
+                () -> onboardingService.completeOnboarding(userId2, request));
+
+        assertThat(exception.getMessage()).contains("Onboarding already completed");
+        verify(pollRepository, never()).findLatestActive();
+        verify(questionRepository, never()).findByPollId(any());
+    }
+
+    @Test
+    void completeOnboarding_NoActivePoll() {
+        // Arrange
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.of(testProfile1));
+        when(pollRepository.findLatestActive()).thenReturn(Optional.empty());
+
+        OnboardingCompleteRequest request = new OnboardingCompleteRequest();
+        request.setResponses(Arrays.asList());
+
+        // Act & Assert
+        OnboardingException exception = assertThrows(OnboardingException.class,
+                () -> onboardingService.completeOnboarding(userId1, request));
+
+        assertThat(exception.getMessage()).contains("No active onboarding poll");
+        verify(questionRepository, never()).findByPollId(any());
+    }
+
+    @Test
+    void completeOnboarding_NoQuestionsInPoll() {
+        // Arrange
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.of(testProfile1));
+        when(pollRepository.findLatestActive()).thenReturn(Optional.of(testPoll1));
+        when(questionRepository.findByPollId(pollId1)).thenReturn(Arrays.asList());
+
+        OnboardingCompleteRequest request = new OnboardingCompleteRequest();
+        request.setResponses(Arrays.asList());
+
+        // Act & Assert
+        OnboardingException exception = assertThrows(OnboardingException.class,
+                () -> onboardingService.completeOnboarding(userId1, request));
+
+        assertThat(exception.getMessage()).contains("Onboarding poll has no questions");
+        verify(profileRepository, never()).save(any());
+    }
+
     @Test
     void completeOnboarding_RequiredQuestionNotAnswered() {
+        // Arrange
         List<Question> questions = Arrays.asList(
                 testQuestion1, testQuestion2, testQuestion3, testQuestion4,
                 testQuestion5, testQuestion6, testQuestion7
@@ -354,17 +485,18 @@ class OnboardingServiceTest {
                 createResponseItem(questionId4, Arrays.asList("gaming"))
         ));
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        // Act & Assert
+        ValidationException exception = assertThrows(ValidationException.class,
                 () -> onboardingService.completeOnboarding(userId1, request));
 
         assertThat(exception.getMessage()).contains("Required question not answered");
-        verify(onboardingResponseRepository, never()).save(any());
+        verify(onboardingResponseRepository, never()).createResponse(any(), any(), any(), any());
         verify(profileRepository, never()).save(any());
     }
 
-    // completeOnboarding - unknown question
     @Test
     void completeOnboarding_UnknownQuestion() {
+        // Arrange
         List<Question> questions = Arrays.asList(
                 testQuestion1, testQuestion2, testQuestion3, testQuestion4,
                 testQuestion5, testQuestion6, testQuestion7
@@ -383,11 +515,173 @@ class OnboardingServiceTest {
                 createResponseItem(unknownQuestionId, "Unknown Answer")
         ));
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        // Act & Assert
+        ValidationException exception = assertThrows(ValidationException.class,
                 () -> onboardingService.completeOnboarding(userId1, request));
 
         assertThat(exception.getMessage()).contains("Unknown question");
         verify(profileRepository, never()).save(any());
+    }
+
+    @Test
+    void completeOnboarding_SaveResponsesError() {
+        // Arrange
+        List<Question> questions = Arrays.asList(
+                testQuestion1, testQuestion2, testQuestion3, testQuestion4,
+                testQuestion5, testQuestion6, testQuestion7
+        );
+
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.of(testProfile1));
+        when(pollRepository.findLatestActive()).thenReturn(Optional.of(testPoll1));
+        when(questionRepository.findByPollId(pollId1)).thenReturn(questions);
+        when(onboardingResponseRepository.createResponse(any(), any(), any(), any()))
+                .thenThrow(new RuntimeException("Database error"));
+
+        OnboardingCompleteRequest request = new OnboardingCompleteRequest();
+        request.setResponses(Arrays.asList(
+                createResponseItem(questionId1, "John"),
+                createResponseItem(questionId2, "Doe"),
+                createResponseItem(questionId4, Arrays.asList("gaming"))
+        ));
+
+        // Act & Assert
+        DataPersistenceException exception = assertThrows(DataPersistenceException.class,
+                () -> onboardingService.completeOnboarding(userId1, request));
+
+        assertThat(exception.getMessage()).contains("Failed to save onboarding responses");
+        verify(profileRepository, never()).save(any());
+    }
+
+    @Test
+    void completeOnboarding_SetsProfileFieldsCorrectly() {
+        // Arrange
+        List<Question> questions = Arrays.asList(testQuestion1, testQuestion2, testQuestion4, testQuestion5);
+
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.of(testProfile1));
+        when(pollRepository.findLatestActive()).thenReturn(Optional.of(testPoll1));
+        when(questionRepository.findByPollId(pollId1)).thenReturn(questions);
+        when(profileRepository.save(any(Profile.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Mock для createResponse
+        when(onboardingResponseRepository.createResponse(any(UUID.class), any(UUID.class), any(UUID.class), any()))
+                .thenReturn(null);
+
+        OnboardingCompleteRequest request = new OnboardingCompleteRequest();
+        request.setResponses(Arrays.asList(
+                createResponseItem(questionId1, "John"),
+                createResponseItem(questionId2, "Doe"),
+                createResponseItem(questionId4, Arrays.asList("gaming", "music")),
+                createResponseItem(questionId5, "Moscow")
+        ));
+
+        // Act
+        OnboardingCompleteResponse response = onboardingService.completeOnboarding(userId1, request);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(testProfile1.getName()).isEqualTo("John");
+        assertThat(testProfile1.getSurname()).isEqualTo("Doe");
+        assertThat(testProfile1.getPersonalInterests()).isEqualTo("gaming, music");
+        assertThat(testProfile1.getCity()).isEqualTo("Moscow");
+        assertThat(testProfile1.isOnboardingCompleted()).isTrue();
+    }
+
+    @Test
+    void completeOnboarding_WithEmptyListAnswer() {
+        // Arrange
+        List<Question> questions = Arrays.asList(testQuestion1, testQuestion2, testQuestion4);
+
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.of(testProfile1));
+        when(pollRepository.findLatestActive()).thenReturn(Optional.of(testPoll1));
+        when(questionRepository.findByPollId(pollId1)).thenReturn(questions);
+        when(profileRepository.save(any(Profile.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(onboardingResponseRepository.createResponse(any(UUID.class), any(UUID.class), any(UUID.class), any()))
+                .thenReturn(null);
+
+        OnboardingCompleteRequest request = new OnboardingCompleteRequest();
+        request.setResponses(Arrays.asList(
+                createResponseItem(questionId1, "John"),
+                createResponseItem(questionId2, "Doe"),
+                createResponseItem(questionId4, Arrays.asList()) // Пустой список для интересов
+        ));
+
+        // Act
+        OnboardingCompleteResponse response = onboardingService.completeOnboarding(userId1, request);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(testProfile1.getName()).isEqualTo("John");
+        assertThat(testProfile1.getSurname()).isEqualTo("Doe");
+        assertThat(testProfile1.getPersonalInterests()).isEqualTo(""); // Пустая строка для пустого списка
+    }
+
+    @Test
+    void completeOnboarding_WithoutOptionalFields() {
+        // Arrange - отвечаем только на обязательные вопросы
+        List<Question> questions = Arrays.asList(testQuestion1, testQuestion2, testQuestion4);
+
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.of(testProfile1));
+        when(pollRepository.findLatestActive()).thenReturn(Optional.of(testPoll1));
+        when(questionRepository.findByPollId(pollId1)).thenReturn(questions);
+        when(profileRepository.save(any(Profile.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(onboardingResponseRepository.createResponse(any(UUID.class), any(UUID.class), any(UUID.class), any()))
+                .thenReturn(null);
+
+        OnboardingCompleteRequest request = new OnboardingCompleteRequest();
+        request.setResponses(Arrays.asList(
+                createResponseItem(questionId1, "John"),
+                createResponseItem(questionId2, "Doe"),
+                createResponseItem(questionId4, Arrays.asList("reading"))
+        ));
+
+        // Act
+        OnboardingCompleteResponse response = onboardingService.completeOnboarding(userId1, request);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(testProfile1.getName()).isEqualTo("John");
+        assertThat(testProfile1.getSurname()).isEqualTo("Doe");
+        assertThat(testProfile1.getPersonalInterests()).isEqualTo("reading");
+        assertThat(testProfile1.getCity()).isNull(); // Не задавали город
+        assertThat(testProfile1.isOnboardingCompleted()).isTrue();
+    }
+
+    @Test
+    void buildOnboardingEventData_ExtractsInterestsCorrectly() {
+        // Arrange - через публичный метод completeOnboarding
+        List<Question> questions = Arrays.asList(testQuestion1, testQuestion2, testQuestion4);
+
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.of(testProfile1));
+        when(pollRepository.findLatestActive()).thenReturn(Optional.of(testPoll1));
+        when(questionRepository.findByPollId(pollId1)).thenReturn(questions);
+        when(profileRepository.save(any(Profile.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(onboardingResponseRepository.createResponse(any(UUID.class), any(UUID.class), any(UUID.class), any()))
+                .thenReturn(null);
+
+        OnboardingCompleteRequest request = new OnboardingCompleteRequest();
+        request.setResponses(Arrays.asList(
+                createResponseItem(questionId1, "John"),
+                createResponseItem(questionId2, "Doe"),
+                createResponseItem(questionId4, Arrays.asList("gaming", "music", "reading"))
+        ));
+
+        // Act
+        OnboardingCompleteResponse response = onboardingService.completeOnboarding(userId1, request);
+
+        // Assert - проверяем, что интересы сохранились правильно
+        assertThat(response).isNotNull();
+        assertThat(testProfile1.getPersonalInterests()).isEqualTo("gaming, music, reading");
+
+        // Проверяем, что событие было опубликовано
+        verify(profileEventPublisher).publishOnboardingCompleted(
+                eq(userId1),
+                eq(profileId1),
+                eq("John"),
+                eq("Doe"),
+                any(List.class) // интересы
+        );
     }
 
     private OnboardingCompleteRequest.ResponseItem createResponseItem(UUID questionId, Object answer) {

@@ -1,8 +1,13 @@
 package com.tandem.profile_service;
 
-import com.tandem.profile_service.dto.PrivacySettingsDto;
-import com.tandem.profile_service.dto.ProfileRequest;
 import com.tandem.profile_service.dto.ProfileResponse;
+import com.tandem.profile_service.dto.UpdateResponse;
+import com.tandem.profile_service.dto.ProfileRequest;
+import com.tandem.profile_service.dto.PrivacySettingsDto;
+import com.tandem.profile_service.exception.DataPersistenceException;
+import com.tandem.profile_service.exception.ProfileNotFoundException;
+import com.tandem.profile_service.exception.ResourceNotFoundException;
+import com.tandem.profile_service.kafka.ProfileEventPublisher;
 import com.tandem.profile_service.model.PrivacySettings;
 import com.tandem.profile_service.model.Profile;
 import com.tandem.profile_service.repository.PrivacySettingsRepository;
@@ -22,8 +27,12 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 class ProfileServiceTest {
@@ -33,6 +42,9 @@ class ProfileServiceTest {
 
     @Mock
     private PrivacySettingsRepository privacySettingsRepository;
+
+    @Mock
+    private ProfileEventPublisher profileEventPublisher;
 
     private ProfileService profileService;
 
@@ -48,7 +60,7 @@ class ProfileServiceTest {
 
     @BeforeEach
     void setUp() {
-        profileService = new ProfileService(profileRepository, privacySettingsRepository);
+        profileService = new ProfileService(profileRepository, privacySettingsRepository, profileEventPublisher);
         initializeTestData();
     }
 
@@ -95,29 +107,31 @@ class ProfileServiceTest {
                 .updatedAt(LocalDateTime.now().minusDays(1))
                 .build();
 
-        privacySettings1 = new PrivacySettings();
-        privacySettings1.setUserId(userId1);
-        privacySettings1.setShowPhoneNumber(true);
-        privacySettings1.setShowEmail(true);
-        privacySettings1.setShowCity(true);
-        privacySettings1.setShowPlaceOfWork(true);
-        privacySettings1.setShowJobTitle(true);
-        privacySettings1.setShowBirthday(false);
-        privacySettings1.setShowPersonalInterests(true);
-        privacySettings1.setCreatedAt(LocalDateTime.now().minusDays(30));
-        privacySettings1.setUpdatedAt(LocalDateTime.now().minusDays(5));
+        privacySettings1 = PrivacySettings.builder()
+                .userId(userId1)
+                .showPhoneNumber(true)
+                .showEmail(true)
+                .showCity(true)
+                .showPlaceOfWork(true)
+                .showJobTitle(true)
+                .showBirthday(false)
+                .showPersonalInterests(true)
+                .createdAt(LocalDateTime.now().minusDays(30))
+                .updatedAt(LocalDateTime.now().minusDays(5))
+                .build();
 
-        privacySettings2 = new PrivacySettings();
-        privacySettings2.setUserId(userId2);
-        privacySettings2.setShowPhoneNumber(false);
-        privacySettings2.setShowEmail(false);
-        privacySettings2.setShowCity(true);
-        privacySettings2.setShowPlaceOfWork(false);
-        privacySettings2.setShowJobTitle(false);
-        privacySettings2.setShowBirthday(false);
-        privacySettings2.setShowPersonalInterests(false);
-        privacySettings2.setCreatedAt(LocalDateTime.now().minusDays(7));
-        privacySettings2.setUpdatedAt(LocalDateTime.now().minusDays(1));
+        privacySettings2 = PrivacySettings.builder()
+                .userId(userId2)
+                .showPhoneNumber(false)
+                .showEmail(false)
+                .showCity(true)
+                .showPlaceOfWork(false)
+                .showJobTitle(false)
+                .showBirthday(false)
+                .showPersonalInterests(false)
+                .createdAt(LocalDateTime.now().minusDays(7))
+                .updatedAt(LocalDateTime.now().minusDays(1))
+                .build();
     }
 
     // getAllProfiles
@@ -153,20 +167,27 @@ class ProfileServiceTest {
         request.setJobTitle("Engineer");
         request.setPersonalInterests("Nanotechnology");
 
-        Profile result = profileService.updateProfile(userId1, request);
+        UpdateResponse result = profileService.updateProfile(userId1, request);
 
-        assertThat(result.getName()).isEqualTo("John");
-        assertThat(result.getSurname()).isEqualTo("Doe");
-        assertThat(result.getPhoneNumber()).isEqualTo("123456789");
-        assertThat(result.getEmail()).isEqualTo("john.doe@example.com");
-        assertThat(result.getStatus()).isEqualTo("online");
-        assertThat(result.getBirthday()).isEqualTo(LocalDate.of(1990, 1, 1));
-        assertThat(result.getCity()).isEqualTo("Omsk");
-        assertThat(result.getPlaceOfWork()).isEqualTo("TechCorp");
-        assertThat(result.getJobTitle()).isEqualTo("Engineer");
-        assertThat(result.getPersonalInterests()).isEqualTo("Nanotechnology");
-        assertThat(result.getUpdatedAt()).isNotNull();
+        assertThat(result.isUpdated()).isTrue();
+        assertThat(result.getProfile()).isNotNull();
+        assertThat(result.getProfile().getName()).isEqualTo("John");
+        assertThat(result.getProfile().getSurname()).isEqualTo("Doe");
         verify(profileRepository).save(testProfile1);
+        verify(profileEventPublisher).publishProfileUpdated(any(), any(), any());
+    }
+
+    @Test
+    void updateProfile_ProfileNotFound() {
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.empty());
+
+        ProfileRequest request = new ProfileRequest();
+
+        ProfileNotFoundException exception = assertThrows(ProfileNotFoundException.class,
+                () -> profileService.updateProfile(userId1, request));
+
+        assertThat(exception.getMessage()).contains("Profile not found for user:");
+        verify(profileRepository, never()).save(any());
     }
 
     // patchProfile
@@ -178,18 +199,29 @@ class ProfileServiceTest {
         ProfileRequest request = new ProfileRequest();
         request.setName("NewName");
         request.setSurname("NewSurname");
-        // city и email null
 
-        Profile result = profileService.patchProfile(userId1, request);
+        UpdateResponse result = profileService.patchProfile(userId1, request);
 
-        assertThat(result.getName()).isEqualTo("NewName");
-        assertThat(result.getSurname()).isEqualTo("NewSurname");
-        assertThat(result.getCity()).isEqualTo("Omsk"); // не изменился
-        assertThat(result.getEmail()).isEqualTo("john@example.com"); // не изменился
-        assertThat(result.getUpdatedAt()).isNotNull();
+        assertThat(result.isUpdated()).isTrue();
+        assertThat(result.getProfile()).isNotNull();
+        assertThat(result.getProfile().getName()).isEqualTo("NewName");
+        assertThat(result.getProfile().getSurname()).isEqualTo("NewSurname");
         verify(profileRepository).save(testProfile1);
+        verify(profileEventPublisher).publishProfileUpdated(any(), any(), any());
     }
 
+    @Test
+    void patchProfile_ProfileNotFound() {
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.empty());
+
+        ProfileRequest request = new ProfileRequest();
+
+        ProfileNotFoundException exception = assertThrows(ProfileNotFoundException.class,
+                () -> profileService.patchProfile(userId1, request));
+
+        assertThat(exception.getMessage()).contains("Profile not found for user:");
+        verify(profileRepository, never()).save(any());
+    }
 
     // deleteProfile
     @Test
@@ -202,6 +234,17 @@ class ProfileServiceTest {
         verify(privacySettingsRepository).deleteByUserId(userId1);
     }
 
+    @Test
+    void deleteProfile_ProfileNotFound() {
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.empty());
+
+        ProfileNotFoundException exception = assertThrows(ProfileNotFoundException.class,
+                () -> profileService.deleteProfile(userId1));
+
+        assertThat(exception.getMessage()).contains("Profile not found for user:");
+        verify(profileRepository, never()).deleteByUserId(any());
+        verify(privacySettingsRepository, never()).deleteByUserId(any());
+    }
 
     // getPrivacySettings
     @Test
@@ -220,10 +263,22 @@ class ProfileServiceTest {
         assertThat(dto.isShowPersonalInterests()).isTrue();
     }
 
+    @Test
+    void getPrivacySettings_NotFound() {
+        when(privacySettingsRepository.findByUserId(userId1)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> profileService.getPrivacySettings(userId1));
+
+        assertThat(exception.getMessage()).contains("Privacy settings not found");
+        verify(privacySettingsRepository).findByUserId(userId1);
+    }
+
     // updatePrivacySettings
     @Test
     void updatePrivacySettings_Success() {
         when(privacySettingsRepository.findByUserId(userId1)).thenReturn(Optional.of(privacySettings1));
+        when(privacySettingsRepository.save(any(PrivacySettings.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         PrivacySettingsDto dto = new PrivacySettingsDto();
         dto.setShowPhoneNumber(false);
@@ -234,15 +289,28 @@ class ProfileServiceTest {
         dto.setShowBirthday(true);
         dto.setShowPersonalInterests(false);
 
-        profileService.updatePrivacySettings(userId1, dto);
+        UpdateResponse result = profileService.updatePrivacySettings(userId1, dto);
 
+        assertThat(result.isUpdated()).isTrue();
+        assertThat(result.getProfile()).isNull();
+        verify(privacySettingsRepository).save(privacySettings1);
         assertThat(privacySettings1.isShowPhoneNumber()).isFalse();
         assertThat(privacySettings1.isShowEmail()).isFalse();
-        assertThat(privacySettings1.isShowCity()).isTrue();
         assertThat(privacySettings1.isShowBirthday()).isTrue();
         assertThat(privacySettings1.getUpdatedAt()).isNotNull();
-        verify(privacySettingsRepository).save(privacySettings1);
-        verify(privacySettingsRepository, never()).saveDefaultSettings(any());
+    }
+
+    @Test
+    void updatePrivacySettings_NotFound() {
+        when(privacySettingsRepository.findByUserId(userId1)).thenReturn(Optional.empty());
+
+        PrivacySettingsDto dto = new PrivacySettingsDto();
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> profileService.updatePrivacySettings(userId1, dto));
+
+        assertThat(exception.getMessage()).contains("Privacy settings not found");
+        verify(privacySettingsRepository, never()).save(any());
     }
 
     // getProfileWithPrivacy - owner
@@ -254,6 +322,9 @@ class ProfileServiceTest {
 
         assertThat(response).isNotNull();
         assertThat(response.getName()).isEqualTo("John");
+        assertThat(response.getSurname()).isEqualTo("Doe");
+        assertThat(response.getPhoneNumber()).isEqualTo("89991234567");
+        assertThat(response.getEmail()).isEqualTo("john@example.com");
         verify(privacySettingsRepository, never()).findByUserId(any());
     }
 
@@ -266,9 +337,12 @@ class ProfileServiceTest {
         ProfileResponse response = profileService.getProfileWithPrivacy(userId2, userId1);
 
         assertThat(response).isNotNull();
-        assertThat(response.getPhoneNumber()).isEqualTo("89991234567");
-        assertThat(response.getEmail()).isEqualTo("john@example.com");
+        assertThat(response.getPhoneNumber()).isEqualTo("89991234567"); // показан
+        assertThat(response.getEmail()).isEqualTo("john@example.com"); // показан
         assertThat(response.getBirthday()).isNull(); // скрыт
+        assertThat(response.getBio()).isNotNull();
+        assertThat(response.getBio().getCity()).isEqualTo("Omsk"); // показан
+        assertThat(response.getBio().getPlaceOfWork()).isEqualTo("NanoTech Corp"); // показан
     }
 
     // getProfileWithPrivacy - private settings
@@ -283,6 +357,75 @@ class ProfileServiceTest {
         assertThat(response.getPhoneNumber()).isNull(); // скрыт
         assertThat(response.getEmail()).isNull(); // скрыт
         assertThat(response.getBirthday()).isNull(); // скрыт
+        assertThat(response.getBio()).isNotNull();
+        assertThat(response.getBio().getCity()).isEqualTo("Moscow"); // показан
+        assertThat(response.getBio().getPlaceOfWork()).isNull(); // скрыт
+        assertThat(response.getBio().getJobTitle()).isNull(); // скрыт
+        assertThat(response.getBio().getPersonalInterests()).isNull(); // скрыт
+    }
 
+    @Test
+    void getProfileWithPrivacy_ProfileNotFound() {
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.empty());
+
+        ProfileNotFoundException exception = assertThrows(ProfileNotFoundException.class,
+                () -> profileService.getProfileWithPrivacy(userId2, userId1));
+
+        assertThat(exception.getMessage()).contains("Profile not found for user:");
+        verify(privacySettingsRepository, never()).findByUserId(any());
+    }
+
+    // getChangedFields
+    @Test
+    void getChangedFields_ReturnsCorrectFields() {
+        ProfileRequest request = new ProfileRequest();
+        request.setName("New Name");
+        request.setSurname("New Surname");
+        request.setCity("New City");
+        // Остальные поля null
+
+        List<String> changedFields = profileService.getChangedFields(request);
+
+        assertThat(changedFields).hasSize(3);
+        assertThat(changedFields).contains("name", "surname", "city");
+        assertThat(changedFields).doesNotContain("phoneNumber", "email", "status");
+    }
+
+    @Test
+    void getChangedFields_ReturnsEmptyList_WhenAllFieldsNull() {
+        ProfileRequest request = new ProfileRequest();
+        // Все поля null
+
+        List<String> changedFields = profileService.getChangedFields(request);
+
+        assertThat(changedFields).isEmpty();
+    }
+
+    // DataPersistenceException tests
+    @Test
+    void updateProfile_ThrowsDataPersistenceException_OnSaveError() {
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.of(testProfile1));
+        when(profileRepository.save(any(Profile.class))).thenThrow(new RuntimeException("Database error"));
+
+        ProfileRequest request = new ProfileRequest();
+        request.setName("John");
+
+        DataPersistenceException exception = assertThrows(DataPersistenceException.class,
+                () -> profileService.updateProfile(userId1, request));
+
+        assertThat(exception.getMessage()).contains("Failed to update profile");
+        verify(profileRepository).save(any(Profile.class));
+    }
+
+    @Test
+    void deleteProfile_ThrowsDataPersistenceException_OnDeleteError() {
+        when(profileRepository.findByUserId(userId1)).thenReturn(Optional.of(testProfile1));
+        doThrow(new RuntimeException("Database error")).when(profileRepository).deleteByUserId(userId1);
+
+        DataPersistenceException exception = assertThrows(DataPersistenceException.class,
+                () -> profileService.deleteProfile(userId1));
+
+        assertThat(exception.getMessage()).contains("Failed to delete profile");
+        verify(profileRepository).deleteByUserId(userId1);
     }
 }
