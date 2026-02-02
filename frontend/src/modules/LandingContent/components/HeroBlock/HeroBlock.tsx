@@ -1,11 +1,10 @@
 import Button from "@/ui/Button.tsx";
 import {NavLink} from "react-router";
 
-
 function HeroBlock() {
     return (
-        <section className="py-[6.25rem] bg-landing-bg">
-            <div className="container max-w-[69rem]">
+        <section className="py-25 bg-landing-bg">
+            <div className="container max-w-276">
                 <div className="flex justify-between">
                     <div className="space-y-8">
                         <div className="space-y-4">
@@ -26,10 +25,10 @@ function HeroBlock() {
 
                     <div className="w-full">
                         <img
-                            src="@/../public/hero/Hero_Image.png"
+                            src="/hero/Hero_Image.png"
                             alt="Hero"
                             draggable="false"
-                            className="w-[19.375rem] h-[18.75rem] float-right"
+                            className="w-77.5 h-75 float-right"
                         />
                     </div>
                 </div>

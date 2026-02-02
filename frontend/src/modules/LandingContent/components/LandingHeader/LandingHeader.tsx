@@ -1,17 +1,16 @@
 import Button from "@/ui/Button.tsx";
 import {NavLink} from "react-router";
 
-
 function LandingHeader() {
     return (
         <header className="sticky top-0 z-50 border-b-2 border-header-border bg-accent-white flex" >
-            <div className="container flex items-center justify-between max-w-[69rem]">
+            <div className="container flex items-center justify-between max-w-276">
                 <div className="ml-[-0.125rem]">
                     <img
-                        src="@/../public/logo/Black_logo.png"
+                        src="/logo/Black_Logo.svg"
                         alt="Tandem"
                         draggable="false"
-                        className="size-[3.875rem] scale-120"
+                        className="size-15.5 left"
                     />
                 </div>
                 <div className="flex items-center gap-4">

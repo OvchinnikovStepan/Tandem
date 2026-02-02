@@ -37,6 +37,7 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
+    --tw-shadow-opacity: 0.25;
 }
 
 /* Кастомные цвета, шрифты и т.д. */
@@ -52,11 +53,12 @@
     --color-base-black: #6B6E72;
     --color-button-yellow: #FFDD2D;
     --color-button-yellow-hover: #FFCD33;
-    --color-icon-gray: #D9D9D9;
+    --color-icon-gray: #C4C4C4;
     --color-decoration-color: #FFFFFF80;
     --font-heading-bold: 700 44px/48px dsHeading,"dsHeading Fallback",-apple-system,BlinkMacSystemFont,"Segoe UI", Roboto,"Helvetica Neue", sans-serif;
     --font-base-regular: 400 44px/48px dsHeading;
     --font-roboto: "Roboto", sans-serif;
+    --shadow-default: 0 2px 8px rgb(0 0 0 / var(--tw-shadow-opacity));
 }
 
 @theme inline {
