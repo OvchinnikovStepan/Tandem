@@ -5,6 +5,9 @@ import com.tandem.profile_service.dto.UpdateResponse;
 import com.tandem.profile_service.dto.ProfileRequest;
 import com.tandem.profile_service.dto.PrivacySettingsDto;
 import com.tandem.profile_service.dto.ProfileEventDto;
+import com.tandem.profile_service.exception.DataPersistenceException;
+import com.tandem.profile_service.exception.ProfileNotFoundException;
+import com.tandem.profile_service.exception.ResourceNotFoundException;
 import com.tandem.profile_service.kafka.ProfileEventPublisher;
 import com.tandem.profile_service.model.PrivacySettings;
 import com.tandem.profile_service.model.Profile;
@@ -49,29 +52,34 @@ public class ProfileService {
     @Transactional
     public UpdateResponse updateProfile(UUID userId, ProfileRequest request) {
         Profile existingProfile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Profile not found for user: " + userId));
+                .orElseThrow(() -> new ProfileNotFoundException(userId));
 
-        existingProfile.setName(request.getName());
-        existingProfile.setSurname(request.getSurname());
-        existingProfile.setPhoneNumber(request.getPhoneNumber());
-        existingProfile.setEmail(request.getEmail());
-        existingProfile.setStatus(request.getStatus());
-        existingProfile.setBirthday(request.getBirthday());
-        existingProfile.setCity(request.getCity());
-        existingProfile.setPlaceOfWork(request.getPlaceOfWork());
-        existingProfile.setJobTitle(request.getJobTitle());
-        existingProfile.setPersonalInterests(request.getPersonalInterests());
-        existingProfile.setUpdatedAt(LocalDateTime.now());
+        try {
+            existingProfile.setName(request.getName());
+            existingProfile.setSurname(request.getSurname());
+            existingProfile.setPhoneNumber(request.getPhoneNumber());
+            existingProfile.setEmail(request.getEmail());
+            existingProfile.setStatus(request.getStatus());
+            existingProfile.setBirthday(request.getBirthday());
+            existingProfile.setCity(request.getCity());
+            existingProfile.setPlaceOfWork(request.getPlaceOfWork());
+            existingProfile.setJobTitle(request.getJobTitle());
+            existingProfile.setPersonalInterests(request.getPersonalInterests());
+            existingProfile.setUpdatedAt(LocalDateTime.now());
 
-        Profile updatedProfile = profileRepository.save(existingProfile);
+            Profile updatedProfile = profileRepository.save(existingProfile);
 
-        publishProfileUpdatedEvent(userId, updatedProfile, request);
+            publishProfileUpdatedEvent(userId, updatedProfile, request);
 
-        log.info("Profile successfully updated for userId={}", userId);
+            log.info("Profile successfully updated for userId={}", userId);
 
-        ProfileResponse profileResponse = ProfileResponse.forOwner(updatedProfile);
+            ProfileResponse profileResponse = ProfileResponse.forOwner(updatedProfile);
 
-        return UpdateResponse.success(profileResponse);
+            return UpdateResponse.success(profileResponse);
+        } catch (Exception e) {
+            log.error("Failed to update profile for userId={}", userId, e);
+            throw new DataPersistenceException("Failed to update profile", e);
+        }
     }
 
     /**
@@ -80,21 +88,26 @@ public class ProfileService {
     @Transactional
     public UpdateResponse patchProfile(UUID userId, ProfileRequest request) {
         Profile existingProfile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Profile not found for user: " + userId));
+                .orElseThrow(() -> new ProfileNotFoundException(userId));
 
-        // Автоматически копирует только ненулевые поля
-        BeanUtils.copyProperties(request, existingProfile, getNullPropertyNames(request));
-        existingProfile.setUpdatedAt(LocalDateTime.now());
+        try {
+            // Автоматически копирует только ненулевые поля
+            BeanUtils.copyProperties(request, existingProfile, getNullPropertyNames(request));
+            existingProfile.setUpdatedAt(LocalDateTime.now());
 
-        Profile updatedProfile = profileRepository.save(existingProfile);
+            Profile updatedProfile = profileRepository.save(existingProfile);
 
-        publishProfileUpdatedEvent(userId, updatedProfile, request);
+            publishProfileUpdatedEvent(userId, updatedProfile, request);
 
-        log.info("Profile successfully patched for userId={}", userId);
+            log.info("Profile successfully patched for userId={}", userId);
 
-        ProfileResponse profileResponse = ProfileResponse.forOwner(updatedProfile);
+            ProfileResponse profileResponse = ProfileResponse.forOwner(updatedProfile);
 
-        return UpdateResponse.success(profileResponse);
+            return UpdateResponse.success(profileResponse);
+        } catch (Exception e) {
+            log.error("Failed to patch profile for userId={}", userId, e);
+            throw new DataPersistenceException("Failed to patch profile", e);
+        }
     }
 
     private String[] getNullPropertyNames(Object source) {
@@ -116,11 +129,15 @@ public class ProfileService {
     @Transactional
     public void deleteProfile(UUID userId) {
         Profile existingProfile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Profile not found for user: " + userId));
-
-        profileRepository.deleteByUserId(userId);
-        privacySettingsRepository.deleteByUserId(userId);
-        log.info("Profile and privacy settings successfully deleted for userId={}", userId);
+                .orElseThrow(() -> new ProfileNotFoundException(userId));
+        try {
+            profileRepository.deleteByUserId(userId);
+            privacySettingsRepository.deleteByUserId(userId);
+            log.info("Profile and privacy settings successfully deleted for userId={}", userId);
+        } catch (Exception e) {
+            log.error("Failed to delete profile for userId={}", userId, e);
+            throw new DataPersistenceException("Failed to delete profile", e);
+        }
     }
 
     /**
@@ -139,9 +156,8 @@ public class ProfileService {
                     dto.setShowPersonalInterests(settings.isShowPersonalInterests());
                     return dto;
                 })
-                .orElseThrow(() -> new RuntimeException("Privacy settings not found for user: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Privacy settings not found for user: " + userId));
     }
-
 
     /**
      * Обновить настройки приватности
@@ -149,22 +165,27 @@ public class ProfileService {
     @Transactional
     public UpdateResponse updatePrivacySettings(UUID userId, PrivacySettingsDto request) {
         PrivacySettings settings = privacySettingsRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Privacy settings not found for userId= " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Privacy settings not found for userId= " + userId));
 
-        settings.setShowPhoneNumber(request.isShowPhoneNumber());
-        settings.setShowEmail(request.isShowEmail());
-        settings.setShowCity(request.isShowCity());
-        settings.setShowPlaceOfWork(request.isShowPlaceOfWork());
-        settings.setShowJobTitle(request.isShowJobTitle());
-        settings.setShowBirthday(request.isShowBirthday());
-        settings.setShowPersonalInterests(request.isShowPersonalInterests());
-        settings.setUpdatedAt(LocalDateTime.now());
+        try {
+            settings.setShowPhoneNumber(request.isShowPhoneNumber());
+            settings.setShowEmail(request.isShowEmail());
+            settings.setShowCity(request.isShowCity());
+            settings.setShowPlaceOfWork(request.isShowPlaceOfWork());
+            settings.setShowJobTitle(request.isShowJobTitle());
+            settings.setShowBirthday(request.isShowBirthday());
+            settings.setShowPersonalInterests(request.isShowPersonalInterests());
+            settings.setUpdatedAt(LocalDateTime.now());
 
-        privacySettingsRepository.save(settings);
+            privacySettingsRepository.save(settings);
 
-        log.info("Privacy settings successfully updated for userId={}", userId);
+            log.info("Privacy settings successfully updated for userId={}", userId);
 
-        return UpdateResponse.success(null);
+            return UpdateResponse.success(null);
+        } catch (Exception e) {
+            log.error("Failed to update privacy settings for userId={}", userId, e);
+            throw new DataPersistenceException("Failed to update privacy settings", e);
+        }
     }
 
     /**
@@ -173,7 +194,7 @@ public class ProfileService {
     @Transactional
     public ProfileResponse getProfileWithPrivacy(UUID viewerId, UUID targetUserId) {
         Profile profile = profileRepository.findByUserId(targetUserId)
-                .orElseThrow(() -> new RuntimeException("Profile not found for user: " + targetUserId));
+                .orElseThrow(() -> new ProfileNotFoundException(targetUserId));
 
         // Если смотрим свой профиль
         if (viewerId.equals(targetUserId)) {
@@ -241,7 +262,8 @@ public class ProfileService {
             return createdProfile;
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create profile: " + e.getMessage(), e);
+            log.error("Failed to create profile from registration event: {}", event, e);
+            throw new DataPersistenceException("Failed to create profile from registration event", e);
         }
     }
 

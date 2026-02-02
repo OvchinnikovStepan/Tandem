@@ -4,6 +4,10 @@ import com.tandem.profile_service.dto.OnboardingCompleteRequest;
 import com.tandem.profile_service.dto.OnboardingCompleteResponse;
 import com.tandem.profile_service.dto.OnboardingEventData;
 import com.tandem.profile_service.dto.OnboardingQuestionsResponse;
+import com.tandem.profile_service.exception.DataPersistenceException;
+import com.tandem.profile_service.exception.OnboardingException;
+import com.tandem.profile_service.exception.ProfileNotFoundException;
+import com.tandem.profile_service.exception.ValidationException;
 import com.tandem.profile_service.kafka.ProfileEventPublisher;
 import com.tandem.profile_service.model.OnboardingResponse;
 import com.tandem.profile_service.model.Poll;
@@ -46,15 +50,15 @@ public class OnboardingService {
     @Transactional
     public OnboardingQuestionsResponse getOnboardingQuestions(UUID userId) {
         Profile profile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Profile not found for user: " + userId));
+                .orElseThrow(() -> new ProfileNotFoundException(userId));
 
         if (profile.isOnboardingCompleted()) {
             log.warn("Onboarding already completed for userId={}", userId);
-            throw new RuntimeException("Onboarding already completed");
+            throw new OnboardingException("Onboarding already completed for user: " + userId);
         }
 
         Poll poll = pollRepository.findLatestActive()
-                .orElseThrow(() -> new RuntimeException("No active onboarding poll"));
+                .orElseThrow(() -> new OnboardingException("No active onboarding poll found"));
 
         UUID pollId = poll.getId();
 
@@ -84,22 +88,22 @@ public class OnboardingService {
     @Transactional
     public OnboardingCompleteResponse completeOnboarding(UUID userId, OnboardingCompleteRequest request) {
         Profile profile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Profile not found for user: " + userId));
+                .orElseThrow(() -> new ProfileNotFoundException(userId));
 
         if (profile.isOnboardingCompleted()) {
             log.warn("Attempt to complete already completed onboarding for userId={}", userId);
-            throw new RuntimeException("Onboarding already completed for user: " + userId);
+            throw new OnboardingException("Onboarding already completed for user: " + userId);
         }
 
         Poll poll = pollRepository.findLatestActive()
-                .orElseThrow(() -> new RuntimeException("No active onboarding poll"));
+                .orElseThrow(() -> new OnboardingException("No active onboarding poll found"));
 
         UUID pollId = poll.getId();
 
         List<Question> questions = questionRepository.findByPollId(pollId);
         if (questions.isEmpty()) {
             log.error("Onboarding poll {} has no questions", pollId);
-            throw new RuntimeException("Onboarding poll has no questions");
+            throw new OnboardingException("Onboarding poll has no questions");
         }
 
         Map<UUID, Question> questionById = questions.stream()
@@ -133,8 +137,9 @@ public class OnboardingService {
                 .toList();
 
         for (Question rq : requiredQuestions) {
+            // Если ID обязательного вопроса отсутствует в answeredIds - бросает исключение
             if (!answeredIds.contains(rq.getId())) {
-                throw new RuntimeException("Required question not answered: " + rq.getId());
+                throw new ValidationException("Required question not answered: " + rq.getId());
             }
         }
         log.debug("All required questions are answered");
@@ -151,30 +156,36 @@ public class OnboardingService {
             Map<UUID, Question> questionById,
             OnboardingCompleteRequest request
     ) {
-        for (OnboardingCompleteRequest.ResponseItem item : request.getResponses()) {
-            UUID questionId = item.getQuestionId();
-            Object answer = item.getAnswer();
+        try {
+            for (OnboardingCompleteRequest.ResponseItem item : request.getResponses()) {
+                UUID questionId = item.getQuestionId();
+                Object answer = item.getAnswer();
 
-            Question question = questionById.get(questionId);
-            if (question == null) {
-                throw new RuntimeException("Unknown question: " + questionId);
+                Question question = questionById.get(questionId);
+                if (question == null) {
+                    throw new ValidationException("Unknown question: " + questionId);
+                }
+
+                OnboardingResponse response = onboardingResponseRepository.createResponse(
+                        userId,
+                        pollId,
+                        questionId,
+                        answer
+                );
+
+                applyAnswerToProfile(profile, question, answer);
             }
 
-            OnboardingResponse response = onboardingResponseRepository.createResponse(
-                    userId,
-                    pollId,
-                    questionId,
-                    answer
-            );
+            profileRepository.save(profile);
 
-            applyAnswerToProfile(profile, question, answer);
+            log.info("All responses saved and profile updated for userId={}", userId);
+        } catch (ValidationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to save onboarding responses for userId={}", userId, e);
+            throw new DataPersistenceException("Failed to save onboarding responses", e);
         }
-
-        profileRepository.save(profile);
-
-        log.info("All responses saved and profile updated for userId={}", userId);
     }
-
 
     /**
      * Помечает онбординг завершенным.
@@ -186,7 +197,6 @@ public class OnboardingService {
             profile.setOnboardingCompletedAt(LocalDateTime.now());
         }
         profile.setUpdatedAt(LocalDateTime.now());
-        profileRepository.save(profile);
         log.info("Profile saved with onboarding completed status");
     }
 
@@ -206,6 +216,7 @@ public class OnboardingService {
         }
 
         String value;
+        // Проверка список ли ответ (для интересов), преобразовываем в строку
         if (answer instanceof List<?> listAnswer) {
             value = listAnswer.stream()
                     .map(Object::toString)
