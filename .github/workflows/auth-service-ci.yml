@@ -1,13 +1,21 @@
-name: Java CI
+name: Auth Service CI
 
 on:
   push:
     branches: [ "main", "dev" ]
+    paths:
+      - "backend/auth_service/**"
   pull_request:
+    paths:
+      - "backend/auth_service/**"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend/auth_service
 
     steps:
       - uses: actions/checkout@v4
@@ -25,11 +33,11 @@ jobs:
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-report
-          path: target/site/jacoco
+          name: auth-service-jacoco-report
+          path: backend/auth_service/target/site/jacoco
 
       - name: Publish test results
         uses: mikepenz/action-junit-report@v4
         if: always()
         with:
-          report_paths: "**/target/surefire-reports/*.xml"
+          report_paths: "backend/auth_service/target/surefire-reports/*.xml"
