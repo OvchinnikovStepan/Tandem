@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import {
   User,
   Home,
@@ -9,8 +8,6 @@ import {
   Settings,
   HelpCircle,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,140 +23,125 @@ const navItems: NavItem[] = [
   { icon: Home, label: "Главная", path: "/feed" },
   { icon: MessageCircle, label: "Чаты", path: "/chats", badge: 2 },
   { icon: Users, label: "Друзья", path: "/friends", badge: 2 },
-  { icon: UsersRound, label: "Группы", path: "/groups" },
+  { icon: UsersRound, label: "Групповые чаты", path: "/groups" },
   { icon: Settings, label: "Настройки", path: "/settings" },
   { icon: HelpCircle, label: "Помощь", path: "/help" },
 ];
 
 interface CurrentUser {
   name: string;
-  username: string;
   avatar?: string;
-  memberType: string;
 }
 
 interface LeftSidebarProps {
   currentUser?: CurrentUser;
-  defaultCollapsed?: boolean;
 }
 
 const defaultUser: CurrentUser = {
   name: "Azunyan U. Wu",
-  username: "azunyandesu",
-  memberType: "Basic Member",
   avatar: undefined,
 };
 
 export default function LeftSidebar({
   currentUser = defaultUser,
-  defaultCollapsed = false,
 }: LeftSidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
-  const navigate = useNavigate();
-
   return (
-    <aside
-      className={cn(
-        "h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300 sticky top-0",
-        isCollapsed ? "w-20" : "w-64"
-      )}
+    <aside 
+      className="bg-[#FEFEFE] flex flex-col justify-between items-start shrink-0 h-full"
+      style={{ width: '312px', padding: '32px 16px', gap: '32px' }}
     >
-      {/* Logo */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <img
-            src="/logo/Black_Logo.png"
-            alt="Tandem"
-            className={cn("transition-all duration-300", isCollapsed ? "h-10" : "h-12")}
-          />
+      {/* Top section: Logo + Navigation */}
+      <div className="w-[280px] flex flex-col items-start gap-8 mx-auto flex-1">
+        {/* Logo */}
+        <div className="w-[280px] h-14 flex flex-col items-start gap-2.5 border-b border-[#EAECEE]">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center">
+              <span className="text-lg font-bold">&lt;&gt;</span>
+            </div>
+            <span className="text-xl font-bold text-[#333333]">Tandem</span>
+          </div>
         </div>
+
+        {/* Navigation */}
+        <nav className="w-[280px] flex flex-col items-start gap-2">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                cn(
+                  "w-[280px] h-12 min-h-12 flex items-center px-3 py-2.5 gap-2 rounded-xl transition-colors",
+                  isActive
+                    ? "bg-gray-100"
+                    : "hover:bg-gray-50"
+                )
+              }
+            >
+              {({ isActive }) => (
+                <div className="flex items-center gap-2 flex-1">
+                  <item.icon className="w-6 h-6 shrink-0 text-[#333333]" />
+                  <span 
+                    className={cn(
+                      "flex-1 text-base leading-[22px] tracking-[-0.007em] text-[#333333]",
+                      isActive ? "font-bold" : "font-normal"
+                    )}
+                    style={{ fontFamily: 'Roboto, sans-serif' }}
+                  >
+                    {item.label}
+                  </span>
+                  {item.badge && (
+                    <span 
+                      className="flex justify-center items-center w-7 h-7 rounded-full text-sm font-semibold text-[#126DF7]"
+                      style={{ 
+                        background: 'rgba(18, 109, 247, 0.1)',
+                        border: '1px solid rgba(18, 109, 247, 0.5)'
+                      }}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
+              )}
+            </NavLink>
+          ))}
+        </nav>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-4">
-        <ul className="space-y-1">
-          {navItems.map((item) => (
-            <li key={item.path}>
-              <NavLink
-                to={item.path}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors relative group",
-                    isActive
-                      ? "bg-gray-100 text-gray-900 font-medium"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                  )
-                }
-              >
-                <item.icon className="w-5 h-5 shrink-0" />
-                {!isCollapsed && (
-                  <>
-                    <span className="flex-1">{item.label}</span>
-                    {item.badge && (
-                      <span className="bg-primary text-primary-foreground text-xs font-medium px-2 py-0.5 rounded-full">
-                        {item.badge}
-                      </span>
-                    )}
-                  </>
-                )}
-                {isCollapsed && item.badge && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-medium w-5 h-5 rounded-full flex items-center justify-center">
-                    {item.badge}
-                  </span>
-                )}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      {/* Collapse Toggle */}
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm"
-      >
-        {isCollapsed ? (
-          <ChevronRight className="w-4 h-4 text-gray-600" />
-        ) : (
-          <ChevronLeft className="w-4 h-4 text-gray-600" />
-        )}
-      </button>
-
-      {/* Current User */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0">
-            {currentUser.avatar ? (
-              <img
-                src={currentUser.avatar}
-                alt={currentUser.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600 text-white font-medium">
-                {currentUser.name.charAt(0)}
-              </div>
-            )}
+      {/* Bottom section: Current User */}
+      <div className="w-[280px] h-[70px] flex flex-col justify-end items-center mx-auto">
+        <div className="w-[280px] flex items-end pt-6 gap-4 border-t border-[#EAECEE]">
+          <div className="flex items-center gap-3 flex-1">
+            {/* Avatar */}
+            <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0">
+              {currentUser.avatar ? (
+                <img
+                  src={currentUser.avatar}
+                  alt={currentUser.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <img
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
+                  alt={currentUser.name}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+            {/* Name */}
+            <span 
+              className="flex-1 text-base font-bold leading-[22px] tracking-[-0.007em] text-[#333333]"
+              style={{ fontFamily: 'Roboto, sans-serif' }}
+            >
+              {currentUser.name}
+            </span>
           </div>
-          {!isCollapsed && (
-            <>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {currentUser.name}
-                </p>
-                <p className="text-xs text-blue-500 truncate">
-                  {currentUser.memberType}
-                </p>
-              </div>
-              <button
-                onClick={() => navigate("/login")}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                title="Выйти"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
-            </>
-          )}
+          {/* Logout button */}
+          <button
+            className="w-10 h-10 flex justify-center items-center rounded-full hover:bg-gray-100 transition-colors"
+            title="Выйти"
+          >
+            <LogOut className="w-7 h-7 text-[#333333]" />
+          </button>
         </div>
       </div>
     </aside>
