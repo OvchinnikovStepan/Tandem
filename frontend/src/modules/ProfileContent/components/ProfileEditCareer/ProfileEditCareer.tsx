@@ -22,7 +22,6 @@ const defaultCareer: CareerData = {
   position: "",
 };
 
-// Generate years from current year back to 1950
 const years = Array.from({ length: 76 }, (_, i) => String(2026 - i));
 
 export default function ProfileEditCareer({
@@ -51,7 +50,7 @@ export default function ProfileEditCareer({
         position: "relative",
       }}
     >
-      {/* Title */}
+
       <div
         className="absolute"
         style={{ left: "50%", transform: "translateX(-50%)", top: "26px" }}
@@ -59,12 +58,10 @@ export default function ProfileEditCareer({
         <PageTitle>Карьера</PageTitle>
       </div>
 
-      {/* Divider 1 */}
       <div className="absolute" style={{ width: "935px", left: "20px", top: "113px" }}>
         <Divider />
       </div>
 
-      {/* Form Fields */}
       <div
         className="absolute flex flex-col justify-center items-center"
         style={{
@@ -79,7 +76,7 @@ export default function ProfileEditCareer({
           className="flex flex-col justify-center items-end gap-[18px]"
           style={{ width: "935px", paddingRight: "263px" }}
         >
-          {/* Workplace */}
+
           <FormField label="Место работы:">
             <Input
               variant="profile"
@@ -91,7 +88,6 @@ export default function ProfileEditCareer({
             />
           </FormField>
 
-          {/* Start Year */}
           <FormField label="Год начала работы:">
             <Select
               variant="profile"
@@ -108,7 +104,6 @@ export default function ProfileEditCareer({
             </Select>
           </FormField>
 
-          {/* End Year */}
           <FormField label="Год окончания работы:">
             <Select
               variant="profile"
@@ -125,7 +120,6 @@ export default function ProfileEditCareer({
             </Select>
           </FormField>
 
-          {/* Position */}
           <FormField label="Должность:">
             <Input
               variant="profile"
@@ -138,12 +132,10 @@ export default function ProfileEditCareer({
         </div>
       </div>
 
-      {/* Divider 2 */}
       <div className="absolute" style={{ width: "935px", left: "20px", top: "406px" }}>
         <Divider />
       </div>
 
-      {/* Save Button */}
       <div
         className="absolute"
         style={{ left: "50%", transform: "translateX(-50%)", top: "433px" }}
