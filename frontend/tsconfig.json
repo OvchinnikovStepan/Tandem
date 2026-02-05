@@ -18,6 +18,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
+    "types": ["vitest/globals", "vitest/importMeta"],
+
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
