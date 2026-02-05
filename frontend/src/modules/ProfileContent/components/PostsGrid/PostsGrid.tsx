@@ -21,7 +21,7 @@ function PostCard({ post }: { post: Post }) {
 
   return (
     <div
-      className="relative aspect-square bg-gray-200 rounded-lg overflow-hidden cursor-pointer group"
+      className="relative bg-[#C4C4C4] overflow-hidden cursor-pointer group aspect-square rounded-xl"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -33,14 +33,12 @@ function PostCard({ post }: { post: Post }) {
         />
       )}
       
-      {/* Video indicator */}
       {post.type === "video" && (
         <div className="absolute top-3 right-3">
           <Play className="w-5 h-5 text-white drop-shadow-lg" fill="white" />
         </div>
       )}
 
-      {/* Hover overlay */}
       <div
         className={cn(
           "absolute inset-0 bg-black/40 flex items-center justify-center gap-6 transition-opacity",
@@ -62,16 +60,19 @@ function PostCard({ post }: { post: Post }) {
 
 function PostSkeleton() {
   return (
-    <div className="aspect-square bg-gray-200 rounded-lg animate-pulse" />
+    <div 
+      className="bg-[#C4C4C4] shrink-0"
+      style={{ width: '309px', height: '309px', borderRadius: '12px' }}
+    />
   );
 }
 
 export default function PostsGrid({ posts, isLoading }: PostsGridProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-3 gap-1 mt-1">
+      <div className="grid grid-cols-3 gap-1 w-full">
         {Array.from({ length: 9 }).map((_, index) => (
-          <PostSkeleton key={index} />
+          <div key={index} className="aspect-square bg-[#C4C4C4] rounded-xl" />
         ))}
       </div>
     );
@@ -79,15 +80,20 @@ export default function PostsGrid({ posts, isLoading }: PostsGridProps) {
 
   if (posts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-        <p className="text-lg">Пока нет постов</p>
-        <p className="text-sm mt-1">Создайте свой первый пост!</p>
+      <div className="flex flex-col items-center justify-center py-16 text-gray-400 w-full">
+        <p className="text-lg font-roboto">Пока нет постов</p>
+        <p className="text-sm mt-1 font-roboto">Создайте свой первый пост!</p>
       </div>
     );
   }
 
+  const rows = [];
+  for (let i = 0; i < posts.length; i += 3) {
+    rows.push(posts.slice(i, i + 3));
+  }
+
   return (
-    <div className="grid grid-cols-3 gap-1 mt-1">
+    <div className="grid grid-cols-3 gap-1 w-full">
       {posts.map((post) => (
         <PostCard key={post.id} post={post} />
       ))}

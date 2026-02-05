@@ -1,5 +1,4 @@
 import { Search, Plus } from "lucide-react";
-import { Button } from "@/ui/button";
 
 interface ProfileHeaderProps {
   onSearch?: (query: string) => void;
@@ -8,28 +7,70 @@ interface ProfileHeaderProps {
 
 export default function ProfileHeader({ onSearch, onCreatePost }: ProfileHeaderProps) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 mb-6 overflow-hidden">
-      <div className="flex items-center gap-3">
-        {/* Search */}
-        <div className="flex-1 min-w-0 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Поиск по вашим постам..."
-            className="w-full h-11 pl-12 pr-4 rounded-full border border-gray-200 bg-white text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-            onChange={(e) => onSearch?.(e.target.value)}
-          />
-        </div>
+    <div 
+      className="flex flex-row justify-between items-start bg-[#FEFEFE] w-full"
+      style={{ 
+        padding: '20px 32px',
+        gap: '16px',
+        height: '88px',
+        borderWidth: '0px 1px 1px 1px',
+        borderStyle: 'solid',
+        borderColor: '#EAECEE',
+        isolation: 'isolate'
+      }}
+    >
 
-        {/* Create Post Button */}
-        <Button
-          onClick={onCreatePost}
-          className="h-11 px-4 rounded-full font-medium shrink-0 whitespace-nowrap"
+      <div 
+        className="flex flex-col items-end flex-1"
+        style={{ gap: '8px', height: '48px' }}
+      >
+        <div 
+          className="flex flex-row items-center bg-[#FEFEFE] border border-[#EAECEE] w-full"
+          style={{ 
+            padding: '12px',
+            gap: '12px',
+            height: '48px',
+            minHeight: '48px',
+            borderRadius: '12px'
+          }}
+        >
+          <div className="flex flex-row items-center flex-1" style={{ gap: '8px' }}>
+            <input
+              type="text"
+              placeholder="Поиск по вашим постам..."
+              className="flex-1 bg-transparent focus:outline-none font-roboto font-medium text-[#333333] placeholder:text-[rgba(51,51,51,0.75)]"
+              style={{ 
+                fontSize: '16px',
+                lineHeight: '22px',
+                letterSpacing: '-0.007em'
+              }}
+              onChange={(e) => onSearch?.(e.target.value)}
+            />
+          </div>
+          <Search className="w-5 h-5 text-[#333333] shrink-0" />
+        </div>
+      </div>
+
+      <button
+        onClick={onCreatePost}
+        className="flex flex-row justify-center items-center bg-[#FFDD2D] hover:bg-[#f0d029] transition-colors shrink-0"
+        style={{
+          padding: '12px 20px',
+          gap: '10px',
+          width: '173px',
+          height: '48px',
+          minHeight: '48px',
+          borderRadius: '12px'
+        }}
+      >
+        <span 
+          className="font-roboto font-bold text-[#333333]"
+          style={{ fontSize: '16px', lineHeight: '22px', letterSpacing: '-0.007em' }}
         >
           Создать пост
-          <Plus className="w-5 h-5 ml-1" />
-        </Button>
-      </div>
+        </span>
+        <Plus className="w-5 h-5 text-[#333333]" />
+      </button>
     </div>
   );
 }
