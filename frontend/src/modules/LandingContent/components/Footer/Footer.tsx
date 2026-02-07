@@ -1,21 +1,24 @@
 import Link from "@/ui/Link.tsx";
 import {FOOTER_LINKS} from "@/modules/LandingContent/constants/constants.ts";
+import { useTranslation } from "react-i18next";
 
 function Footer() {
+    const { t } = useTranslation();
+
     return (
         <footer className="bg-heading-black">
             <div className="container max-w-276 py-5">
                 <div className="ml-[-0.125rem]">
                     <img
                         src="/logo/White_Logo.svg"
-                        alt="Tandem"
+                        alt="Tandem Logo"
                         draggable="false"
                         className="size-15.5"
                     />
                 </div>
                 <div className="w-full mt-4 mb-2">
                     <h4 className="text-[0.8125rem] font-roboto font-light leading-5 text-white/50">
-                        По всем вопросам обращайтесь на&nbsp;
+                        {t("landing.footer.contact")}
                         <Link
                             to="/"
                             variant={"footer"}
@@ -27,12 +30,12 @@ function Footer() {
                 <div className="table mt-2 mb-4">
                     <ul className="text-[0.8125rem] text-accent-white w-full">
                         {FOOTER_LINKS.map((link) => (
-                            <li key={link.name} className="float-left mr-6">
+                            <li key={t(link.name)} className="float-left mr-6">
                                 <Link
                                     to={link.href}
                                     variant={"footer"}
                                 >
-                                    {link.name}
+                                    {t(link.name)}
                                 </Link>
                             </li>
                         ))}

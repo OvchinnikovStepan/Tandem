@@ -1,0 +1,51 @@
+{
+  "landing": {
+    "header": {
+      "login": "Log in"
+    },
+    "hero": {
+      "title": "Tandem: your corporate messenger for engaging communication",
+      "description": "Work is more than just tasks.\nIt’s the people you want to communicate with, learn from, grow with, and have fun together.",
+      "cta": "Try for free"
+    },
+    "features": {
+      "secure": {
+        "title": "Secure communication",
+        "description": "End-to-end encryption for all your chats."
+      },
+      "interests": {
+        "title": "Interest-based groups",
+        "description": "Create, join, organize events — all in one app."
+      },
+      "questionnaire": {
+        "title": "Interactive profile",
+        "description": "Fill out a short profile and meet people who share your interests."
+      },
+      "interface": {
+        "title": "Nothing extra",
+        "description": "Easy to learn from the first launch — a simple and intuitive interface."
+      }
+    },
+    "qtb": {
+      "title": "Ready to get started with Tandem?",
+      "description": "Fill out the profile, and Tandem will match you with people and groups that fit you and your interests!",
+      "button": "Try for free"
+    },
+    "footer": {
+      "contact": "For any questions, contact us at ",
+      "links": {
+        "email": "Email",
+        "vk": "VK",
+        "telegram": "Telegram",
+        "offer": "Offer",
+        "organization": "Organization details",
+        "privacy": "Privacy Policy"
+      }
+    }
+  },
+  "common": {
+    "language": "Language",
+    "russian": "Русский",
+    "english": "English"
+  }
+}

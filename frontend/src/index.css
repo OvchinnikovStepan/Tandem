@@ -44,6 +44,8 @@
 @theme {
     --color-header-button: rgba(36, 74, 127, 0.06);
     --color-header-button-hover: rgba(36, 74, 127, 0.09);
+    --color-action-button: #E9EBEF;
+    --color-action-button-hover: #DFDFDF;
     --color-header-button-text: #126DF7;
     --color-header-border: oklch(0.9421 0.0035 247.86);
     --color-accent-white: #FEFEFE;

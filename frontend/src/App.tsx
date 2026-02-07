@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import { Provider } from "jotai";
 import Questionnaire from "@/pages/QuestionnairePage/components/QuestionnairePage/Questionnaire.tsx";
 
-
 const App = () => {
     return (
         <Provider>
