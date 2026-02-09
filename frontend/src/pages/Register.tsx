@@ -10,8 +10,6 @@ import { LinkButton } from "@/ui/link-button";
 
 const formSchema = z
   .object({
-    firstName: z.string().min(2, "Имя должно содержать минимум 2 символа"),
-    lastName: z.string().min(2, "Фамилия должна содержать минимум 2 символа"),
     email: z.string().email("Введите корректный email"),
     password: z.string().min(8, "Пароль должен содержать минимум 8 символов"),
     confirmPassword: z.string(),
@@ -52,7 +50,7 @@ export default function Register() {
   const passwordStrength = useMemo(() => calculatePasswordStrength(password), [password]);
 
   const handleNextStep = async () => {
-    const isValid = await trigger(["firstName", "lastName", "email"]);
+    const isValid = await trigger(["email"]);
     if (isValid) {
       setStep(2);
     }
