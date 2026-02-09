@@ -1,4 +1,4 @@
-import Link from "@/ui/Link.tsx";
+import AppLink from "@/ui/AppLink.tsx";
 import {FOOTER_LINKS} from "@/modules/LandingContent/constants/constants.ts";
 import { useTranslation } from "react-i18next";
 
@@ -17,32 +17,33 @@ function Footer() {
                     />
                 </div>
                 <div className="w-full mt-4 mb-2">
-                    <h4 className="text-[0.8125rem] font-roboto font-light leading-5 text-white/50">
+                    <p className="text-[0.8125rem] font-roboto font-light leading-5 text-white/50">
                         {t("landing.footer.contact")}
-                        <Link
-                            to="/"
+                        <AppLink
+                            href="mailto:tandem@t-bang.ru"
                             variant={"footer"}
                         >
                             tandem@t-bang.ru
-                        </Link>
-                    </h4>
+                        </AppLink>
+                    </p>
                 </div>
-                <div className="table mt-2 mb-4">
-                    <ul className="text-[0.8125rem] text-accent-white w-full">
+                <div className="mt-2 mb-4">
+                    <ul className="text-[0.8125rem] text-accent-white flex flex-wrap gap-x-5 gap-y-1">
                         {FOOTER_LINKS.map((link) => (
-                            <li key={t(link.name)} className="float-left mr-6">
-                                <Link
-                                    to={link.href}
+                            <li key={t(link.name)}>
+                                <AppLink
+                                    href={link.href}
                                     variant={"footer"}
+                                    asBlank={link.asBlank}
                                 >
                                     {t(link.name)}
-                                </Link>
+                                </AppLink>
                             </li>
                         ))}
                     </ul>
                 </div>
                 <div className="border-t border-white/15 pt-4">
-                    <p className="text-[0.8125rem] font-roboto font-light leading-5 text-white/50">
+                    <p className="text-[0.8125rem] text-sm font-roboto font-light leading-5 text-white/50">
                         2025, T-Bang
                     </p>
                 </div>

@@ -2,7 +2,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
     --radius: 0.625rem;
@@ -144,36 +144,37 @@
     body
     {
         @apply bg-background text-foreground;
+        padding-bottom: env(safe-area-inset-bottom);
     }
 
     button:not(:disabled),
     [role="button"]:not(:disabled) {
         cursor: pointer;
     }
+
+    html, body, #root {
+        height: 100%;
+    }
 }
 
 @layer components {
     .container {
         width: 100%;
-        margin-left: auto;
-        margin-right: auto;
+        margin-inline: auto;
+        padding-inline: 1rem;
+        max-width: 100%;
     }
 
-    .flex {
-        min-height: 0;
-        min-width: 0;
-    }
-
-
-    @media screen and (width >= 640px) and (width < 1104px) {
+    @media (min-width: 640px) {
         .container {
-            /* Добавить адаптивность для меньших экранов */
+
         }
     }
 
-    @media screen and (width >= 1104px) {
+    @media (min-width: 1104px) {
         .container {
             max-width: 69rem;
+            padding-inline: 0.5rem;
         }
     }
 }

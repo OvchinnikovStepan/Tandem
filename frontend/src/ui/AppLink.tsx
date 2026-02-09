@@ -1,10 +1,8 @@
-import {NavLink, type NavLinkProps} from "react-router";
 import {cva, type VariantProps} from "class-variance-authority";
 import {cn} from "@/lib/utils.ts";
 
-
 const linkVariants = cva(
-    "text-[0.8125rem] font-roboto font-normal leading-5 underline underline-offset-[3px] transition-all duration-200",
+    "font-roboto font-normal leading-5 underline underline-offset-[3px] transition-all duration-200",
     {
         variants: {
             variant: {
@@ -18,20 +16,25 @@ const linkVariants = cva(
     }
 );
 
-function Link({
+function AppLink({
     children,
     variant,
     className,
-    ...props }: NavLinkProps & VariantProps<typeof linkVariants>
-    ){
+    asBlank,
+    ...props
+}: React.ComponentProps<"a"> &
+    VariantProps<typeof linkVariants> & {
+    asBlank?: boolean
+}){
     return (
-        <NavLink
+        <a
             className={cn(linkVariants({ variant, className }))}
+            {...asBlank ? {rel: "noreferrer", target: "_blank"} : null}
             {...props}
         >
             {children}
-        </NavLink>
+        </a>
     );
 }
 
-export default Link;
+export default AppLink;

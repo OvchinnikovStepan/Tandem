@@ -13,43 +13,50 @@ function FeaturesBlock() {
 
     const features: Feature[] = [
         {
-            icon: <Shield className="size-7.5 stroke-heading-black fill-icon-gray"/>,
+            icon: <Shield className="size-6 md:size-7.5 stroke-heading-black fill-icon-gray"/>,
             titleKey: "landing.features.secure.title",
             descriptionKey: "landing.features.secure.description",
         },
         {
-            icon: <Users className="size-7.5 stroke-heading-black fill-icon-gray"/>,
+            icon: <Users className="size-6 md:size-7.5 stroke-heading-black fill-icon-gray"/>,
             titleKey: "landing.features.interests.title",
             descriptionKey: "landing.features.interests.description",
         },
         {
-            icon: <ClipboardList className="size-7.5 stroke-heading-black fill-icon-gray"/>,
+            icon: <ClipboardList className="size-6 md:size-7.5 stroke-heading-black fill-icon-gray"/>,
             titleKey: "landing.features.questionnaire.title",
             descriptionKey: "landing.features.questionnaire.description",
         },
         {
-            icon: <Sparkles className="size-7.5 stroke-heading-black fill-icon-gray"/>,
+            icon: <Sparkles className="size-6 md:size-7.5 stroke-heading-black fill-icon-gray"/>,
             titleKey: "landing.features.interface.title",
             descriptionKey: "landing.features.interface.description",
         },
     ];
 
     return (
-        <section className="pb-[6.25rem] bg-landing-bg">
-            <div className="container max-w-[69rem]">
-                <div className="grid md:grid-cols-2 gap-24">
+        <section className="pb-12 md:pb-20 lg:pb-25 bg-landing-bg">
+            <div className="container max-w-276">
+                <div className="grid items-center justify-center md:grid-cols-2 gap-10 md:gap-16 lg:gap-24">
                     {features.map((feature) => (
-                        <div key={feature.titleKey}>
-                            <div
-                                className="size-16 bg-accent-white rounded-[1.25rem] flex items-center justify-center mr-5 float-left">
-                                {feature.icon}
+                        <div
+                            key={feature.titleKey}
+                            className="flex items-center gap-5"
+                        >
+                            <div>
+                                <div
+                                    className="size-14 md:size-16 bg-accent-white rounded-[1.25rem] flex items-center justify-center">
+                                    {feature.icon}
+                                </div>
                             </div>
-                            <h3 className="text-[1.375rem] leading-7 font-roboto font-medium text-heading-black mb-2">
-                                {t(feature.titleKey)}
-                            </h3>
-                            <p className="text-[0.9375rem] leading-6 font-roboto font-normal text-heading-black">
-                                {t(feature.descriptionKey)}
-                            </p>
+                            <div className="flex flex-col">
+                                <h3 className="text-xl leading-snug md:text-[1.375rem] md:leading-7 font-roboto font-medium text-heading-black mb-2">
+                                    {t(feature.titleKey)}
+                                </h3>
+                                <p className="text-sm leading-relaxed md:text-[0.9375rem] md:leading-6 font-roboto font-normal text-heading-black max-w-95">
+                                    {t(feature.descriptionKey)}
+                                </p>
+                            </div>
                         </div>
                     ))}
                 </div>
