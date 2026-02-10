@@ -42,6 +42,19 @@
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
 
+		<!-- Spring Security для работы с аутентификацией -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<!-- Для работы с JWT -->
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
+			<version>9.37</version>
+		</dependency>
+
 		<!-- Валидация -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -194,6 +207,7 @@
 						<exclude>**/exception/*</exclude>
 						<exclude>**/controller/*</exclude>
 						<exclude>**/repository/*</exclude>
+						<exclude>**/security/*</exclude>
 						<exclude>**/ProfileServiceApplication.class</exclude>
 					</excludes>
 				</configuration>
