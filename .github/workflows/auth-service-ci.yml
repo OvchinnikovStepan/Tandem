@@ -19,13 +19,13 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: tandem
-          POSTGRES_USER: tandem
-          POSTGRES_PASSWORD: tandem
+          POSTGRES_DB: auth_db
+          POSTGRES_USER: auth_user
+          POSTGRES_PASSWORD: auth_pass
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U tandem"
+          --health-cmd "pg_isready -U auth_user"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -44,21 +44,38 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Install Postgres client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
       - name: Wait for PostgreSQL
         run: |
           for i in {1..10}; do
-            nc -z localhost 5432 && echo "Postgres is up" && exit 0
+            pg_isready -h localhost -U auth_user -d auth_db && echo "Postgres is up" && exit 0
             echo "Waiting for postgres..."
             sleep 3
           done
           exit 1
 
-      - name: Run tests and coverage
+      - name: Run Flyway migrations
+        run: mvn flyway:migrate
         env:
-          DB_URL: jdbc:postgresql://localhost:5432/tandem
-          DB_USER: tandem
-          DB_PASSWORD: tandem
-        run: mvn clean test jacoco:report -P jooq
+          FLYWAY_URL: jdbc:postgresql://localhost:5432/auth_db
+          FLYWAY_USER: auth_user
+          FLYWAY_PASSWORD: auth_pass
+
+      - name: Generate jOOQ sources
+        run: mvn jooq-codegen:generate -P jooq
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/auth_db
+          DB_USER: auth_user
+          DB_PASSWORD: auth_pass
+
+      - name: Run tests and coverage
+        run: mvn test jacoco:report -P jooq
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/auth_db
+          DB_USER: auth_user
+          DB_PASSWORD: auth_pass
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
