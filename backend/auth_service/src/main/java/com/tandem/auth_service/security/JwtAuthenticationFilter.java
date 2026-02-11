@@ -64,6 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (!sessionService.isSessionActive(sessionId)) {
                 SecurityContextHolder.clearContext();
                 filterChain.doFilter(request, response);
+                return;
             }
 
             Authentication authentication =

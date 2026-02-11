@@ -7,7 +7,7 @@ import com.tandem.auth_service.model.User;
 import com.tandem.auth_service.repository.SessionRepository;
 import com.tandem.auth_service.repository.UserRepository;
 import com.tandem.auth_service.service.token.JwtService;
-import com.tandem.auth_service.service.token.TokenHashUtil;
+import com.tandem.auth_service.utils.TokenHashUtil;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
