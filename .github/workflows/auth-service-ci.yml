@@ -11,11 +11,24 @@ on:
       - 'backend/auth_service/**'
       - '.github/workflows/auth-service-ci.yml'
 
-
-
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: tandem
+          POSTGRES_USER: tandem
+          POSTGRES_PASSWORD: tandem
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tandem"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     defaults:
       run:
@@ -31,7 +44,20 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Wait for PostgreSQL
+        run: |
+          for i in {1..10}; do
+            nc -z localhost 5432 && echo "Postgres is up" && exit 0
+            echo "Waiting for postgres..."
+            sleep 3
+          done
+          exit 1
+
       - name: Run tests and coverage
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/tandem
+          DB_USER: tandem
+          DB_PASSWORD: tandem
         run: mvn clean test jacoco:report -P jooq
 
       - name: Upload coverage report
