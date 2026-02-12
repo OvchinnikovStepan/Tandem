@@ -57,10 +57,8 @@ jobs:
           exit 1
 
       - name: Run Flyway migrations
-        run: mvn flyway:migrate \
-          -Dflyway.url=$DB_URL \
-          -Dflyway.user=$DB_USER \
-          -Dflyway.password=$DB_PASSWORD
+        run: mvn flyway:migrate -Dflyway.url=$DB_URL -Dflyway.user=$DB_USER -Dflyway.password=$DB_PASSWORD
+
 
       - name: Generate jOOQ sources
         run: mvn jooq-codegen:generate -P jooq
