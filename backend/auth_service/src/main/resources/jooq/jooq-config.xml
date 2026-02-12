@@ -1,0 +1,24 @@
+<configuration xmlns="http://www.jooq.org/xsd/jooq-codegen-3.20.0.xsd">
+
+  <jdbc>
+    <driver>org.postgresql.Driver</driver>
+    <url>jdbc:postgresql://postgres:5432/auth_db</url>
+    <user>auth_user</user>
+    <password>auth_pass</password>
+  </jdbc>
+
+  <generator>
+    <database>
+      <name>org.jooq.meta.postgres.PostgresDatabase</name>
+      <inputSchema>public</inputSchema>
+      <excludes>flyway_schema_history</excludes>
+
+    </database>
+
+    <target>
+      <packageName>com.tandem.jooq</packageName>
+      <directory>target/generated-sources/jooq</directory>
+    </target>
+  </generator>
+
+</configuration>
