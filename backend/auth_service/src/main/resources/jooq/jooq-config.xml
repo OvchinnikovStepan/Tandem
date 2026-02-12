@@ -2,9 +2,9 @@
 
   <jdbc>
     <driver>org.postgresql.Driver</driver>
-    <url>jdbc:postgresql://postgres:5432/auth_db</url>
-    <user>auth_user</user>
-    <password>auth_pass</password>
+    <url>${env.DB_URL}</url>
+    <user>${env.DB_USER}</user>
+    <password>${env.DB_PASSWORD}</password>
   </jdbc>
 
   <generator>

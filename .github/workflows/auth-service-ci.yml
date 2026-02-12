@@ -50,25 +50,24 @@ jobs:
       - name: Wait for PostgreSQL
         run: |
           for i in {1..10}; do
-            pg_isready -h localhost -U auth_user -d auth_db && echo "Postgres is up" && exit 0
+            nc -z localhost 5432 && echo "Postgres is up" && exit 0
             echo "Waiting for postgres..."
             sleep 3
           done
           exit 1
 
       - name: Run Flyway migrations
-        run: mvn flyway:migrate
-        env:
-          FLYWAY_URL: jdbc:postgresql://localhost:5432/auth_db
-          FLYWAY_USER: auth_user
-          FLYWAY_PASSWORD: auth_pass
+        run: mvn flyway:migrate \
+          -Dflyway.url=$DB_URL \
+          -Dflyway.user=$DB_USER \
+          -Dflyway.password=$DB_PASSWORD
 
       - name: Generate jOOQ sources
         run: mvn jooq-codegen:generate -P jooq
         env:
-          DB_URL: jdbc:postgresql://localhost:5432/auth_db
-          DB_USER: auth_user
-          DB_PASSWORD: auth_pass
+          DB_URL: ${{ env.DB_URL }}
+          DB_USER: ${{ env.DB_USER }}
+          DB_PASSWORD: ${{ env.DB_PASSWORD }}
 
       - name: Run tests and coverage
         run: mvn test jacoco:report -P jooq
@@ -88,3 +87,8 @@ jobs:
         if: always()
         with:
           report_paths: "backend/auth_service/target/surefire-reports/*.xml"
+  
+    env:
+      DB_URL: jdbc:postgresql://localhost:5432/auth_db
+      DB_USER: auth_user
+      DB_PASSWORD: auth_pass
