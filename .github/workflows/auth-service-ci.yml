@@ -73,11 +73,12 @@ jobs:
 
 
       - name: Run tests and coverage
-        run: mvn test jacoco:report -P jooq
-        env:
-          DB_URL: jdbc:postgresql://localhost:5432/auth_db
-          DB_USER: auth_user
-          DB_PASSWORD: auth_pass
+        run: |
+          mvn test jacoco:report -Pjooq \
+            -Denv.DB_URL=$DB_URL \
+            -Denv.DB_USER=$DB_USER \
+            -Denv.DB_PASSWORD=$DB_PASSWORD
+
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
