@@ -20,6 +20,8 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
+    env_file:
+      - .env
     depends_on:
       postgres:
         condition: service_healthy

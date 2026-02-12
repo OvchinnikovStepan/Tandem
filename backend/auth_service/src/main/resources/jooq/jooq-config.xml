@@ -2,9 +2,10 @@
 
   <jdbc>
     <driver>org.postgresql.Driver</driver>
-    <url>${env.DB_URL}</url>
-    <user>${env.DB_USER}</user>
-    <password>${env.DB_PASSWORD}</password>
+    <url>${db.url}</url>
+    <user>${db.user}</user>
+    <password>${db.password}</password>
+
   </jdbc>
 
   <generator>

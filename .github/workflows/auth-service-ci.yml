@@ -57,15 +57,19 @@ jobs:
           exit 1
 
       - name: Run Flyway migrations
-        run: mvn flyway:migrate -Dflyway.url=$DB_URL -Dflyway.user=$DB_USER -Dflyway.password=$DB_PASSWORD
+        run: |
+          mvn flyway:migrate \
+            -Dflyway.url=$DB_URL \
+            -Dflyway.user=$DB_USER \
+            -Dflyway.password=$DB_PASSWORD
 
 
-      - name: Generate jOOQ sources
-        run: mvn jooq-codegen:generate -P jooq
-        env:
-          DB_URL: ${{ env.DB_URL }}
-          DB_USER: ${{ env.DB_USER }}
-          DB_PASSWORD: ${{ env.DB_PASSWORD }}
+      - name: Generate jOOQ classes
+        run: |
+          mvn jooq-codegen:generate -Pjooq \
+            -Ddb.url=$DB_URL \
+            -Ddb.user=$DB_USER \
+            -Ddb.password=$DB_PASSWORD
 
       - name: Run tests and coverage
         run: mvn test jacoco:report -P jooq
