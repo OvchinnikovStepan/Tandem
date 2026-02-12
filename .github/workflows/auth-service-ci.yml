@@ -66,10 +66,7 @@ jobs:
 
       - name: Generate jOOQ classes
         run: |
-          mvn jooq-codegen:generate -Pjooq \
-            -Ddb.url=$DB_URL \
-            -Ddb.user=$DB_USER \
-            -Ddb.password=$DB_PASSWORD
+          mvn jooq-codegen:generate -Pjooq
 
       - name: Run tests and coverage
         run: mvn test jacoco:report -P jooq
