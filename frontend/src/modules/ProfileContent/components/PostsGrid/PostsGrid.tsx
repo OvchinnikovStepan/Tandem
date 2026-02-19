@@ -1,4 +1,5 @@
 import { Heart, MessageCircle, Play } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface Post {
   id: string;
@@ -48,6 +49,8 @@ function PostCard({ post }: { post: Post }) {
 }
 
 export default function PostsGrid({ posts, isLoading }: PostsGridProps) {
+  const { t } = useTranslation();
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-3 gap-1 w-full">
@@ -61,8 +64,8 @@ export default function PostsGrid({ posts, isLoading }: PostsGridProps) {
   if (posts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-400 w-full">
-        <p className="text-lg font-roboto">Пока нет постов</p>
-        <p className="text-sm mt-1 font-roboto">Создайте свой первый пост!</p>
+        <p className="text-lg font-roboto">{t("profile.posts.emptyTitle")}</p>
+        <p className="text-sm mt-1 font-roboto">{t("profile.posts.emptyDescription")}</p>
       </div>
     );
   }

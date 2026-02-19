@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Plus } from "lucide-react";
 import { SearchInput, Tag, PageTitle, Divider, Button } from "@/ui";
 import { Controller, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 interface Interest {
   id: string;
@@ -19,24 +20,32 @@ interface InterestsFormData {
   selectedInterests: Interest[];
 }
 
-const defaultInterests: Interest[] = [
-  { id: "1", label: "Баскетбол" },
-  { id: "2", label: "Фильмы" },
-  { id: "3", label: "Футбол" },
-  { id: "4", label: "Игры" },
-  { id: "5", label: "Разработка" },
-  { id: "6", label: "Музыка" },
-];
+const defaultInterestKeys = [
+  { id: "1", key: "basketball" },
+  { id: "2", key: "movies" },
+  { id: "3", key: "football" },
+  { id: "4", key: "games" },
+  { id: "5", key: "development" },
+  { id: "6", key: "music" },
+] as const;
 
 export default function ProfileEditInterests({
-  interests = defaultInterests,
+  interests,
   onSave,
   onBack: _onBack,
 }: ProfileEditInterestsProps) {
+  const { t } = useTranslation();
+  const resolvedInterests =
+    interests ??
+    defaultInterestKeys.map((item) => ({
+      id: item.id,
+      label: t(`profile.interests.defaults.${item.key}`),
+    }));
+
   const methods = useForm<InterestsFormData>({
     defaultValues: {
       searchQuery: "",
-      selectedInterests: interests,
+      selectedInterests: resolvedInterests,
     },
   });
   const selectedInterests = methods.watch("selectedInterests");
@@ -44,9 +53,9 @@ export default function ProfileEditInterests({
   useEffect(() => {
     methods.reset({
       searchQuery: "",
-      selectedInterests: interests,
+      selectedInterests: resolvedInterests,
     });
-  }, [interests, methods]);
+  }, [resolvedInterests, methods]);
 
   const handleRemoveInterest = (id: string) => {
     const updatedInterests = methods
@@ -75,7 +84,7 @@ export default function ProfileEditInterests({
         className="absolute"
         style={{ left: "50%", transform: "translateX(-50%)", top: "26px" }}
       >
-        <PageTitle>Интересы</PageTitle>
+        <PageTitle>{t("profile.interests.title")}</PageTitle>
       </div>
 
       <div
@@ -88,7 +97,7 @@ export default function ProfileEditInterests({
           control={methods.control}
           render={({ field }) => (
             <SearchInput
-              placeholder="Введите название вашего интереса..."
+              placeholder={t("profile.interests.searchPlaceholder")}
               {...field}
             />
           )}
@@ -98,7 +107,7 @@ export default function ProfileEditInterests({
           variant="primary"
           className="w-[138px] h-10 rounded-xl gap-1.5"
         >
-          <span>Добавить</span>
+          <span>{t("profile.interests.add")}</span>
           <Plus className="w-5 h-5 text-[#333333]" />
         </Button>
       </div>
@@ -136,7 +145,7 @@ export default function ProfileEditInterests({
           onClick={handleSave}
           className="w-[100px] h-[45px] rounded-lg text-[15px]"
         >
-          Сохранить
+          {t("profile.interests.save")}
         </Button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { Search, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ProfileHeaderProps {
   onSearch?: (query: string) => void;
@@ -6,6 +7,8 @@ interface ProfileHeaderProps {
 }
 
 export default function ProfileHeader({ onSearch, onCreatePost }: ProfileHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <div 
       className="flex flex-row justify-between items-start bg-[#FEFEFE] w-full"
@@ -37,7 +40,7 @@ export default function ProfileHeader({ onSearch, onCreatePost }: ProfileHeaderP
           <div className="flex flex-row items-center flex-1" style={{ gap: '8px' }}>
             <input
               type="text"
-              placeholder="Поиск по вашим постам..."
+              placeholder={t("profile.header.searchPlaceholder")}
               className="flex-1 bg-transparent focus:outline-none font-roboto font-medium text-[#333333] placeholder:text-[rgba(51,51,51,0.75)]"
               style={{ 
                 fontSize: '16px',
@@ -67,7 +70,7 @@ export default function ProfileHeader({ onSearch, onCreatePost }: ProfileHeaderP
           className="font-roboto font-bold text-[#333333]"
           style={{ fontSize: '16px', lineHeight: '22px', letterSpacing: '-0.007em' }}
         >
-          Создать пост
+          {t("profile.header.createPost")}
         </span>
         <Plus className="w-5 h-5 text-[#333333]" />
       </button>

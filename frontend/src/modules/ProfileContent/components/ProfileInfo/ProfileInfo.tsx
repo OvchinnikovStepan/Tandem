@@ -1,4 +1,5 @@
 import { getDefaultAvatarUrl } from "@/lib/avatar";
+import { useTranslation } from "react-i18next";
 
 interface UserProfile {
   id: string;
@@ -20,6 +21,8 @@ interface ProfileInfoProps {
 }
 
 export default function ProfileInfo({ user, onEditProfile }: ProfileInfoProps) {
+  const { t } = useTranslation();
+
   return (
     <div 
       className="relative w-full"
@@ -71,7 +74,7 @@ export default function ProfileInfo({ user, onEditProfile }: ProfileInfoProps) {
                 borderRadius: '8px'
               }}
             >
-              Редактировать профиль
+              {t("profile.info.editProfile")}
             </button>
           )}
         </div>
@@ -84,19 +87,19 @@ export default function ProfileInfo({ user, onEditProfile }: ProfileInfoProps) {
             className="font-roboto font-semibold text-[#262626] flex items-center"
             style={{ fontSize: '14px', lineHeight: '24px' }}
           >
-            {user.postsCount} постов
+            {user.postsCount} {t("profile.info.posts")}
           </span>
           <span 
             className="font-roboto font-semibold text-[#262626] flex items-center"
             style={{ fontSize: '15px', lineHeight: '24px' }}
           >
-            {user.followersCount} подписчик
+            {user.followersCount} {t("profile.info.followers")}
           </span>
           <span 
             className="font-roboto font-semibold text-[#262626] flex items-center"
             style={{ fontSize: '15px', lineHeight: '24px' }}
           >
-            {user.friendsCount} друзей
+            {user.friendsCount} {t("profile.info.friends")}
           </span>
         </div>
 
@@ -128,7 +131,7 @@ export default function ProfileInfo({ user, onEditProfile }: ProfileInfoProps) {
             className="font-roboto font-normal text-[#126DF7] flex items-center hover:underline"
             style={{ fontSize: '14px', lineHeight: '18px', width: '84px' }}
           >
-            Подробнее...
+            {t("profile.info.more")}
           </button>
         </div>
       </div>

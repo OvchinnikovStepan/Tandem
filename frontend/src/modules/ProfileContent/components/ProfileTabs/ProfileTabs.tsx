@@ -1,5 +1,6 @@
 import { Grid3X3, Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export type TabType = "posts" | "saved";
 
@@ -9,17 +10,18 @@ interface Tab {
   icon: React.ElementType;
 }
 
-const tabs: Tab[] = [
-  { id: "posts", label: "посты", icon: Grid3X3 },
-  { id: "saved", label: "сохраненное", icon: Bookmark },
-];
-
 interface ProfileTabsProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
 }
 
 export default function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
+  const { t } = useTranslation();
+  const tabs: Tab[] = [
+    { id: "posts", label: t("profile.tabs.posts"), icon: Grid3X3 },
+    { id: "saved", label: t("profile.tabs.saved"), icon: Bookmark },
+  ];
+
   return (
     <div 
       className="border-t border-[#DBDBDB] mx-5"

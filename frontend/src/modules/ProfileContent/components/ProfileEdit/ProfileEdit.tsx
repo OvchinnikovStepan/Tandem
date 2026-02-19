@@ -4,6 +4,7 @@ import { Input, Select, Textarea, PageTitle, Divider, Button, Avatar } from "@/u
 import { FormField } from "@/components";
 import { getDefaultAvatarUrl } from "@/lib/avatar";
 import { Controller, FormProvider, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 interface UserProfile {
   id: string;
@@ -24,6 +25,7 @@ interface ProfileEditProps {
 }
 
 export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: ProfileEditProps) {
+  const { t } = useTranslation();
   const methods = useForm<UserProfile>({ defaultValues: user });
   const avatar = methods.watch("avatar");
 
@@ -51,7 +53,7 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
         className="absolute"
         style={{ left: "50%", transform: "translateX(-50%)", top: "26px" }}
       >
-        <PageTitle>Профиль</PageTitle>
+        <PageTitle>{t("profile.edit.title")}</PageTitle>
       </div>
       <div
         className="absolute"
@@ -79,7 +81,7 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
             top: "calc(50% - 98px/2)",
           }}
         >
-          <FormField label="Имя:" name="firstName">
+          <FormField label={t("profile.edit.firstName")} name="firstName">
             <Controller
               name="firstName"
               control={methods.control}
@@ -89,7 +91,7 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
             />
           </FormField>
 
-          <FormField label="Фамилия:" name="lastName">
+          <FormField label={t("profile.edit.lastName")} name="lastName">
             <Controller
               name="lastName"
               control={methods.control}
@@ -121,21 +123,21 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
           style={{ width: "935px", paddingRight: "263px" }}
         >
 
-          <FormField label="Пол:" name="gender">
+          <FormField label={t("profile.edit.gender")} name="gender">
             <Controller
               name="gender"
               control={methods.control}
               render={({ field }) => (
                 <Select variant="profile" className="w-[326px] font-bold" {...field}>
-                  <option value="male">Мужской</option>
-                  <option value="female">Женский</option>
-                  <option value="other">Другой</option>
+                  <option value="male">{t("profile.edit.male")}</option>
+                  <option value="female">{t("profile.edit.female")}</option>
+                  <option value="other">{t("profile.edit.other")}</option>
                 </Select>
               )}
             />
           </FormField>
 
-          <FormField label="Дата рождения:" name="birthDate">
+          <FormField label={t("profile.edit.birthDate")} name="birthDate">
             <Controller
               name="birthDate"
               control={methods.control}
@@ -143,7 +145,7 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
                 <Input
                   variant="profile"
                   type="text"
-                  placeholder="00 / 00 / 0000"
+                  placeholder={t("profile.edit.birthDatePlaceholder")}
                   icon={<Calendar className="w-5 h-5 text-[#333333]" />}
                   className="w-[326px]"
                   {...field}
@@ -152,7 +154,7 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
             />
           </FormField>
 
-          <FormField label="Имя пользователя:" name="username">
+          <FormField label={t("profile.edit.username")} name="username">
             <Controller
               name="username"
               control={methods.control}
@@ -162,14 +164,14 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
             />
           </FormField>
 
-          <FormField label="Краткая информация:" labelAlign="start" name="bio">
+          <FormField label={t("profile.edit.bio")} labelAlign="start" name="bio">
             <Controller
               name="bio"
               control={methods.control}
               render={({ field }) => (
                 <Textarea
                   variant="profile"
-                  placeholder="Расскажите о себе..."
+                  placeholder={t("profile.edit.bioPlaceholder")}
                   className="w-[326px] h-[104px]"
                   {...field}
                 />
@@ -177,7 +179,7 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
             />
           </FormField>
 
-          <FormField label="Ваш город:" name="city">
+          <FormField label={t("profile.edit.city")} name="city">
             <Controller
               name="city"
               control={methods.control}
@@ -202,7 +204,7 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
           onClick={handleSubmit}
           className="w-[100px] h-[45px] rounded-lg text-[15px]"
         >
-          Сохранить
+          {t("profile.edit.save")}
         </Button>
       </div>
       </div>

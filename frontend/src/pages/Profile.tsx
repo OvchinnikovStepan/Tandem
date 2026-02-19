@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar, { RightSidebarEdit, EditSection } from "@/components/RightSidebar";
 import { useInfiniteScroll } from "@/lib/hooks/useInfiniteScroll";
@@ -13,19 +14,6 @@ import {
   TabType,
 } from "@/modules/ProfileContent";
 
-const mockUser = {
-  id: "1",
-  name: "Azunyan U. Wu",
-  avatar: undefined,
-  location: "Омск",
-  occupation: "Product Manager",
-  bio: "Люблю путешествовать по миру 🌍",
-  postsCount: 11,
-  followersCount: 41,
-  friendsCount: 17,
-  isOwnProfile: true,
-};
-
 interface EditUserProfile {
   id: string;
   firstName: string;
@@ -37,18 +25,6 @@ interface EditUserProfile {
   city: string;
   avatar?: string;
 }
-
-const mockEditUser: EditUserProfile = {
-  id: "1",
-  firstName: "U. Wu",
-  lastName: "Azunyan",
-  username: "azunyan_0777",
-  gender: "male",
-  birthDate: "",
-  bio: "",
-  city: "Омск",
-  avatar: undefined,
-};
 
 const generateMockPosts = (count: number) => {
   return Array.from({ length: count }, (_, i) => ({
@@ -63,6 +39,31 @@ const generateMockPosts = (count: number) => {
 const POSTS_PER_PAGE = 9;
 
 export default function Profile() {
+  const { t } = useTranslation();
+  const mockUser = {
+    id: "1",
+    name: "Azunyan U. Wu",
+    avatar: undefined,
+    location: t("profile.mock.location"),
+    occupation: "Product Manager",
+    bio: t("profile.mock.bio"),
+    postsCount: 11,
+    followersCount: 41,
+    friendsCount: 17,
+    isOwnProfile: true,
+  };
+  const mockEditUser: EditUserProfile = {
+    id: "1",
+    firstName: "U. Wu",
+    lastName: "Azunyan",
+    username: "azunyan_0777",
+    gender: "male",
+    birthDate: "",
+    bio: "",
+    city: t("profile.mock.city"),
+    avatar: undefined,
+  };
+
   const [activeTab, setActiveTab] = useState<TabType>("posts");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -122,7 +123,7 @@ export default function Profile() {
     <div className="h-screen w-screen bg-[#F6F7F8] flex overflow-hidden">
       <LeftSidebar />
 
-      <main className="flex-1 flex flex-col overflow-y-auto min-w-0">
+      <main className="flex-1 flex flex-col overflow-y-auto no-scrollbar min-w-0">
         <ProfileHeader
           onSearch={handleSearch}
           onCreatePost={() => console.log("Create post")}
@@ -183,7 +184,7 @@ export default function Profile() {
                 <div ref={sentinelRef} className="h-8" />
                 {isLoadingMore && (
                   <div className="flex justify-center py-4 text-sm text-gray-400">
-                    Загрузка...
+                    {t("profile.posts.loading")}
                   </div>
                 )}
               </div>
