@@ -1,0 +1,58 @@
+{
+	"common": {
+		"email": "Email",
+		"password": "Password",
+		"confirmPassword": "Confirm password"
+	},
+	"validation": {
+		"invalidEmail": "Enter a valid email",
+		"minPassword": "Password must be at least 8 characters",
+		"minPasswordShort": "At least 8 characters",
+		"passwordsMismatch": "Passwords do not match",
+		"codeLength": "Code must contain 6 digits"
+	},
+	"header": {
+		"switchToRu": "Switch to Russian",
+		"switchToEn": "Switch to English"
+	},
+	"login": {
+		"title": "Sign in to Tandem",
+		"subtitle": "Enter your details to access your account",
+		"forgotPassword": "Forgot password?",
+		"submit": "Sign in",
+		"submitting": "Signing in...",
+		"noAccount": "No account yet?",
+		"register": "Register",
+		"terms": "By signing in, you agree to the Terms of Use and Privacy Policy"
+	},
+	"register": {
+		"titleStep1": "Create account",
+		"titleStep2": "Create a password",
+		"step": "Step {{step}} of 2",
+		"next": "Next",
+		"submit": "Register",
+		"submitting": "Registering...",
+		"haveAccount": "Already have an account?",
+		"login": "Sign in"
+	},
+	"forgotPassword": {
+		"titleStep1": "Reset password",
+		"titleStep2": "Enter code",
+		"titleStep3": "Create new password",
+		"subtitleStep1": "Enter your email to continue",
+		"emailPlaceholder": "email",
+		"submitEmail": "Confirm email",
+		"submittingEmail": "Sending...",
+		"codeSent": "We sent a verification code to",
+		"codeLabel": "Verification code",
+		"submitCode": "Confirm code",
+		"submittingCode": "Verifying...",
+		"noCode": "Didn't get a code?",
+		"resendCode": "Resend",
+		"submitNewPassword": "Set new password",
+		"submittingNewPassword": "Saving..."
+	},
+	"hero": {
+		"illustrationAlt": "Illustration"
+	}
+}

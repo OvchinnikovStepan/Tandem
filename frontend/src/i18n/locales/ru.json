@@ -1,0 +1,58 @@
+{
+	"common": {
+		"email": "Email",
+		"password": "Пароль",
+		"confirmPassword": "Повторите пароль"
+	},
+	"validation": {
+		"invalidEmail": "Введите корректный email",
+		"minPassword": "Пароль должен содержать минимум 8 символов",
+		"minPasswordShort": "Минимум 8 символов",
+		"passwordsMismatch": "Пароли не совпадают",
+		"codeLength": "Код должен содержать 6 цифр"
+	},
+	"header": {
+		"switchToRu": "Переключить на русский",
+		"switchToEn": "Switch to English"
+	},
+	"login": {
+		"title": "Вход в Tandem",
+		"subtitle": "Введите свои данные для доступа к аккаунту",
+		"forgotPassword": "Забыли пароль?",
+		"submit": "Войти",
+		"submitting": "Вход...",
+		"noAccount": "Нет аккаунта?",
+		"register": "Зарегистрироваться",
+		"terms": "Входя в систему, вы соглашаетесь с Условиями использования и Политикой конфиденциальности"
+	},
+	"register": {
+		"titleStep1": "Создать аккаунт",
+		"titleStep2": "Придумайте пароль",
+		"step": "Шаг {{step}} из 2",
+		"next": "Далее",
+		"submit": "Зарегистрироваться",
+		"submitting": "Регистрация...",
+		"haveAccount": "Уже есть аккаунт?",
+		"login": "Войти"
+	},
+	"forgotPassword": {
+		"titleStep1": "Восстановить пароль",
+		"titleStep2": "Введите код",
+		"titleStep3": "Создать новый пароль",
+		"subtitleStep1": "Введите ваш email для подтверждения",
+		"emailPlaceholder": "email",
+		"submitEmail": "Подтвердить email",
+		"submittingEmail": "Отправка...",
+		"codeSent": "Мы отправили код подтверждения на",
+		"codeLabel": "Код подтверждения",
+		"submitCode": "Подтвердить код",
+		"submittingCode": "Проверка...",
+		"noCode": "Не получили код?",
+		"resendCode": "Отправить повторно",
+		"submitNewPassword": "Установить новый пароль",
+		"submittingNewPassword": "Сохранение..."
+	},
+	"hero": {
+		"illustrationAlt": "Illustration"
+	}
+}
