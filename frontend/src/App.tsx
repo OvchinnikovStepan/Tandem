@@ -1,7 +1,7 @@
 import Landing from "@/pages/LandingPage/Landing.tsx";
-import { BrowserRouter, Routes, Route } from "react-router";
+import Profile from "@/pages/Profile";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Provider } from "jotai";
-import Questionnaire from "@/pages/QuestionnairePage/components/QuestionnairePage/Questionnaire.tsx";
 
 const App = () => {
     return (
@@ -9,7 +9,8 @@ const App = () => {
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<Landing/>} />
-                    <Route path="/questionnaire" element={<Questionnaire/>} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </BrowserRouter>
         </Provider>
