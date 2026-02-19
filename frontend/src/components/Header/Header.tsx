@@ -1,7 +1,6 @@
 import { IconButton } from "@/ui/icon-button";
-import { LinkButton } from "@/ui/link-button";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "../LanguageSwitcher/LanguageSwitcher";
 
 interface HeaderProps {
   onBack?: () => void;
@@ -11,10 +10,6 @@ interface HeaderProps {
 
 export default function Header({ onBack, closeUrl = "/", showClose = true }: HeaderProps) {
   const navigate = useNavigate();
-  const { i18n, t } = useTranslation();
-
-  const isEnglish = i18n.language === "en";
-  const nextLanguage = isEnglish ? "ru" : "en";
 
   return (
     <header className="border-b border-gray-200 bg-white">
@@ -23,13 +18,7 @@ export default function Header({ onBack, closeUrl = "/", showClose = true }: Hea
           <img src="/logo/Black_Logo.png" alt="Tandem" className="h-14" />
         </div>
         <div className="flex items-center gap-2">
-          <LinkButton
-            onClick={() => i18n.changeLanguage(nextLanguage)}
-            aria-label={isEnglish ? t("header.switchToRu") : t("header.switchToEn")}
-            className="text-sm font-semibold"
-          >
-            {isEnglish ? "RU" : "EN"}
-          </LinkButton>
+          <LanguageSwitcher />
           {onBack && (
             <IconButton icon="back" onClick={onBack} />
           )}
