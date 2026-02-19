@@ -1,6 +1,7 @@
 import { Bell, Settings, Plus, MoreHorizontal, TrendingUp } from "lucide-react";
 import { Avatar, IconButton } from "@/ui";
 import { SectionHeader } from "@/components/SectionHeader";
+import { getDefaultAvatarUrl } from "@/lib/avatar";
 
 interface SuggestedFriend {
   id: string;
@@ -73,7 +74,7 @@ export default function RightSidebar({
       >
         {/* Avatar with online indicator */}
         <Avatar
-          src={currentUser.avatar || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"}
+          src={currentUser.avatar || getDefaultAvatarUrl(100)}
           alt={currentUser.name}
           size="md"
           showOnlineIndicator

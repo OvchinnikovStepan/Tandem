@@ -1,4 +1,5 @@
 import { Bell, Settings } from "lucide-react";
+import { getDefaultAvatarUrl } from "@/lib/avatar";
 
 export type EditSection = "profile" | "interests" | "career";
 
@@ -55,7 +56,7 @@ export default function RightSidebarEdit({
               />
             ) : (
               <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
+                src={getDefaultAvatarUrl(100)}
                 alt={currentUser.name}
                 className="w-full h-full object-cover"
               />

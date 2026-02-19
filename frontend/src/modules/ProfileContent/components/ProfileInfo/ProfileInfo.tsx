@@ -1,3 +1,5 @@
+import { getDefaultAvatarUrl } from "@/lib/avatar";
+
 interface UserProfile {
   id: string;
   name: string;
@@ -35,7 +37,7 @@ export default function ProfileInfo({ user, onEditProfile }: ProfileInfoProps) {
           />
         ) : (
           <img
-            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face"
+            src={getDefaultAvatarUrl(200)}
             alt={user.name}
             className="w-full h-full object-cover rounded-full"
           />
