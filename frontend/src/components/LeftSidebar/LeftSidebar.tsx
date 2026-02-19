@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getDefaultAvatarUrl } from "@/lib/avatar";
+import { useTranslation } from "react-i18next";
 
 interface NavItem {
   icon: React.ElementType;
@@ -18,16 +19,6 @@ interface NavItem {
   path: string;
   badge?: number;
 }
-
-const navItems: NavItem[] = [
-  { icon: User, label: "Профиль", path: "/profile" },
-  { icon: Home, label: "Главная", path: "/feed" },
-  { icon: MessageCircle, label: "Чаты", path: "/chats", badge: 2 },
-  { icon: Users, label: "Друзья", path: "/friends", badge: 2 },
-  { icon: UsersRound, label: "Групповые чаты", path: "/groups" },
-  { icon: Settings, label: "Настройки", path: "/settings" },
-  { icon: HelpCircle, label: "Помощь", path: "/help" },
-];
 
 interface CurrentUser {
   name: string;
@@ -46,6 +37,17 @@ const defaultUser: CurrentUser = {
 export default function LeftSidebar({
   currentUser = defaultUser,
 }: LeftSidebarProps) {
+  const { t } = useTranslation();
+  const navItems: NavItem[] = [
+    { icon: User, label: t("profile.sidebar.nav.profile"), path: "/profile" },
+    { icon: Home, label: t("profile.sidebar.nav.home"), path: "/feed" },
+    { icon: MessageCircle, label: t("profile.sidebar.nav.chats"), path: "/chats", badge: 2 },
+    { icon: Users, label: t("profile.sidebar.nav.friends"), path: "/friends", badge: 2 },
+    { icon: UsersRound, label: t("profile.sidebar.nav.groupChats"), path: "/groups" },
+    { icon: Settings, label: t("profile.sidebar.nav.settings"), path: "/settings" },
+    { icon: HelpCircle, label: t("profile.sidebar.nav.help"), path: "/help" },
+  ];
+
   return (
     <aside 
       className="bg-[#FEFEFE] flex flex-col justify-between items-start shrink-0 h-full"
@@ -139,7 +141,7 @@ export default function LeftSidebar({
           {/* Logout button */}
           <button
             className="w-10 h-10 flex justify-center items-center rounded-full hover:bg-gray-100 transition-colors"
-            title="Выйти"
+            title={t("profile.sidebar.logout")}
           >
             <LogOut className="w-7 h-7 text-[#333333]" />
           </button>

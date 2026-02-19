@@ -47,5 +47,100 @@
     "language": "Язык",
     "russian": "Русский",
     "english": "English"
+  },
+  "profile": {
+    "sidebar": {
+      "nav": {
+        "profile": "Профиль",
+        "home": "Главная",
+        "chats": "Чаты",
+        "friends": "Друзья",
+        "groupChats": "Групповые чаты",
+        "settings": "Настройки",
+        "help": "Помощь"
+      },
+      "logout": "Выйти"
+    },
+    "rightSidebar": {
+      "suggestedFriends": "Возможные друзья",
+      "view": "Посмотреть",
+      "profileActivity": "Активность профиля",
+      "followers": "Подписчиков",
+      "period": "за месяц",
+      "message": "В этом месяце вы значительно увеличили число своих подписчиков!"
+    },
+    "rightSidebarEdit": {
+      "title": "Редактирование профиля",
+      "menu": {
+        "profile": "Профиль",
+        "interests": "Интересы",
+        "career": "Карьера"
+      }
+    },
+    "header": {
+      "searchPlaceholder": "Поиск по вашим постам...",
+      "createPost": "Создать пост"
+    },
+    "info": {
+      "editProfile": "Редактировать профиль",
+      "posts": "постов",
+      "followers": "подписчиков",
+      "friends": "друзей",
+      "more": "Подробнее..."
+    },
+    "tabs": {
+      "posts": "посты",
+      "saved": "сохраненное"
+    },
+    "posts": {
+      "emptyTitle": "Пока нет постов",
+      "emptyDescription": "Создайте свой первый пост!",
+      "loading": "Загрузка..."
+    },
+    "edit": {
+      "title": "Профиль",
+      "firstName": "Имя:",
+      "lastName": "Фамилия:",
+      "gender": "Пол:",
+      "male": "Мужской",
+      "female": "Женский",
+      "other": "Другой",
+      "birthDate": "Дата рождения:",
+      "birthDatePlaceholder": "00 / 00 / 0000",
+      "username": "Имя пользователя:",
+      "bio": "Краткая информация:",
+      "bioPlaceholder": "Расскажите о себе...",
+      "city": "Ваш город:",
+      "save": "Сохранить"
+    },
+    "career": {
+      "title": "Карьера",
+      "workplace": "Место работы:",
+      "workplacePlaceholder": "Укажите компанию",
+      "startYear": "Год начала работы:",
+      "endYear": "Год окончания работы:",
+      "position": "Должность:",
+      "notSelected": "Не выбран",
+      "save": "Сохранить"
+    },
+    "interests": {
+      "title": "Интересы",
+      "searchPlaceholder": "Введите название вашего интереса...",
+      "add": "Добавить",
+      "save": "Сохранить",
+      "defaults": {
+        "basketball": "Баскетбол",
+        "movies": "Фильмы",
+        "football": "Футбол",
+        "games": "Игры",
+        "development": "Разработка",
+        "music": "Музыка"
+      }
+    },
+    "mock": {
+      "location": "Омск",
+      "bio": "Люблю путешествовать по миру 🌍",
+      "city": "Омск"
+    }
   }
 }

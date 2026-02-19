@@ -2,6 +2,8 @@ import { Bell, Settings, Plus, MoreHorizontal, TrendingUp } from "lucide-react";
 import { Avatar, IconButton } from "@/ui";
 import { SectionHeader } from "@/components/SectionHeader";
 import { getDefaultAvatarUrl } from "@/lib/avatar";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher/LanguageSwitcher";
 
 interface SuggestedFriend {
   id: string;
@@ -42,35 +44,37 @@ const defaultSuggestedFriends: SuggestedFriend[] = [
   { id: "5", name: "Oarack Babama", username: "obama21" },
 ];
 
-const defaultProfileActivity: ProfileActivity = {
-  followersCount: 1158,
-  growthPercent: 23,
-  period: "за месяц",
-  message: "В этом месяце вы значительно увеличили число своих подписчиков!",
-  recentFollowers: [
-    { id: "1" },
-    { id: "2" },
-    { id: "3" },
-    { id: "4" },
-    { id: "5" },
-    { id: "6" },
-  ],
-};
-
 export default function RightSidebar({
   currentUser = defaultCurrentUser,
   suggestedFriends = defaultSuggestedFriends,
-  profileActivity = defaultProfileActivity,
+  profileActivity,
 }: RightSidebarProps) {
+  const { t } = useTranslation();
+  const resolvedProfileActivity: ProfileActivity =
+    profileActivity ?? {
+      followersCount: 1158,
+      growthPercent: 23,
+      period: t("profile.rightSidebar.period"),
+      message: t("profile.rightSidebar.message"),
+      recentFollowers: [
+        { id: "1" },
+        { id: "2" },
+        { id: "3" },
+        { id: "4" },
+        { id: "5" },
+        { id: "6" },
+      ],
+    };
+
   return (
     <aside 
-      className="bg-[#FEFEFE] flex flex-col shrink-0 overflow-y-auto h-full"
+      className="bg-[#FEFEFE] flex flex-col shrink-0 overflow-hidden h-full"
       style={{ width: '312px' }}
     >
       {/* Header */}
       <div 
-        className="flex justify-between items-start bg-white"
-        style={{ padding: '20px 24px', gap: '46px', height: '88px' }}
+        className="flex items-center bg-white"
+        style={{ padding: '20px 24px', gap: '12px', minHeight: '88px' }}
       >
         {/* Avatar with online indicator */}
         <Avatar
@@ -79,10 +83,12 @@ export default function RightSidebar({
           size="md"
           showOnlineIndicator
           isOnline
+          className="shrink-0"
         />
 
         {/* Action buttons */}
-        <div className="flex gap-2">
+        <div className="ml-auto flex items-center gap-2 shrink-0">
+          <LanguageSwitcher />
           <IconButton size="md">
             <Bell className="w-7 h-7 text-[#333333]" />
           </IconButton>
@@ -100,8 +106,8 @@ export default function RightSidebar({
         {/* Suggested Friends Section */}
         <div className="flex flex-col border-t border-[#EAECEE]">
           <SectionHeader
-            title="Возможные друзья"
-            linkText="Посмотреть"
+            title={t("profile.rightSidebar.suggestedFriends")}
+            linkText={t("profile.rightSidebar.view")}
             linkHref="/friends/suggestions"
           />
 
@@ -163,7 +169,7 @@ export default function RightSidebar({
               className="flex-1 font-roboto font-bold text-[#333333]"
               style={{ fontSize: '18px', lineHeight: '24px', letterSpacing: '-0.008em' }}
             >
-              Активность профиля
+              {t("profile.rightSidebar.profileActivity")}
             </h3>
             <button className="text-[rgba(51,51,51,0.5)] hover:text-[#333333] transition-colors">
               <MoreHorizontal className="w-6 h-6" />
@@ -177,7 +183,7 @@ export default function RightSidebar({
           >
             {/* Avatar Group */}
             <div className="flex" style={{ marginLeft: '12px' }}>
-              {profileActivity.recentFollowers.slice(0, 7).map((follower, index) => (
+              {resolvedProfileActivity.recentFollowers.slice(0, 7).map((follower, index) => (
                 <div
                   key={follower.id}
                   className="rounded-full border-2 border-[#FEFEFE] overflow-hidden"
@@ -216,13 +222,13 @@ export default function RightSidebar({
                   className="font-bold text-[#333333]"
                   style={{ fontFamily: 'Plus Jakarta Sans', fontSize: '24px', lineHeight: '32px', letterSpacing: '-0.012em' }}
                 >
-                  +{profileActivity.followersCount.toLocaleString()}
+                  +{resolvedProfileActivity.followersCount.toLocaleString()}
                 </span>
                 <span 
                   className="font-roboto font-medium text-[#333333]"
                   style={{ fontSize: '16px', lineHeight: '22px', letterSpacing: '-0.007em', paddingBottom: '2px' }}
                 >
-                  Подписчиков
+                  {t("profile.rightSidebar.followers")}
                 </span>
               </div>
 
@@ -241,7 +247,7 @@ export default function RightSidebar({
                   className="font-roboto font-medium text-[#333333]"
                   style={{ fontSize: '16px', lineHeight: '22px', letterSpacing: '-0.007em' }}
                 >
-                  {profileActivity.period}
+                  {resolvedProfileActivity.period}
                 </span>
               </div>
             </div>
@@ -251,7 +257,7 @@ export default function RightSidebar({
               className="font-roboto font-medium text-[#333333]"
               style={{ fontSize: '16px', lineHeight: '22px', letterSpacing: '-0.007em' }}
             >
-              {profileActivity.message}
+              {resolvedProfileActivity.message}
             </p>
           </div>
         </div>
