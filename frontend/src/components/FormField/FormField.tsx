@@ -1,55 +1,94 @@
-import * as React from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { useFormContext } from "react-hook-form";
 
-export interface FormFieldProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface FormFieldProps extends HTMLAttributes<HTMLDivElement> {
   label: string;
   htmlFor?: string;
   required?: boolean;
   error?: string;
-  children: React.ReactNode;
+  name?: string;
+  children: ReactNode;
   labelAlign?: "center" | "start";
 }
 
-const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
-  (
-    { className, label, htmlFor, required, error, children, labelAlign = "center", ...props },
-    ref
-  ) => {
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          "flex flex-row gap-[10px]",
-          labelAlign === "center" ? "items-center justify-end" : "items-start justify-end",
-          className
-        )}
-        {...props}
-      >
-        <label
-          htmlFor={htmlFor}
-          className={cn(
-            "font-roboto font-medium text-[#333333] flex items-center shrink-0",
-            labelAlign === "start" && "pt-2"
-          )}
-          style={{
-            fontSize: "16px",
-            lineHeight: "22px",
-            letterSpacing: "-0.007em",
-          }}
-        >
-          {label}
-          {required && <span className="text-red-500 ml-0.5">*</span>}
-        </label>
-        <div className="flex flex-col">
-          {children}
-          {error && (
-            <span className="text-sm text-red-500 mt-1">{error}</span>
-          )}
-        </div>
-      </div>
-    );
+function getNestedErrorMessage(
+  errors: Record<string, unknown> | undefined,
+  fieldName: string | undefined
+) {
+  if (!errors || !fieldName) {
+    return undefined;
   }
-);
-FormField.displayName = "FormField";
+
+  const parts = fieldName.split(".");
+  let current: unknown = errors;
+
+  for (const part of parts) {
+    if (typeof current !== "object" || current === null || !(part in current)) {
+      return undefined;
+    }
+
+    current = (current as Record<string, unknown>)[part];
+  }
+
+  if (typeof current === "object" && current !== null && "message" in current) {
+    const message = (current as { message?: unknown }).message;
+    if (typeof message === "string") {
+      return message;
+    }
+  }
+
+  return undefined;
+}
+
+const FormField = ({
+  className,
+  label,
+  htmlFor,
+  required,
+  error,
+  name,
+  children,
+  labelAlign = "center",
+  ...props
+}: FormFieldProps) => {
+  const formContext = useFormContext();
+  const formError = getNestedErrorMessage(
+    formContext?.formState?.errors as Record<string, unknown> | undefined,
+    name
+  );
+  const resolvedError = error ?? formError;
+
+  return (
+    <div
+      className={cn(
+        "flex flex-row gap-[10px]",
+        labelAlign === "center" ? "items-center justify-end" : "items-start justify-end",
+        className
+      )}
+      {...props}
+    >
+      <label
+        htmlFor={htmlFor}
+        className={cn(
+          "font-roboto font-medium text-[#333333] flex items-center shrink-0",
+          labelAlign === "start" && "pt-2"
+        )}
+        style={{
+          fontSize: "16px",
+          lineHeight: "22px",
+          letterSpacing: "-0.007em",
+        }}
+      >
+        {label}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
+      <div className="flex flex-col">
+        {children}
+        {resolvedError && <span className="text-sm text-red-500 mt-1">{resolvedError}</span>}
+      </div>
+    </div>
+  );
+};
 
 export { FormField };

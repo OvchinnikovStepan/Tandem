@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { Plus } from "lucide-react";
 import { SearchInput, Tag, PageTitle, Divider, Button } from "@/ui";
+import { Controller, useForm } from "react-hook-form";
 
 interface Interest {
   id: string;
@@ -11,6 +12,11 @@ interface ProfileEditInterestsProps {
   interests?: Interest[];
   onSave: (interests: Interest[]) => void;
   onBack: () => void;
+}
+
+interface InterestsFormData {
+  searchQuery: string;
+  selectedInterests: Interest[];
 }
 
 const defaultInterests: Interest[] = [
@@ -25,18 +31,33 @@ const defaultInterests: Interest[] = [
 export default function ProfileEditInterests({
   interests = defaultInterests,
   onSave,
-  onBack,
+  onBack: _onBack,
 }: ProfileEditInterestsProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedInterests, setSelectedInterests] = useState<Interest[]>(interests);
+  const methods = useForm<InterestsFormData>({
+    defaultValues: {
+      searchQuery: "",
+      selectedInterests: interests,
+    },
+  });
+  const selectedInterests = methods.watch("selectedInterests");
+
+  useEffect(() => {
+    methods.reset({
+      searchQuery: "",
+      selectedInterests: interests,
+    });
+  }, [interests, methods]);
 
   const handleRemoveInterest = (id: string) => {
-    setSelectedInterests((prev) => prev.filter((i) => i.id !== id));
+    const updatedInterests = methods
+      .getValues("selectedInterests")
+      .filter((interest) => interest.id !== id);
+    methods.setValue("selectedInterests", updatedInterests);
   };
 
-  const handleSave = () => {
-    onSave(selectedInterests);
-  };
+  const handleSave = methods.handleSubmit((data) => {
+    onSave(data.selectedInterests);
+  });
 
   return (
     <div
@@ -62,10 +83,15 @@ export default function ProfileEditInterests({
         style={{ left: "50%", transform: "translateX(-50%)", top: "119px" }}
       >
 
-        <SearchInput
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Введите название вашего интереса..."
+        <Controller
+          name="searchQuery"
+          control={methods.control}
+          render={({ field }) => (
+            <SearchInput
+              placeholder="Введите название вашего интереса..."
+              {...field}
+            />
+          )}
         />
 
         <Button

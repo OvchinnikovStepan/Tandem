@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { Input, Select, PageTitle, Divider, Button } from "@/ui";
 import { FormField } from "@/components";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 
 interface CareerData {
   workplace: string;
@@ -27,17 +28,17 @@ const years = Array.from({ length: 76 }, (_, i) => String(2026 - i));
 export default function ProfileEditCareer({
   career = defaultCareer,
   onSave,
-  onBack,
+  onBack: _onBack,
 }: ProfileEditCareerProps) {
-  const [formData, setFormData] = useState<CareerData>(career);
+  const methods = useForm<CareerData>({ defaultValues: career });
 
-  const handleChange = (field: keyof CareerData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  useEffect(() => {
+    methods.reset(career);
+  }, [career, methods]);
 
-  const handleSave = () => {
-    onSave(formData);
-  };
+  const handleSave = methods.handleSubmit((data) => {
+    onSave(data);
+  });
 
   return (
     <div
@@ -77,58 +78,67 @@ export default function ProfileEditCareer({
           style={{ width: "935px", paddingRight: "263px" }}
         >
 
-          <FormField label="Место работы:">
-            <Input
-              variant="profile"
-              type="text"
-              value={formData.workplace}
-              onChange={(e) => handleChange("workplace", e.target.value)}
-              placeholder="Укажите компанию"
-              className="w-[326px]"
-            />
-          </FormField>
+          <FormProvider {...methods}>
+            <FormField label="Место работы:" name="workplace">
+              <Controller
+                name="workplace"
+                control={methods.control}
+                render={({ field }) => (
+                  <Input
+                    variant="profile"
+                    type="text"
+                    placeholder="Укажите компанию"
+                    className="w-[326px]"
+                    {...field}
+                  />
+                )}
+              />
+            </FormField>
 
-          <FormField label="Год начала работы:">
-            <Select
-              variant="profile"
-              value={formData.startYear}
-              onChange={(e) => handleChange("startYear", e.target.value)}
-              className="w-[326px]"
-            >
-              <option value="">Не выбран</option>
-              {years.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </Select>
-          </FormField>
+            <FormField label="Год начала работы:" name="startYear">
+              <Controller
+                name="startYear"
+                control={methods.control}
+                render={({ field }) => (
+                  <Select variant="profile" className="w-[326px]" {...field}>
+                    <option value="">Не выбран</option>
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              />
+            </FormField>
 
-          <FormField label="Год окончания работы:">
-            <Select
-              variant="profile"
-              value={formData.endYear}
-              onChange={(e) => handleChange("endYear", e.target.value)}
-              className="w-[326px]"
-            >
-              <option value="">Не выбран</option>
-              {years.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </Select>
-          </FormField>
+            <FormField label="Год окончания работы:" name="endYear">
+              <Controller
+                name="endYear"
+                control={methods.control}
+                render={({ field }) => (
+                  <Select variant="profile" className="w-[326px]" {...field}>
+                    <option value="">Не выбран</option>
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              />
+            </FormField>
 
-          <FormField label="Должность:">
-            <Input
-              variant="profile"
-              type="text"
-              value={formData.position}
-              onChange={(e) => handleChange("position", e.target.value)}
-              className="w-[326px]"
-            />
-          </FormField>
+            <FormField label="Должность:" name="position">
+              <Controller
+                name="position"
+                control={methods.control}
+                render={({ field }) => (
+                  <Input variant="profile" type="text" className="w-[326px]" {...field} />
+                )}
+              />
+            </FormField>
+          </FormProvider>
         </div>
       </div>
 
