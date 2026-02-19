@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { Heart, MessageCircle, Play } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface Post {
   id: string;
@@ -17,13 +15,9 @@ interface PostsGridProps {
 }
 
 function PostCard({ post }: { post: Post }) {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
     <div
       className="relative bg-[#C4C4C4] overflow-hidden cursor-pointer group aspect-square rounded-xl"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       {post.imageUrl && (
         <img
@@ -39,12 +33,7 @@ function PostCard({ post }: { post: Post }) {
         </div>
       )}
 
-      <div
-        className={cn(
-          "absolute inset-0 bg-black/40 flex items-center justify-center gap-6 transition-opacity",
-          isHovered ? "opacity-100" : "opacity-0"
-        )}
-      >
+      <div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-6 opacity-0 transition-opacity group-hover:opacity-100">
         <div className="flex items-center gap-2 text-white">
           <Heart className="w-5 h-5" fill="white" />
           <span className="font-semibold">{post.likesCount}</span>
@@ -55,15 +44,6 @@ function PostCard({ post }: { post: Post }) {
         </div>
       </div>
     </div>
-  );
-}
-
-function PostSkeleton() {
-  return (
-    <div 
-      className="bg-[#C4C4C4] shrink-0"
-      style={{ width: '309px', height: '309px', borderRadius: '12px' }}
-    />
   );
 }
 
@@ -85,11 +65,6 @@ export default function PostsGrid({ posts, isLoading }: PostsGridProps) {
         <p className="text-sm mt-1 font-roboto">Создайте свой первый пост!</p>
       </div>
     );
-  }
-
-  const rows = [];
-  for (let i = 0; i < posts.length; i += 3) {
-    rows.push(posts.slice(i, i + 3));
   }
 
   return (
