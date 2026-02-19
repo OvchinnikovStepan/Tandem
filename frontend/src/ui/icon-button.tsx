@@ -1,8 +1,8 @@
-import * as React from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
+export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
   size?: "sm" | "md" | "lg";
 }
 
@@ -12,23 +12,19 @@ const sizeStyles = {
   lg: { width: "56px", height: "56px", padding: "16px" },
 };
 
-const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
-  ({ className, children, size = "md", ...props }, ref) => {
-    return (
-      <button
-        ref={ref}
-        className={cn(
-          "flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors",
-          className
-        )}
-        style={sizeStyles[size]}
-        {...props}
-      >
-        {children}
-      </button>
-    );
-  }
-);
-IconButton.displayName = "IconButton";
+const IconButton = ({ className, children, size = "md", ...props }: IconButtonProps) => {
+  return (
+    <button
+      className={cn(
+        "flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors",
+        className
+      )}
+      style={sizeStyles[size]}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
 
 export { IconButton };
