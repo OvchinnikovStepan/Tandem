@@ -2,6 +2,7 @@ import { Button } from "@/ui/button";
 import { LinkButton } from "@/ui/link-button";
 import { useRef, useState, useEffect } from "react";
 import { UseFormSetValue, FieldErrors } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 interface CodeFormData {
   code: string;
@@ -16,6 +17,7 @@ interface CodeStepProps {
 }
 
 export default function CodeStep({ setValue, errors, isSubmitting, email, onResendCode }: CodeStepProps) {
+  const { t } = useTranslation();
   const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -56,14 +58,14 @@ export default function CodeStep({ setValue, errors, isSubmitting, email, onRese
     <div className="space-y-5">
       <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
         <p className="text-sm text-gray-700">
-          Мы отправили код подтверждения на{" "}
+          {t("forgotPassword.codeSent")} {" "}
           <span className="font-semibold text-black">{email}</span>
         </p>
       </div>
 
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-900">
-          Код подтверждения
+          {t("forgotPassword.codeLabel")}
         </label>
         <div className="flex gap-1 justify-between">
           {digits.map((digit, index) => (
@@ -92,14 +94,14 @@ export default function CodeStep({ setValue, errors, isSubmitting, email, onRese
         size="xl"
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Проверка..." : "Подтвердить код"}
+        {isSubmitting ? t("forgotPassword.submittingCode") : t("forgotPassword.submitCode")}
       </Button>
 
       <div className="text-center">
         <p className="text-sm text-gray-600">
-          Не получили код?{" "}
+          {t("forgotPassword.noCode")} {" "}
           <LinkButton onClick={onResendCode}>
-            Отправить повторно
+            {t("forgotPassword.resendCode")}
           </LinkButton>
         </p>
       </div>

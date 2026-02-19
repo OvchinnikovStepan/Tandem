@@ -2,6 +2,7 @@ import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Mail } from "lucide-react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 interface EmailFormData {
   email: string;
@@ -14,6 +15,8 @@ interface EmailStepProps {
 }
 
 export default function EmailStep({ register, errors, isSubmitting }: EmailStepProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-5">
       <div className="space-y-2">
@@ -24,7 +27,7 @@ export default function EmailStep({ register, errors, isSubmitting }: EmailStepP
             type="email"
             variant="form"
             leftIcon
-            placeholder="email"
+            placeholder={t("forgotPassword.emailPlaceholder")}
             {...register("email")}
           />
         </div>
@@ -39,7 +42,7 @@ export default function EmailStep({ register, errors, isSubmitting }: EmailStepP
         size="xl"
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Отправка..." : "Подтвердить email"}
+        {isSubmitting ? t("forgotPassword.submittingEmail") : t("forgotPassword.submitEmail")}
       </Button>
     </div>
   );

@@ -1,6 +1,6 @@
 import { QuestionBlock } from "@/modules/LoginContent";
-import HeroBlock from "@/components/HeroBlock";
-import Header from "@/components/Header";
+import HeroBlock from "@/components/HeroBlock/HeroBlock";
+import Header from "@/components/Header/Header";
 
 export default function Login() {
   return (

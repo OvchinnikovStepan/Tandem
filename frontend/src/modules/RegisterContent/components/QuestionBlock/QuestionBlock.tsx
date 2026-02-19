@@ -2,10 +2,9 @@ import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { User } from "lucide-react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 interface FormData {
-  firstName: string;
-  lastName: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -26,6 +25,8 @@ export default function QuestionBlock({
   password, 
   passwordStrength 
 }: QuestionBlockProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-5">
       <div>
@@ -36,7 +37,7 @@ export default function QuestionBlock({
             type="password"
             variant="form"
             leftIcon
-            placeholder="Пароль"
+            placeholder={t("common.password")}
             {...register("password")}
           />
         </div>
@@ -63,7 +64,7 @@ export default function QuestionBlock({
             type="password"
             variant="form"
             leftIcon
-            placeholder="Повторите пароль"
+            placeholder={t("common.confirmPassword")}
             {...register("confirmPassword")}
           />
         </div>
@@ -78,7 +79,7 @@ export default function QuestionBlock({
         size="xl"
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Регистрация..." : "Зарегистрироваться"}
+        {isSubmitting ? t("register.submitting") : t("register.submit")}
       </Button>
     </div>
   );

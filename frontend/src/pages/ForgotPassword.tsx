@@ -1,36 +1,61 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { EmailStep, CodeStep, NewPasswordStep } from "@/modules/ForgotPasswordContent";
-import HeroBlock from "@/components/HeroBlock";
-import Header from "@/components/Header";
+import HeroBlock from "@/components/HeroBlock/HeroBlock";
+import Header from "@/components/Header/Header";
+import { useTranslation } from "react-i18next";
 
-const emailSchema = z.object({
-  email: z.string().email("Введите корректный email"),
-});
+type EmailFormData = {
+  email: string;
+};
 
-const codeSchema = z.object({
-  code: z.string().length(6, "Код должен содержать 6 цифр"),
-});
+type CodeFormData = {
+  code: string;
+};
 
-const newPasswordSchema = z.object({
-  password: z.string().min(8, "Минимум 8 символов"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Пароли не совпадают",
-  path: ["confirmPassword"],
-});
-
-type EmailFormData = z.infer<typeof emailSchema>;
-type CodeFormData = z.infer<typeof codeSchema>;
-type NewPasswordFormData = z.infer<typeof newPasswordSchema>;
+type NewPasswordFormData = {
+  password: string;
+  confirmPassword: string;
+};
 
 export default function ForgotPassword() {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const emailSchema = useMemo(
+    () =>
+      z.object({
+        email: z.string().email(t("validation.invalidEmail")),
+      }),
+    [t]
+  );
+
+  const codeSchema = useMemo(
+    () =>
+      z.object({
+        code: z.string().length(6, t("validation.codeLength")),
+      }),
+    [t]
+  );
+
+  const newPasswordSchema = useMemo(
+    () =>
+      z
+        .object({
+          password: z.string().min(8, t("validation.minPasswordShort")),
+          confirmPassword: z.string(),
+        })
+        .refine((data) => data.password === data.confirmPassword, {
+          message: t("validation.passwordsMismatch"),
+          path: ["confirmPassword"],
+        }),
+    [t]
+  );
 
   const emailForm = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
@@ -67,20 +92,20 @@ export default function ForgotPassword() {
   const getStepTitle = () => {
     switch (step) {
       case 1:
-        return "Восстановить пароль";
+        return t("forgotPassword.titleStep1");
       case 2:
-        return "Введите код";
+        return t("forgotPassword.titleStep2");
       case 3:
-        return "Создать новый пароль";
+        return t("forgotPassword.titleStep3");
       default:
-        return "Восстановить пароль";
+        return t("forgotPassword.titleStep1");
     }
   };
 
   const getStepDescription = () => {
     switch (step) {
       case 1:
-        return "Введите ваш email для подтверждения";
+        return t("forgotPassword.subtitleStep1");
       default:
         return "";
     }

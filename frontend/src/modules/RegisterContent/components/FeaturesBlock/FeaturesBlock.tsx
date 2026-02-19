@@ -2,6 +2,7 @@ import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Mail } from "lucide-react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 interface FormData {
   email: string;
@@ -16,11 +17,13 @@ interface FeaturesBlockProps {
 }
 
 export default function FeaturesBlock({ register, errors, onNext }: FeaturesBlockProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-5">
       <div className="space-y-2">
         <label htmlFor="email" className="block text-sm font-medium text-gray-900">
-          Email
+          {t("common.email")}
         </label>
         <div className="relative">
           <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -44,7 +47,7 @@ export default function FeaturesBlock({ register, errors, onNext }: FeaturesBloc
         size="xl"
         onClick={onNext}
       >
-        Далее
+        {t("register.next")}
       </Button>
     </div>
   );

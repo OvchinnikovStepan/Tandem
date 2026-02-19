@@ -4,22 +4,16 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FeaturesBlock, QuestionBlock } from "@/modules/RegisterContent";
-import HeroBlock from "@/components/HeroBlock";
-import Header from "@/components/Header";
+import HeroBlock from "@/components/HeroBlock/HeroBlock";
+import Header from "@/components/Header/Header";
 import { LinkButton } from "@/ui/link-button";
+import { useTranslation } from "react-i18next";
 
-const formSchema = z
-  .object({
-    email: z.string().email("Введите корректный email"),
-    password: z.string().min(8, "Пароль должен содержать минимум 8 символов"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Пароли не совпадают",
-    path: ["confirmPassword"],
-  });
-
-type FormData = z.infer<typeof formSchema>;
+type FormData = {
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 const calculatePasswordStrength = (pwd: string) => {
   let strength = 0;
@@ -34,6 +28,22 @@ const calculatePasswordStrength = (pwd: string) => {
 export default function Register() {
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const formSchema = useMemo(
+    () =>
+      z
+        .object({
+          email: z.string().email(t("validation.invalidEmail")),
+          password: z.string().min(8, t("validation.minPassword")),
+          confirmPassword: z.string(),
+        })
+        .refine((data) => data.password === data.confirmPassword, {
+          message: t("validation.passwordsMismatch"),
+          path: ["confirmPassword"],
+        }),
+    [t]
+  );
 
   const {
     register,
@@ -71,10 +81,10 @@ export default function Register() {
           <div className="w-full max-w-md">
             <div className="mb-8">
               <h1 className="text-4xl font-bold text-black mb-2">
-                {step === 1 ? "Create account" : "Придумайте пароль"}
+                {step === 1 ? t("register.titleStep1") : t("register.titleStep2")}
               </h1>
               <p className="text-gray-600">
-                Шаг {step} из 2
+                {t("register.step", { step })}
               </p>
             </div>
 
@@ -103,12 +113,12 @@ export default function Register() {
 
             <div className="mt-8 text-center">
               <p className="text-gray-600">
-                Уже есть аккаунт?{" "}
+                {t("register.haveAccount")} {" "}
                 <LinkButton
                   onClick={() => navigate("/login")}
                   className="font-bold"
                 >
-                  Войти
+                  {t("register.login")}
                 </LinkButton>
               </p>
             </div>

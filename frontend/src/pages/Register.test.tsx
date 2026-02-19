@@ -37,7 +37,7 @@ describe("Register Page", () => {
 
   it("рендерит заголовок первого шага", () => {
     renderPage();
-    expect(screen.getByText("Create account")).toBeInTheDocument();
+    expect(screen.getByText("Создать аккаунт")).toBeInTheDocument();
   });
 
   it("показывает 'Шаг 1 из 2' на первом шаге", () => {

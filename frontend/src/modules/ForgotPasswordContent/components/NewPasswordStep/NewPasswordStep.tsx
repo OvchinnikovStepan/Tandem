@@ -4,6 +4,7 @@ import { PasswordToggle } from "@/ui/password-toggle";
 import { Lock } from "lucide-react";
 import { useState, useMemo } from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 interface NewPasswordFormData {
   password: string;
@@ -31,6 +32,7 @@ export default function NewPasswordStep({ register, errors, isSubmitting, passwo
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const passwordStrength = useMemo(() => calculatePasswordStrength(password), [password]);
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-5">
@@ -43,7 +45,7 @@ export default function NewPasswordStep({ register, errors, isSubmitting, passwo
             variant="form"
             leftIcon
             rightIcon
-            placeholder="Пароль"
+            placeholder={t("common.password")}
             {...register("password")}
           />
           <PasswordToggle
@@ -75,7 +77,7 @@ export default function NewPasswordStep({ register, errors, isSubmitting, passwo
             variant="form"
             leftIcon
             rightIcon
-            placeholder="Повторите пароль"
+            placeholder={t("common.confirmPassword")}
             {...register("confirmPassword")}
           />
           <PasswordToggle
@@ -94,7 +96,7 @@ export default function NewPasswordStep({ register, errors, isSubmitting, passwo
         size="xl"
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Сохранение..." : "Установить новый пароль"}
+        {isSubmitting ? t("forgotPassword.submittingNewPassword") : t("forgotPassword.submitNewPassword")}
       </Button>
     </div>
   );
