@@ -3,6 +3,8 @@ package com.tandem.auth_service.service.registration;
 import com.tandem.auth_service.api.dto.PasswordStrength;
 import com.tandem.auth_service.api.dto.response.RegisterEmailResponse;
 import com.tandem.auth_service.api.error.exceptions.VerificationCodeInvalidException;
+import com.tandem.auth_service.kafka.UserEventPublisher;
+import com.tandem.auth_service.kafka.events.UserRegisteredEvent;
 import com.tandem.auth_service.model.User;
 import com.tandem.auth_service.repository.UserRepository;
 import com.tandem.auth_service.service.session.SessionService;
@@ -30,6 +32,8 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final PasswordStrengthService passwordStrengthService;
     private final IpExtractor ipExtractor;
     private final SessionService sessionService;
+    private final UserEventPublisher userEventPublisher;
+
 
     @Override
     public UUID startPhoneRegistration(String phoneNumber) {
@@ -121,6 +125,14 @@ public class RegistrationServiceImpl implements RegistrationService {
                 refreshToken,
                 ipAddress,
                 deviceInfo
+            );
+
+            userEventPublisher.publishUserRegistered(
+                    UserRegisteredEvent.of(
+                            user.getId(),
+                            user.getEmail(),
+                            user.getPhoneNumber()
+                    )
             );
 
             return new RegisterEmailResponse(

@@ -2,7 +2,7 @@ services:
 
   postgres:
     image: postgres:16
-    container_name: auth_postgres
+    container_name: postgres
     environment:
       POSTGRES_DB: auth_db
       POSTGRES_USER: auth_user
@@ -15,6 +15,8 @@ services:
       retries: 10
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tandem-network
 
   auth_service:
     build: .
@@ -23,7 +25,7 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "8082:8080"
     env_file:
       - .env
     environment:
@@ -31,6 +33,12 @@ services:
       SPRING_DATASOURCE_USERNAME: auth_user
       SPRING_DATASOURCE_PASSWORD: auth_pass
       PRIVATE_KEY: ${PRIVATE_KEY}
+    networks:
+      - tandem-network
 
 volumes:
   postgres_data:
+
+networks:
+  tandem-network:
+    driver: bridge

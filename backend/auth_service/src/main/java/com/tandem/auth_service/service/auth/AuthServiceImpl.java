@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.tandem.auth_service.api.dto.UserDto;
 import com.tandem.auth_service.api.dto.response.LoginResponse;
+import com.tandem.auth_service.kafka.UserEventPublisher;
+import com.tandem.auth_service.kafka.events.UserLoggedInEvent;
 import com.tandem.auth_service.model.User;
 import com.tandem.auth_service.repository.UserRepository;
 import com.tandem.auth_service.service.session.SessionService;
@@ -25,6 +27,8 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final IpExtractor ipExtractor;
+    private final UserEventPublisher userEventPublisher;
+
     @Override
     public LoginResponse login(HttpServletRequest httpRequest, String email, String rawPassword) {
 
@@ -58,6 +62,14 @@ public class AuthServiceImpl implements AuthService {
             refreshToken,
             ipAddress,
             deviceInfo
+        );
+
+        userEventPublisher.publishUserLogin(
+                UserLoggedInEvent.of(
+                        user.getId(),
+                        ipAddress,
+                        deviceInfo
+                )
         );
 
         return new LoginResponse(accessToken, refreshToken);
