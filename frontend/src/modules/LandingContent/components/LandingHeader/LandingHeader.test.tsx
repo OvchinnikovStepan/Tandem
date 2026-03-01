@@ -1,13 +1,13 @@
-import {render, screen} from "@testing-library/react";
-import {MemoryRouter} from "react-router";
+import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import LandingHeader from "./LandingHeader";
-import {describe} from "vitest";
+import { describe } from "vitest";
 
 describe("LandingHeader", () => {
     const renderHeader = () =>
         render(
             <MemoryRouter>
-                <LandingHeader/>
+                <LandingHeader />
             </MemoryRouter>,
         );
 
@@ -15,10 +15,10 @@ describe("LandingHeader", () => {
         renderHeader();
 
         expect(
-            screen.getByRole("img", {name: "Tandem Logo"}),
+            screen.getByRole("img", { name: "Tandem Logo" }),
         ).toBeInTheDocument();
 
-        const loginButton = screen.getByRole("button", {name: "Войти"});
+        const loginButton = screen.getByRole("link", { name: "Войти" });
         expect(loginButton).toBeInTheDocument();
     });
 
@@ -26,10 +26,9 @@ describe("LandingHeader", () => {
         renderHeader();
 
         expect(
-            screen.getByRole("button", {name: /change language/i}),
+            screen.getByRole("button", { name: /change language/i }),
         ).toBeInTheDocument();
 
         expect(screen.getByText("Русский")).toBeInTheDocument();
     });
 });
-

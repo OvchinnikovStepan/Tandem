@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -44,20 +44,22 @@
 @theme {
     --color-header-button: rgba(36, 74, 127, 0.06);
     --color-header-button-hover: rgba(36, 74, 127, 0.09);
-    --color-action-button: #E9EBEF;
-    --color-action-button-hover: #DFDFDF;
-    --color-header-button-text: #126DF7;
+    --color-action-button: #e9ebef;
+    --color-action-button-hover: #dfdfdf;
+    --color-header-button-text: #126df7;
     --color-header-border: oklch(0.9421 0.0035 247.86);
-    --color-accent-white: #FEFEFE;
-    --color-landing-bg: #F6F7F8;
-    --color-accent-gray: #EAECEE;
+    --color-accent-white: #fefefe;
+    --color-landing-bg: #f6f7f8;
+    --color-accent-gray: #eaecee;
     --color-heading-black: #333333;
-    --color-base-black: #6B6E72;
-    --color-button-yellow: #FFDD2D;
-    --color-button-yellow-hover: #FFCD33;
-    --color-icon-gray: #C4C4C4;
-    --color-decoration-color: #FFFFFF80;
-    --font-heading-bold: 700 44px/48px dsHeading,"dsHeading Fallback",-apple-system,BlinkMacSystemFont,"Segoe UI", Roboto,"Helvetica Neue", sans-serif;
+    --color-base-black: #6b6e72;
+    --color-button-yellow: #ffdd2d;
+    --color-button-yellow-hover: #ffcd33;
+    --color-icon-gray: #c4c4c4;
+    --color-decoration-color: #ffffff80;
+    --font-heading-bold:
+        700 44px/48px dsHeading, "dsHeading Fallback", -apple-system,
+        BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
     --font-base-regular: 400 44px/48px dsHeading;
     --font-roboto: "Roboto", sans-serif;
     --shadow-default: 0 2px 8px rgb(0 0 0 / var(--tw-shadow-opacity));
@@ -136,13 +138,11 @@
 }
 
 @layer base {
-    *
-    {
+    * {
         @apply border-border outline-ring/50;
     }
 
-    body
-    {
+    body {
         @apply bg-background text-foreground;
         padding-bottom: env(safe-area-inset-bottom);
     }
@@ -152,7 +152,9 @@
         cursor: pointer;
     }
 
-    html, body, #root {
+    html,
+    body,
+    #root {
         height: 100%;
     }
 }
@@ -167,7 +169,6 @@
 
     @media (min-width: 640px) {
         .container {
-
         }
     }
 

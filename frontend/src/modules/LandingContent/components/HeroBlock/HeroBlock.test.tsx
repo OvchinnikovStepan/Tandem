@@ -1,12 +1,12 @@
-import {render, screen} from "@testing-library/react";
-import {MemoryRouter} from "react-router";
+import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import HeroBlock from "./HeroBlock";
 
 describe("HeroBlock", () => {
     const renderHero = () =>
         render(
             <MemoryRouter>
-                <HeroBlock/>
+                <HeroBlock />
             </MemoryRouter>,
         );
 
@@ -28,15 +28,14 @@ describe("HeroBlock", () => {
         ).toBeInTheDocument();
 
         expect(
-            screen.getByRole("button", {name: "Попробовать бесплатно"}),
+            screen.getByRole("link", { name: "Попробовать бесплатно" }),
         ).toBeInTheDocument();
     });
 
     it("отображает hero-изображение с корректным alt", () => {
         renderHero();
 
-        const image = screen.getByRole("img", {name: "Hero Image"});
+        const image = screen.getByRole("img", { name: "Hero Image" });
         expect(image).toBeInTheDocument();
     });
 });
-

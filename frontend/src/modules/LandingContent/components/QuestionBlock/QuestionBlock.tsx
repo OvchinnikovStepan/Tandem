@@ -1,9 +1,9 @@
 import Button from "@/ui/Button.tsx";
-import {Link} from "react-router";
-import {useTranslation} from "react-i18next";
+import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 
 function QuestionBlock() {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
     return (
         <section className="pb-12 md:pb-20 lg:pb-25 bg-landing-bg">
             <div className="container max-w-276">
@@ -15,9 +15,7 @@ function QuestionBlock() {
                         {t("landing.qtb.description")}
                     </p>
                     <Button asChild>
-                        <Link to="/login">
-                            {t("landing.qtb.button")}
-                        </Link>
+                        <Link to="/login">{t("landing.qtb.button")}</Link>
                     </Button>
                 </div>
             </div>

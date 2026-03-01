@@ -1,51 +1,123 @@
 {
-  "landing": {
-    "header": {
-      "login": "Log in"
+    "landing": {
+        "header": {
+            "login": "Log in"
+        },
+        "hero": {
+            "title": "Tandem: your corporate messenger for engaging communication",
+            "description": "Work is more than just tasks.\nIt’s the people you want to communicate with, learn from, grow with, and have fun together.",
+            "cta": "Try for free"
+        },
+        "features": {
+            "secure": {
+                "title": "Secure communication",
+                "description": "End-to-end encryption for all your chats."
+            },
+            "interests": {
+                "title": "Interest-based groups",
+                "description": "Create, join, organize events — all in one app."
+            },
+            "questionnaire": {
+                "title": "Interactive profile",
+                "description": "Fill out a short profile and meet people who share your interests."
+            },
+            "interface": {
+                "title": "Nothing extra",
+                "description": "Easy to learn from the first launch — a simple and intuitive interface."
+            }
+        },
+        "qtb": {
+            "title": "Ready to get started with Tandem?",
+            "description": "Fill out the profile, and Tandem will match you with people and groups that fit you and your interests!",
+            "button": "Try for free"
+        },
+        "footer": {
+            "contact": "For any questions, contact us at ",
+            "email": "tandem@t-bang.ru",
+            "links": {
+                "email": "Email",
+                "vk": "VK",
+                "telegram": "Telegram",
+                "offer": "Offer",
+                "organization": "Organization details",
+                "privacy": "Privacy Policy"
+            },
+            "company": "2025, T-Bang"
+        }
     },
-    "hero": {
-      "title": "Tandem: your corporate messenger for engaging communication",
-      "description": "Work is more than just tasks.\nIt’s the people you want to communicate with, learn from, grow with, and have fun together.",
-      "cta": "Try for free"
-    },
-    "features": {
-      "secure": {
-        "title": "Secure communication",
-        "description": "End-to-end encryption for all your chats."
-      },
-      "interests": {
-        "title": "Interest-based groups",
-        "description": "Create, join, organize events — all in one app."
-      },
-      "questionnaire": {
-        "title": "Interactive profile",
-        "description": "Fill out a short profile and meet people who share your interests."
-      },
-      "interface": {
-        "title": "Nothing extra",
-        "description": "Easy to learn from the first launch — a simple and intuitive interface."
-      }
-    },
-    "qtb": {
-      "title": "Ready to get started with Tandem?",
-      "description": "Fill out the profile, and Tandem will match you with people and groups that fit you and your interests!",
-      "button": "Try for free"
-    },
-    "footer": {
-      "contact": "For any questions, contact us at ",
-      "links": {
-        "email": "Email",
-        "vk": "VK",
-        "telegram": "Telegram",
-        "offer": "Offer",
-        "organization": "Organization details",
-        "privacy": "Privacy Policy"
-      }
+    "questionnaire": {
+        "header": {
+            "title": "Questionnaire",
+            "description": {
+                "default": "Please tell us about your interests so we can find the best matches for you with other users and groups!\nBelow you can choose from various categories.",
+                "edit": "Please describe your other interests below!",
+                "profile": "Please provide information about yourself below!"
+            }
+        },
+        "default": {
+            "loading": "Loading interests...",
+            "interests": {
+                "basketball": "Basketball",
+                "football": "Football",
+                "volleyball": "Volleyball",
+                "music": "Music",
+                "running": "Running",
+                "reading": "Reading",
+                "swimming": "Swimming",
+                "anime": "Anime",
+                "drawing": "Drawing",
+                "cooking": "Cooking",
+                "development": "Development",
+                "travel": "Travel",
+                "photography": "Photography",
+                "neural-networks": "AI",
+                "games": "Games",
+                "movies": "Movies",
+                "hockey": "Hockey",
+                "cycling": "Cycling",
+                "astronomy": "Astronomy",
+                "cars": "Cars",
+                "biology": "Biology",
+                "career": "Career",
+                "pets": "Pets",
+                "gardening": "Gardening"
+            }
+        },
+        "edit": {
+            "no-interests": "You must select at least 1 interest!",
+            "add-button": "Add",
+            "search-placeholder": "Please enter the name of your interest..."
+        },
+        "profile": {
+            "first-name": {
+                "title": "First Name",
+                "placeholder": "Your first name"
+            },
+            "last-name": {
+                "title": "Last Name",
+                "placeholder": "Your last name"
+            },
+            "city": {
+                "title": "City",
+                "placeholder": "Enter your city"
+            },
+            "birth-date": {
+                "title": "Date of Birth",
+                "placeholder": "MM / DD / YYYY"
+            },
+            "gender": {
+                "title": "Gender",
+                "options": {
+                    "no-select": "Not selected",
+                    "male": "Male",
+                    "female": "Female"
+                }
+            }
+        },
+        "buttons": {
+            "next": "Next",
+            "back": "Back",
+            "finish": "Finish"
+        }
     }
-  },
-  "common": {
-    "language": "Language",
-    "russian": "Русский",
-    "english": "English"
-  }
 }

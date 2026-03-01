@@ -1,9 +1,9 @@
 import Button from "@/ui/Button.tsx";
-import {Link} from "react-router";
-import {useTranslation} from "react-i18next";
+import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 
 function HeroBlock() {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     return (
         <section className="bg-landing-bg py-12 md:py-20 lg:py-25">
@@ -19,9 +19,7 @@ function HeroBlock() {
                             </p>
                         </div>
                         <Button asChild>
-                            <Link to="/login">
-                                {t("landing.hero.cta")}
-                            </Link>
+                            <Link to="/login">{t("landing.hero.cta")}</Link>
                         </Button>
                     </div>
                     <div className="w-full flex justify-center md:justify-end">
