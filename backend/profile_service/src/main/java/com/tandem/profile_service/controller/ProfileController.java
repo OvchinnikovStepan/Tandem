@@ -5,6 +5,7 @@ import com.tandem.profile_service.dto.UpdateResponse;
 import com.tandem.profile_service.dto.ProfileRequest;
 import com.tandem.profile_service.dto.PrivacySettingsDto;
 import com.tandem.profile_service.model.Profile;
+import com.tandem.profile_service.security.SecurityUtils;
 import com.tandem.profile_service.service.ProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,16 +27,6 @@ import java.util.UUID;
 public class ProfileController {
 
     private final ProfileService profileService;
-
-
-    /**
-     * Метод для извлечения userId из JWT токена
-     */
-    private UUID getCurrentUserId() {
-        // TODO: Реализовать
-        // Пока заглушка, возвращает тестовый userId
-        return UUID.fromString("123e4567-e89b-12d3-a456-426614174002");
-    }
 
     /**
      * GET /api/profiles
@@ -53,8 +43,8 @@ public class ProfileController {
      */
     @GetMapping("/profile/me")
     public ResponseEntity<ProfileResponse> getMyProfile() {
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
 
-        UUID currentUserId = getCurrentUserId();
         ProfileResponse response = profileService.getProfileWithPrivacy(currentUserId, currentUserId);
         return ResponseEntity.ok(response);
     }
@@ -65,8 +55,8 @@ public class ProfileController {
      */
     @DeleteMapping("/profile/me")
     public ResponseEntity<Void> deleteProfile() {
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
 
-        UUID currentUserId = getCurrentUserId();
         profileService.deleteProfile(currentUserId);
         return ResponseEntity.noContent().build();
     }
@@ -77,8 +67,8 @@ public class ProfileController {
      */
     @GetMapping("/profile/{userId}")
     public ResponseEntity<ProfileResponse> getProfileById(@PathVariable UUID userId) {
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
 
-        UUID currentUserId = getCurrentUserId();
         ProfileResponse response = profileService.getProfileWithPrivacy(currentUserId, userId);
         return ResponseEntity.ok(response);
     }
@@ -89,10 +79,9 @@ public class ProfileController {
      */
     @PutMapping("/profile/me")
     public ResponseEntity<UpdateResponse> updateMyProfile(
-            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @Valid @RequestBody ProfileRequest request) {
 
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
 
         UpdateResponse response = profileService.updateProfile(currentUserId, request);
         return ResponseEntity.ok(response);
@@ -104,8 +93,7 @@ public class ProfileController {
      */
     @PatchMapping("/profile/me")
     public ResponseEntity<UpdateResponse> patchMyProfile(@RequestBody ProfileRequest request) {
-
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
 
         UpdateResponse response = profileService.patchProfile(currentUserId, request);
         return ResponseEntity.ok(response);
@@ -117,8 +105,8 @@ public class ProfileController {
      */
     @GetMapping("/profile/me/privacy")
     public ResponseEntity<PrivacySettingsDto> getMyPrivacySettings() {
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
 
-        UUID currentUserId = getCurrentUserId();
         PrivacySettingsDto privacy = profileService.getPrivacySettings(currentUserId);
 
         return ResponseEntity.ok(privacy);
@@ -130,8 +118,7 @@ public class ProfileController {
      */
     @PutMapping("/profile/me/privacy")
     public ResponseEntity<UpdateResponse> updateMyPrivacySettings(@RequestBody PrivacySettingsDto request) {
-
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
 
         UpdateResponse response = profileService.updatePrivacySettings(currentUserId, request);
         return ResponseEntity.ok(response);
