@@ -13,11 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.core.Authentication;
 
-
-import com.tandem.auth_service.api.dto.PasswordStrength;
 import com.tandem.auth_service.api.dto.RefreshResultDto;
 import com.tandem.auth_service.api.dto.SessionDto;
 import com.tandem.auth_service.api.dto.UserDto;
+import com.tandem.auth_service.api.dto.password.PasswordStrengthResult;
 import com.tandem.auth_service.api.dto.request.CheckPasswordStrengthRequest;
 import com.tandem.auth_service.api.dto.request.LoginRequest;
 import com.tandem.auth_service.api.dto.request.RefreshTokenRequest;
@@ -34,6 +33,7 @@ import com.tandem.auth_service.api.dto.response.RegisterPhoneResponse;
 import com.tandem.auth_service.api.dto.response.VerifyPhoneResponse;
 import com.tandem.auth_service.security.AuthPrincipal;
 import com.tandem.auth_service.service.auth.AuthService;
+import com.tandem.auth_service.service.password.PasswordStrengthService;
 import com.tandem.auth_service.service.registration.RegistrationService;
 import com.tandem.auth_service.service.session.SessionService;
 
@@ -49,11 +49,13 @@ public class AuthController {
     private final AuthService authService;
     private final RegistrationService registrationService;
     private final SessionService sessionService;
+    private final PasswordStrengthService passwordStrengthService;
 
-    public AuthController(RegistrationService registrationService, AuthService authService,SessionService sessionService) {
+    public AuthController(RegistrationService registrationService, AuthService authService,SessionService sessionService, PasswordStrengthService passwordStrengthService) {
         this.authService = authService;
         this.registrationService = registrationService;
         this.sessionService=sessionService;
+        this.passwordStrengthService = passwordStrengthService;
     }
 
     @PostMapping("/register/phone")
@@ -96,12 +98,11 @@ public class AuthController {
     public CheckPasswordStrengthResponse checkPassword(
             @Valid @RequestBody CheckPasswordStrengthRequest request
     ) {
-        return new CheckPasswordStrengthResponse(
-                PasswordStrength.GOOD,
-                4,
-                List.of(),
-                Map.of()
-        );
+
+        PasswordStrengthResult result =
+                passwordStrengthService.evaluate(request.password());
+
+        return result.mapToResponse();
     }
 
     @PostMapping("/login")
