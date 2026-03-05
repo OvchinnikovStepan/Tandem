@@ -1,7 +1,7 @@
 package com.tandem.auth_service.service.session;
 
-import com.tandem.auth_service.api.dto.RefreshResultDto;
 import com.tandem.auth_service.api.dto.SessionDto;
+import com.tandem.auth_service.api.dto.auth.common.RefreshResultDto;
 import com.tandem.auth_service.model.Session;
 import com.tandem.auth_service.model.User;
 import com.tandem.auth_service.repository.SessionRepository;

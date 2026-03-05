@@ -1,4 +1,4 @@
-package com.tandem.auth_service.api.dto.request;
+package com.tandem.auth_service.api.dto.register.request;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotBlank;

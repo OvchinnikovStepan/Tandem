@@ -1,13 +1,13 @@
 package com.tandem.auth_service.service.registration;
 
-import com.tandem.auth_service.api.dto.password.PasswordStrengthResult;
-import com.tandem.auth_service.api.dto.response.RegisterEmailResponse;
+import com.tandem.auth_service.api.dto.password_strength.common.PasswordStrengthResult;
+import com.tandem.auth_service.api.dto.register.response.RegisterEmailResponse;
 import com.tandem.auth_service.api.error.exceptions.VerificationCodeInvalidException;
 import com.tandem.auth_service.kafka.UserEventPublisher;
 import com.tandem.auth_service.kafka.events.UserRegisteredEvent;
 import com.tandem.auth_service.model.User;
 import com.tandem.auth_service.repository.UserRepository;
-import com.tandem.auth_service.service.password.PasswordStrengthService;
+import com.tandem.auth_service.service.password_strength.PasswordStrengthService;
 import com.tandem.auth_service.service.session.SessionService;
 import com.tandem.auth_service.service.token.JwtService;
 import com.tandem.auth_service.utils.IpExtractor;

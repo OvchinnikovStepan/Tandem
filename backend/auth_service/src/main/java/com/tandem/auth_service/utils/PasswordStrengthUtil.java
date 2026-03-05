@@ -1,11 +1,12 @@
 package com.tandem.auth_service.utils;
 
-import com.tandem.auth_service.api.dto.password.PasswordFeedback;
 import lombok.experimental.UtilityClass;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import com.tandem.auth_service.api.dto.password_strength.common.PasswordFeedback;
 
 @UtilityClass
 public class PasswordStrengthUtil {

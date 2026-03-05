@@ -1,4 +1,4 @@
-package com.tandem.auth_service.api.dto.password;
+package com.tandem.auth_service.api.dto.password_strength.common;
 
 public enum PasswordFeedback {
 

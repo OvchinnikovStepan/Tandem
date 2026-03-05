@@ -1,9 +1,9 @@
-package com.tandem.auth_service.api.dto.response;
+package com.tandem.auth_service.api.dto.password_strength.response;
 
 import java.util.List;
 import java.util.Map;
 
-import com.tandem.auth_service.api.dto.password.PasswordStrength;
+import com.tandem.auth_service.api.dto.password_strength.common.PasswordStrength;
 
 public record CheckPasswordStrengthResponse(
         PasswordStrength strength,

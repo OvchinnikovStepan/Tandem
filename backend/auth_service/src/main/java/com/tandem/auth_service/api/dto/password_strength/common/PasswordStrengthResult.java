@@ -1,9 +1,9 @@
-package com.tandem.auth_service.api.dto.password;
+package com.tandem.auth_service.api.dto.password_strength.common;
 
 import java.util.List;
 import java.util.Map;
 
-import com.tandem.auth_service.api.dto.response.CheckPasswordStrengthResponse;
+import com.tandem.auth_service.api.dto.password_strength.response.CheckPasswordStrengthResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

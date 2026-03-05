@@ -2,7 +2,7 @@ package com.tandem.auth_service.service.registration;
 
 import java.util.UUID;
 
-import com.tandem.auth_service.api.dto.response.RegisterEmailResponse;
+import com.tandem.auth_service.api.dto.register.response.RegisterEmailResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 

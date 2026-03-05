@@ -7,7 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.tandem.auth_service.api.dto.UserDto;
-import com.tandem.auth_service.api.dto.response.LoginResponse;
+import com.tandem.auth_service.api.dto.auth.response.LoginResponse;
 import com.tandem.auth_service.kafka.UserEventPublisher;
 import com.tandem.auth_service.kafka.events.UserLoggedInEvent;
 import com.tandem.auth_service.model.User;

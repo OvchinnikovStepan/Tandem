@@ -1,4 +1,4 @@
-package com.tandem.auth_service.api.dto.response;
+package com.tandem.auth_service.api.dto.register.response;
 
 
 public record VerifyPhoneResponse(

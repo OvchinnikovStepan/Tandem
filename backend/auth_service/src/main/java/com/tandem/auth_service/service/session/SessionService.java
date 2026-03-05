@@ -1,7 +1,7 @@
 package com.tandem.auth_service.service.session;
 
-import com.tandem.auth_service.api.dto.RefreshResultDto;
 import com.tandem.auth_service.api.dto.SessionDto;
+import com.tandem.auth_service.api.dto.auth.common.RefreshResultDto;
 
 import java.util.List;
 import java.util.UUID;
