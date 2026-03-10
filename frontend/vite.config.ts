@@ -1,26 +1,28 @@
-/// <reference types="vitest/config" />
-import {defineConfig} from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
-import path from "path"
 import tailwindcss from '@tailwindcss/vite'
-import jotaiDebugLabel from 'jotai/babel/plugin-debug-label'
-import jotaiReactRefresh from 'jotai/babel/plugin-react-refresh'
+import path from 'path'
 
-// https://vite.dev/config/
+
 export default defineConfig({
-    plugins: [
-        react({babel: {plugins: [jotaiDebugLabel, jotaiReactRefresh]}}),
-        tailwindcss(),
-    ],
-    resolve: {
-        alias: {
-            "@": path.resolve(__dirname, "./src"),
-        },
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
     },
-    test: {
-        environment: "jsdom",
-        globals: true,
-        setupFiles: "./src/tests/setupTests.ts",
-        css: true,
+  },
+  server: {
+    host: true, // Слушать на всех интерфейсах (0.0.0.0)
+  },
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: "./src/test/setup.ts",
+    css: true,
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      reportsDirectory: "./coverage",
     },
+  },
 })

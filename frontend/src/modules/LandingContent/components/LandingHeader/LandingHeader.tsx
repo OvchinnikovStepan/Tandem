@@ -1,4 +1,4 @@
-import Button from "@/ui/Button.tsx";
+import { Button } from "@/ui";
 import {Link} from "react-router";
 import {useTranslation} from "react-i18next";
 import {LanguageSwitcher} from "@/components/LanguageSwitcher/LanguageSwitcher";

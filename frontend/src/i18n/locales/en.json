@@ -47,5 +47,100 @@
     "language": "Language",
     "russian": "Русский",
     "english": "English"
+  },
+  "profile": {
+    "sidebar": {
+      "nav": {
+        "profile": "Profile",
+        "home": "Home",
+        "chats": "Chats",
+        "friends": "Friends",
+        "groupChats": "Group chats",
+        "settings": "Settings",
+        "help": "Help"
+      },
+      "logout": "Log out"
+    },
+    "rightSidebar": {
+      "suggestedFriends": "Suggested friends",
+      "view": "View",
+      "profileActivity": "Profile activity",
+      "followers": "Followers",
+      "period": "this month",
+      "message": "This month you significantly increased your follower count!"
+    },
+    "rightSidebarEdit": {
+      "title": "Edit profile",
+      "menu": {
+        "profile": "Profile",
+        "interests": "Interests",
+        "career": "Career"
+      }
+    },
+    "header": {
+      "searchPlaceholder": "Search your posts...",
+      "createPost": "Create post"
+    },
+    "info": {
+      "editProfile": "Edit profile",
+      "posts": "posts",
+      "followers": "followers",
+      "friends": "friends",
+      "more": "More..."
+    },
+    "tabs": {
+      "posts": "posts",
+      "saved": "saved"
+    },
+    "posts": {
+      "emptyTitle": "No posts yet",
+      "emptyDescription": "Create your first post!",
+      "loading": "Loading..."
+    },
+    "edit": {
+      "title": "Profile",
+      "firstName": "First name:",
+      "lastName": "Last name:",
+      "gender": "Gender:",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other",
+      "birthDate": "Date of birth:",
+      "birthDatePlaceholder": "00 / 00 / 0000",
+      "username": "Username:",
+      "bio": "About:",
+      "bioPlaceholder": "Tell us about yourself...",
+      "city": "City:",
+      "save": "Save"
+    },
+    "career": {
+      "title": "Career",
+      "workplace": "Workplace:",
+      "workplacePlaceholder": "Enter company",
+      "startYear": "Start year:",
+      "endYear": "End year:",
+      "position": "Position:",
+      "notSelected": "Not selected",
+      "save": "Save"
+    },
+    "interests": {
+      "title": "Interests",
+      "searchPlaceholder": "Enter your interest...",
+      "add": "Add",
+      "save": "Save",
+      "defaults": {
+        "basketball": "Basketball",
+        "movies": "Movies",
+        "football": "Football",
+        "games": "Games",
+        "development": "Development",
+        "music": "Music"
+      }
+    },
+    "mock": {
+      "location": "Omsk",
+      "bio": "I love traveling around the world 🌍",
+      "city": "Omsk"
+    }
   }
 }
