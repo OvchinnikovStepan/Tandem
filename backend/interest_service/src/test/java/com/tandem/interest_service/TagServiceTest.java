@@ -1,12 +1,13 @@
 package com.tandem.interest_service;
 
 import com.tandem.interest_service.dal.TagDal;
+import com.tandem.interest_service.integration.InterestEventPublisher;
 import com.tandem.interest_service.service.TagService;
 import com.tandem.interest_service.service.exception.TagAlreadyExistsException;
 import com.tandem.interest_service.service.exception.TagNotFoundException;
 import com.tandem.interest_service.service.impl.TagServiceImpl;
-import com.tandem.interest_service.service.model.TagRequest;
-import com.tandem.interest_service.service.model.TagResponse;
+import com.tandem.interest_service.service.model.request.TagRequest;
+import com.tandem.interest_service.service.model.response.TagResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +37,9 @@ class TagServiceTest {
     @Mock
     private TagDal tagDal;
 
+    @Mock
+    private InterestEventPublisher eventPublisher;
+
     private TagService tagService;
 
     // Тестовые данные
@@ -48,7 +52,7 @@ class TagServiceTest {
 
     @BeforeEach
     void setUp() {
-        tagService = new TagServiceImpl(tagDal);
+        tagService = new TagServiceImpl(tagDal, eventPublisher);
         initializeTestData();
     }
 
