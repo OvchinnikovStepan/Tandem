@@ -3,22 +3,19 @@ package com.tandem.interest_service.api.model.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
-
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Builder
 @Getter
-public class TagResponseJson {
+@Builder
+public class UserInterestResponseJson {
 
     @JsonProperty("id")
     private UUID id;
 
-    @JsonProperty("name")
-    private String name;
+    @JsonProperty("tag")
+    private TagResponseJson tag;
 
-    @JsonProperty("imageUrl")
-    private String imageUrl;
-
-    @JsonProperty("usageCount")
-    private Integer usageCount ;
+    @JsonProperty("createdAt")
+    private LocalDateTime createdAt;
 }

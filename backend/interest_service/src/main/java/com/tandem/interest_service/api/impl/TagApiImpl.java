@@ -2,12 +2,12 @@ package com.tandem.interest_service.api.impl;
 
 import com.tandem.interest_service.api.TagApi;
 import com.tandem.interest_service.api.mapper.TagApiMapper;
-import com.tandem.interest_service.api.model.TagCreateRequestJson;
-import com.tandem.interest_service.api.model.TagResponseJson;
-import com.tandem.interest_service.api.model.TagUpdateRequestJson;
+import com.tandem.interest_service.api.model.request.TagCreateRequestJson;
+import com.tandem.interest_service.api.model.response.TagResponseJson;
+import com.tandem.interest_service.api.model.request.TagUpdateRequestJson;
 import com.tandem.interest_service.service.TagService;
-import com.tandem.interest_service.service.model.TagRequest;
-import com.tandem.interest_service.service.model.TagResponse;
+import com.tandem.interest_service.service.model.request.TagRequest;
+import com.tandem.interest_service.service.model.response.TagResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
