@@ -78,6 +78,12 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
+		<!-- ===== KAFKA ===== -->
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
+
 		<!-- ===== ТЕСТИРОВАНИЕ ===== -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
