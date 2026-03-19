@@ -1,11 +1,12 @@
 package com.tandem.interest_service.service.impl;
 
 import com.tandem.interest_service.dal.TagDal;
+import com.tandem.interest_service.integration.InterestEventPublisher;
 import com.tandem.interest_service.service.TagService;
 import com.tandem.interest_service.service.exception.TagAlreadyExistsException;
 import com.tandem.interest_service.service.exception.TagNotFoundException;
-import com.tandem.interest_service.service.model.TagRequest;
-import com.tandem.interest_service.service.model.TagResponse;
+import com.tandem.interest_service.service.model.request.TagRequest;
+import com.tandem.interest_service.service.model.response.TagResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.UUID;
 public class TagServiceImpl implements TagService {
 
     private final TagDal tagDal;
+    private final InterestEventPublisher eventPublisher;
 
     @Override
     public TagResponse createTag(String name) {
@@ -31,6 +33,7 @@ public class TagServiceImpl implements TagService {
                 .build();
 
         TagResponse response = tagDal.insert(request);
+        eventPublisher.publishTagCreated(response); // публикация события в кафку
 
         log.info("Successfully created tag with id: {} and name: {}", response.getId(), response.getName());
         return response;
@@ -100,14 +103,17 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public boolean existsByName(String name) {
-        // Проверка на уникальность имени
+    public TagResponse findByName(String name) {
         try {
-            tagDal.getByName(name);
-            return true;
+            return tagDal.getByName(name);
         } catch (RuntimeException e) {
-            return false;
+            return null;
         }
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return findByName(name) != null;
     }
 
     @Override

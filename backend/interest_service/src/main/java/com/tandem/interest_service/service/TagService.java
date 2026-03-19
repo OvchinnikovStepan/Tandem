@@ -1,7 +1,7 @@
 package com.tandem.interest_service.service;
 
-import com.tandem.interest_service.service.model.TagRequest;
-import com.tandem.interest_service.service.model.TagResponse;
+import com.tandem.interest_service.service.model.request.TagRequest;
+import com.tandem.interest_service.service.model.response.TagResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,4 +15,5 @@ public interface TagService {
     TagResponse updateTag(UUID id, TagRequest request); // Обновляет тег по ID
     boolean existsByName(String name); // Проверяет существование тега по имени
     List<TagResponse> searchTagsByPrefix(String prefix, int limit); // Поиск тегов по префиксу
+    TagResponse findByName(String name);
 }
