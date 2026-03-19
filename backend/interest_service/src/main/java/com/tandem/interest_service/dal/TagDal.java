@@ -1,7 +1,7 @@
 package com.tandem.interest_service.dal;
 
-import com.tandem.interest_service.service.model.TagRequest;
-import com.tandem.interest_service.service.model.TagResponse;
+import com.tandem.interest_service.service.model.request.TagRequest;
+import com.tandem.interest_service.service.model.response.TagResponse;
 import java.util.List;
 import java.util.UUID;
 

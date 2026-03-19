@@ -2,11 +2,11 @@ package com.tandem.interest_service.dal.mapper;
 
 import com.tandem.interest_service.dao.model.TagEntity;
 import com.tandem.interest_service.dao.model.TagStatsEntity;
-import com.tandem.interest_service.service.model.TagRequest;
-import com.tandem.interest_service.service.model.TagResponse;
+import com.tandem.interest_service.service.model.request.TagRequest;
+import com.tandem.interest_service.service.model.response.TagResponse;
 import io.micrometer.common.lang.Nullable;
 import lombok.experimental.UtilityClass;
-import com.tandem.interest_service.service.model.TagResponse.TagResponseBuilder;
+import com.tandem.interest_service.service.model.response.TagResponse.TagResponseBuilder;
 
 import java.util.UUID;
 
