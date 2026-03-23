@@ -1,6 +1,5 @@
 package com.tandem.interest_service.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tandem.interest_service.service.model.response.TagResponse;
 import com.tandem.interest_service.service.model.response.UserInterestResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 public class InterestEventPublisher {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private final ObjectMapper objectMapper;
 
     /**
      * Событие создания нового тега

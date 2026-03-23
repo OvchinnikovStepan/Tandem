@@ -6,6 +6,7 @@ import com.tandem.interest_service.api.model.request.UserInterestCreateRequestJs
 import com.tandem.interest_service.api.model.request.UserInterestDeleteRequestJson;
 import com.tandem.interest_service.api.model.response.UserInterestResponseJson;
 import com.tandem.interest_service.api.model.response.UserMatchingResponseJson;
+import com.tandem.interest_service.security.SecurityUtils;
 import com.tandem.interest_service.service.UserInterestService;
 import com.tandem.interest_service.service.impl.MatchingServiceImpl;
 import com.tandem.interest_service.service.model.request.UserInterestRequest;
@@ -27,14 +28,9 @@ public class UserInterestApiImpl implements UserInterestApi {
     private final UserInterestService userInterestService;
     private final MatchingServiceImpl matchingServiceImpl;
 
-    private UUID extractUserIdFromToken() {
-        // TODO: Реализовать получение userId из токена
-        return UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
-    }
-
     @Override
     public ResponseEntity<List<UserInterestResponseJson>> getMyTags() {
-        UUID userId = extractUserIdFromToken();
+        UUID userId = SecurityUtils.getCurrentUserIdOrThrow();
 
         List<UserInterestResponse> interests = userInterestService.getUserInterests(userId);
 
@@ -48,7 +44,7 @@ public class UserInterestApiImpl implements UserInterestApi {
     @Override
     public ResponseEntity<List<UserInterestResponseJson>> addMyTag(UserInterestCreateRequestJson request) {
 
-        UUID userId = extractUserIdFromToken();
+        UUID userId = SecurityUtils.getCurrentUserIdOrThrow();
 
         List<UserInterestRequest> serviceRequests = UserInterestApiMapper.toServiceModel(userId, request);
         List<UserInterestResponse> created = userInterestService.addUserInterest(serviceRequests);
@@ -62,7 +58,7 @@ public class UserInterestApiImpl implements UserInterestApi {
 
     @Override
     public ResponseEntity<String> deleteMyTag(UserInterestDeleteRequestJson request) {
-        UUID userId = extractUserIdFromToken();
+        UUID userId = SecurityUtils.getCurrentUserIdOrThrow();
 
         UserInterestRequest serviceRequest = UserInterestApiMapper.toDeleteServiceModel(userId, request);
         userInterestService.removeUserInterest(serviceRequest);
@@ -75,7 +71,7 @@ public class UserInterestApiImpl implements UserInterestApi {
     public ResponseEntity<List<UserMatchingResponseJson>> getMatchUsers(
             Integer limit, Integer minMatchCount) {
 
-        UUID userId = extractUserIdFromToken();
+        UUID userId = SecurityUtils.getCurrentUserIdOrThrow();
 
         List<UserMatchingResponse> matches = matchingServiceImpl.getMatchingUsers(
                 userId, limit, minMatchCount);

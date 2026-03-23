@@ -21,20 +21,17 @@ public class OnboardingEventParser {
 
     public List<UserInterestRequest> parseToUserInterestRequests(String message) {
         try {
-            // 1. Парсим JSON в DTO
+            // Парсим JSON в DTO
             OnboardingCompletedEvent event = objectMapper.readValue(message, OnboardingCompletedEvent.class);
 
-            // 2. Получаем userId
             UUID userId = event.getUserIdAsUUID();
 
-            // 3. Получаем список интересов
             List<String> interestNames = event.getInterests();
 
             if (interestNames.isEmpty()) {
                 return List.of();
             }
 
-            // 4. Для каждого имени интереса ищем тег
             List<TagResponse> tags = new ArrayList<>();
             for (String interest : interestNames) {
                 TagResponse tag = tagService.findByName(interest);
@@ -47,7 +44,6 @@ public class OnboardingEventParser {
                 return List.of();
             }
 
-            // 5. Создаем запросы
             return tags.stream()
                     .map(tag -> UserInterestRequest.builder()
                             .userId(userId)
