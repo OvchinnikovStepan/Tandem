@@ -96,4 +96,4 @@ volumes:
 
 networks:
   tandem-network:
-    driver: bridge
+    external: true

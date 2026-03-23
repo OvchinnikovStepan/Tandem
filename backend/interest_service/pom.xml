@@ -23,6 +23,7 @@
 		<db.url>jdbc:postgresql://localhost:5432/InterestService</db.url>
 		<db.user>postgres</db.user>
 		<db.password>koroleva</db.password>
+		<jacoco.version>0.8.11</jacoco.version>
 	</properties>
 
 	<dependencies>
@@ -30,6 +31,19 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- Spring Security -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<!-- Для работы с JWT -->
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
+			<version>9.37</version>
 		</dependency>
 
 		<!-- ===== БД ===== -->
@@ -137,6 +151,63 @@
 						<version>42.7.0</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+
+			<!-- JaCoCo плагин для анализа покрытия кода тестами -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<!-- Проверка покрытия после тестов -->
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<!-- Проверка на соответствие минимальному покрытию -->
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>INSTRUCTION</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum> <!-- Минимум 80% покрытия -->
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<!-- Исключаем классы из анализа покрытия -->
+					<excludes>
+						<exclude>**/configuration/**</exclude>
+						<exclude>**/dao/**</exclude>
+						<exclude>**/api/**</exclude>
+						<exclude>**/security/**</exclude>
+						<exclude>**/integration/model/**</exclude>
+						<exclude>**/service/exception/**</exclude>
+						<exclude>**/ProfileServiceApplication.class</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
