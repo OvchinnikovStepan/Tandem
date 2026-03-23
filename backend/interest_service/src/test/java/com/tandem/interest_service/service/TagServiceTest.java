@@ -1,8 +1,7 @@
-package com.tandem.interest_service;
+package com.tandem.interest_service.service;
 
 import com.tandem.interest_service.dal.TagDal;
 import com.tandem.interest_service.integration.InterestEventPublisher;
-import com.tandem.interest_service.service.TagService;
 import com.tandem.interest_service.service.exception.TagAlreadyExistsException;
 import com.tandem.interest_service.service.exception.TagNotFoundException;
 import com.tandem.interest_service.service.impl.TagServiceImpl;
