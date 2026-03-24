@@ -69,8 +69,6 @@ export async function getDefaultInterests(
                   "Gardening",
               ];
 
-    console.log("Fetching...");
-
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve([

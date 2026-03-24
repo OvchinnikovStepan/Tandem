@@ -24,7 +24,6 @@ export async function searchInterests(
     // В будущем это будет запрос к бэкенду:
     // const response = await fetch(`${API_BASE_URL}/interests/search?q=${encodeURIComponent(query)}&limit=${limit}`);
     // return await response.json();
-    console.log("Searching interests");
 
     const mockInterests: InterestSearchResult[] = [
         {
@@ -73,22 +72,21 @@ export async function saveUserInterests(
     // Пример запроса: POST /api/users/{userId}/interests
     // Body: { interests: string[] }
 
-    // Имитация задержки API
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const response = await fetch(`api/users/${_userId}/interests`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ interests }),
+    });
 
-    // Пример использования в дальнейшем:
-    // const response = await fetch(`${API_BASE_URL}/users/${_userId}/interests`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ interests }),
-    // });
-    // if (!response.ok) {
-    //   throw new Error("Failed to save interests");
-    // }
+    if (!response.ok) {
+        // throw new Error("Failed to save interests");
 
-    console.log("Saving interests for user:", _userId, interests);
+        // Пока бэкенд не готов, просто возвращаем успешный промис
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        return Promise.resolve();
+    }
 }
 
 /**

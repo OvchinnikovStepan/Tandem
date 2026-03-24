@@ -36,8 +36,6 @@ export const profileSchema = z.object({
             year -
             (today < new Date(today.getFullYear(), month - 1, day) ? 1 : 0);
 
-        console.log(age);
-
         if (age < 16 || age > 120) {
             ctx.addIssue({
                 code: "custom",

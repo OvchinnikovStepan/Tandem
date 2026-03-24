@@ -55,7 +55,6 @@ export function useInterestSearch({
     const handleSearchResultSelect = async (interest: InterestSearchResult) => {
         toggleInterest(interest);
         setSearchQuery("");
-        console.log("handleSearchResultSelect");
     };
 
     const handleAddButtonClick = async () => {
