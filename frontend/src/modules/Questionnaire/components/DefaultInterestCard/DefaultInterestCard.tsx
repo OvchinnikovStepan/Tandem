@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 interface InterestCardProps extends React.ComponentProps<"button"> {
     interestName: string;
-    iconPath?: string;
+    imgPath?: string;
     gradient: string;
     isSelected?: boolean;
 }
@@ -11,18 +11,18 @@ interface InterestCardProps extends React.ComponentProps<"button"> {
 function DefaultInterestCard({
     className,
     interestName,
-    iconPath,
+    imgPath,
     gradient,
-    isSelected,
+    isSelected = false,
     ...props
 }: InterestCardProps) {
     return (
         <button
             type="button"
             className={cn(
-                "relative size-34.75 rounded-[0.75rem] overflow-hidden flex flex-col",
+                "relative 2xl:size-35 2lg:size-32 size-26 rounded-default overflow-hidden flex flex-col",
                 "transition-all ease-out duration-300",
-                "after:absolute after:inset-0 after:rounded-[0.75rem] after:pointer-events-none after:opacity-0",
+                "after:absolute after:inset-0 after:rounded-default after:pointer-events-none after:opacity-0",
                 "after:transition-opacity after:duration-300 after:ease-out",
                 "after:shadow-[inset_0_0_0_2px_rgba(0,0,0,0.5)] [--tw-shadow-opacity:0.5] hover:shadow-default",
                 gradient,
@@ -33,15 +33,15 @@ function DefaultInterestCard({
             )}
             {...props}
         >
-            <span className="text-lg leading-4.5 font-roboto font-normal text-heading-black text-left pt-2.5 pl-3.75">
+            <span className="text-sm 2lg:text-base 2xl:text-lg leading-4.5 font-roboto font-normal text-heading-black text-left pt-2.5 2xl:pl-3.75 pl-2">
                 {interestName}
             </span>
             <div className="size-full flex relative">
                 <img
-                    src={iconPath}
+                    src={imgPath || "interestsIcons/default.svg"}
                     alt="Icon"
                     draggable="false"
-                    className="size-22.5 absolute bottom-0"
+                    className="2lg:size-22.5 size-16 absolute bottom-0"
                 />
             </div>
         </button>

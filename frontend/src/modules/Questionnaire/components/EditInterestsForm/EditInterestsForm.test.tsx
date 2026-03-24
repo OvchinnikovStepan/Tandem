@@ -2,7 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import EditInterestsForm from "./EditInterestsForm";
 import { type Mock, vi } from "vitest";
-import { useAtom } from "jotai";
+import { useSetAtom } from "jotai";
+import { useToggleInterest } from "@/hooks/useToggleInterest";
 
 vi.mock("jotai", async (importOriginal) => {
     const actual = (await importOriginal()) as Mock<
@@ -10,52 +11,36 @@ vi.mock("jotai", async (importOriginal) => {
     >;
     return {
         ...actual,
-        useAtom: vi.fn(),
+        useSetAtom: vi.fn(),
     };
 });
 
-const useAtomMock = useAtom as unknown as Mock;
+const useSetAtomMock = useSetAtom as unknown as Mock;
 
-vi.mock("@/hooks/useUserInterests", () => ({
-    useUserInterests: () => ({
-        toggleInterest: vi.fn(),
-        createInterest: vi
-            .fn()
-            .mockResolvedValue({ id: "custom", name: "Custom" }),
-    }),
+vi.mock("@/hooks/useToggleInterest.ts", () => ({
+    useToggleInterest: vi.fn(),
 }));
 
-vi.mock("@/hooks/useInterestSearch", () => ({
-    useInterestSearch: () => ({
-        results: [],
-        isLoading: false,
-    }),
-}));
-
-vi.mock("@/components/EditInterestSearch/EditInterestSearch.tsx", () => ({
-    EditInterestSearch: () => <div data-testid="edit-interest-search" />,
+vi.mock("@/components/InterestSearch", () => ({
+    InterestSearch: () => <div data-testid="interest-search" />,
 }));
 
 vi.mock("@/components/EditInterestCard/EditInterestCard.tsx", () => ({
     EditInterestCard: () => <div data-testid="edit-interest-card" />,
 }));
 
-vi.mock("@/components/InterestSearchResults/InterestSearchResults.tsx", () => ({
-    InterestSearchResults: () => <div data-testid="interest-search-results" />,
-}));
-
 describe("EditInterestsForm", () => {
     beforeEach(() => {
-        useAtomMock.mockReset();
-        window.alert = vi.fn();
+        useSetAtomMock.mockReset();
+        (useToggleInterest as unknown as Mock).mockReset();
     });
 
     it("отображает сообщение, если интересы не выбраны", () => {
-        useAtomMock
-            // questionnaireStepperAtom
-            .mockReturnValueOnce([1, vi.fn()])
-            // selectedInterestsAtom
-            .mockReturnValueOnce([[], vi.fn()]);
+        useSetAtomMock.mockReturnValue(vi.fn());
+        (useToggleInterest as unknown as Mock).mockReturnValue({
+            selectedInterests: [],
+            toggleInterest: vi.fn(),
+        });
 
         render(<EditInterestsForm />);
 
@@ -65,13 +50,11 @@ describe("EditInterestsForm", () => {
     });
 
     it("показывает выбранные интересы и активную кнопку 'Далее'", () => {
-        const setSelectedForm = vi.fn();
-
-        useAtomMock
-            // questionnaireStepperAtom
-            .mockReturnValueOnce([1, setSelectedForm])
-            // selectedInterestsAtom
-            .mockReturnValueOnce([[{ id: "music", name: "Музыка" }], vi.fn()]);
+        useSetAtomMock.mockReturnValue(vi.fn());
+        (useToggleInterest as unknown as Mock).mockReturnValue({
+            selectedInterests: [{ id: "music", name: "Музыка" }],
+            toggleInterest: vi.fn(),
+        });
 
         render(<EditInterestsForm />);
 
@@ -85,11 +68,11 @@ describe("EditInterestsForm", () => {
         const user = userEvent.setup();
         const setSelectedForm = vi.fn();
 
-        useAtomMock
-            // questionnaireStepperAtom
-            .mockReturnValueOnce([1, setSelectedForm])
-            // selectedInterestsAtom
-            .mockReturnValueOnce([[{ id: "music", name: "Музыка" }], vi.fn()]);
+        useSetAtomMock.mockReturnValue(setSelectedForm);
+        (useToggleInterest as unknown as Mock).mockReturnValue({
+            selectedInterests: [{ id: "music", name: "Музыка" }],
+            toggleInterest: vi.fn(),
+        });
 
         render(<EditInterestsForm />);
 
@@ -97,5 +80,22 @@ describe("EditInterestsForm", () => {
         await user.click(nextButton);
 
         expect(setSelectedForm).toHaveBeenCalledWith(2);
+    });
+
+    it("переходит назад при клике на кнопку 'Назад'", async () => {
+        const user = userEvent.setup();
+        const setSelectedForm = vi.fn();
+
+        useSetAtomMock.mockReturnValue(setSelectedForm);
+        (useToggleInterest as unknown as Mock).mockReturnValue({
+            selectedInterests: [{ id: "music", name: "Музыка" }],
+            toggleInterest: vi.fn(),
+        });
+
+        render(<EditInterestsForm />);
+
+        await user.click(screen.getByRole("button", { name: "Назад" }));
+
+        expect(setSelectedForm).toHaveBeenCalledWith(0);
     });
 });

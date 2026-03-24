@@ -1,43 +1,28 @@
 import { Suspense } from "react";
-import { useAtom, useAtomValue } from "jotai";
 import { INTERESTS_GRADIENTS } from "@/modules/Questionnaire/constants/constants.ts";
 import { DefaultInterestCard } from "@/modules/Questionnaire/components/DefaultInterestCard/DefaultInterestCard.tsx";
-import {
-    defaultInterestsAtom,
-    selectedInterestsAtom,
-} from "@/modules/Questionnaire/atoms/interestsAtoms.ts";
+import { selectedInterestsAtom } from "@/modules/Questionnaire/atoms/interestsAtoms.ts";
 import { useTranslation } from "react-i18next";
-import { useUserInterests } from "@/hooks/useUserInterests.ts";
-import type { Interest } from "@/types/interests.ts";
+import { useToggleInterest } from "@/hooks/useToggleInterest.ts";
+import { useDefaultInterests } from "@/modules/Questionnaire/hooks/useDefaultInterests.ts";
 
 function InterestsGrid() {
-    const [selectedInterests] = useAtom(selectedInterestsAtom);
-    const defaultInterests = useAtomValue(defaultInterestsAtom);
-    const { t } = useTranslation();
-    const { toggleInterest } = useUserInterests();
-
-    const isCardSelected = (interest: Interest) => {
-        return selectedInterests.some(
-            (someInterest) =>
-                someInterest.id.toLowerCase() === interest.id.toLowerCase(),
-        );
-    };
+    const { i18n } = useTranslation();
+    const { defaultInterests } = useDefaultInterests(i18n.language);
+    const { toggleInterest, isSelected } = useToggleInterest(
+        selectedInterestsAtom,
+    );
 
     return (
-        <div className="grid grid-cols-[repeat(8,8.6875rem)] gap-2.5">
+        <div className="grid grid-cols-8 2lg:gap-2.5 gap-2">
             {defaultInterests.map((interest, index) => (
                 <DefaultInterestCard
                     key={interest.id}
-                    onClick={() => {
-                        toggleInterest(interest);
-                        console.log(`${selectedInterests}`);
-                    }}
-                    interestName={t(
-                        `questionnaire.default.interests.${interest.id}`,
-                    )}
+                    onClick={() => toggleInterest(interest)}
+                    interestName={interest.name}
                     gradient={INTERESTS_GRADIENTS[index]}
-                    isSelected={isCardSelected(interest)}
-                    iconPath={`interestsIcons/${interest.id}.svg`}
+                    isSelected={isSelected(interest)}
+                    imgPath={interest.img}
                 />
             ))}
         </div>
@@ -51,7 +36,7 @@ function DefaultInterestsList() {
         <div className="flex justify-center">
             <Suspense
                 fallback={
-                    <div className="flex text-center text-base-black justify-center">
+                    <div className="flex text-center text-base-black justify-center text-lg font-roboto font-normal">
                         {t("questionnaire.default.loading")}
                     </div>
                 }

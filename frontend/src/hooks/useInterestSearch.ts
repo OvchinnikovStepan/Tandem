@@ -1,120 +1,103 @@
 import { useEffect, useRef, useState } from "react";
 import type { Interest, InterestSearchResult } from "@/types/interests.ts";
 import { searchInterests } from "@/api/interests.ts";
+import type { PrimitiveAtom } from "jotai";
+import { useToggleInterest } from "@/hooks/useToggleInterest.ts";
+import { useDebounce } from "@/hooks/useDebounce.ts";
+import { useQuery } from "@tanstack/react-query";
 
-export function useInterestSearch(
-    selectedInterests: Interest[],
-    toggleInterest: (interest: Interest) => void,
-    createInterest: (name: string) => Promise<Interest>,
-    delay: number = 300,
-) {
-    const [searchResults, setSearchResults] = useState<InterestSearchResult[]>(
-        [],
-    );
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+interface UseInterestSearchOptions {
+    interestsAtom: PrimitiveAtom<Interest[]>;
+    onCustomInterestAdd?: (name: string) => Promise<Interest | void>;
+}
 
+export function useInterestSearch({
+    interestsAtom,
+    onCustomInterestAdd,
+}: UseInterestSearchOptions) {
+    const { selectedInterests, toggleInterest } =
+        useToggleInterest(interestsAtom);
     const [searchQuery, setSearchQuery] = useState("");
     const searchInputRef = useRef<HTMLInputElement>(null);
     const searchResultsRef = useRef<HTMLDivElement>(null);
+    const addButtonRef = useRef<HTMLDivElement>(null);
+    const debouncedQuery = useDebounce(searchQuery.trim(), 350);
+    const showSearchResults = searchQuery.trim().length > 0;
 
-    const [showSearchResults, setShowSearchResults] = useState(false);
-
-    useEffect(() => {
-        setShowSearchResults(
-            searchQuery.trim().length > 0 && searchResults.length > 0,
-        );
-    }, [searchQuery, searchResults]);
+    const {
+        data: searchResults = [],
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: ["interests", "search", debouncedQuery],
+        queryFn: () => searchInterests(debouncedQuery),
+        enabled: debouncedQuery.length > 0,
+        staleTime: 1000 * 60 * 2,
+    });
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (
-                searchResultsRef.current &&
-                !searchResultsRef.current.contains(event.target as Node) &&
-                searchInputRef.current &&
-                !searchInputRef.current.contains(event.target as Node)
-            ) {
-                setShowSearchResults(false);
-            }
+                searchResultsRef.current?.contains(event.target as Node) ||
+                searchInputRef.current?.contains(event.target as Node) ||
+                addButtonRef.current?.contains(event.target as Node)
+            )
+                return;
+
+            setSearchQuery("");
         }
 
         document.addEventListener("mousedown", handleClickOutside);
-        return () => {
+        return () =>
             document.removeEventListener("mousedown", handleClickOutside);
-        };
     }, []);
-
-    useEffect(() => {
-        if (!searchQuery.trim()) {
-            setSearchResults([]);
-            return;
-        }
-
-        const timeoutId = setTimeout(async () => {
-            setIsLoading(true);
-            setError(null);
-            try {
-                const searchResults = await searchInterests(searchQuery);
-                setSearchResults(searchResults);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : "Ошибка поиска");
-                setSearchResults([]);
-            } finally {
-                setIsLoading(false);
-            }
-        }, delay);
-
-        return () => clearTimeout(timeoutId);
-    }, [searchQuery, delay]);
 
     const handleSearchResultSelect = async (interest: InterestSearchResult) => {
         toggleInterest(interest);
         setSearchQuery("");
-        setShowSearchResults(false);
+        console.log("handleSearchResultSelect");
     };
 
-    const handleCustomInterestAdd = async () => {
-        const customInterestName = searchQuery.trim();
+    const handleAddButtonClick = async () => {
+        const trimmed = searchQuery.trim();
+        if (!trimmed) return;
+
         const isAlreadySelected = selectedInterests.some(
-            (item) =>
-                item.name.toLowerCase() === customInterestName.toLowerCase(),
+            (i) => i.name.toLowerCase() === trimmed.toLowerCase(),
         );
 
-        if (!customInterestName || isAlreadySelected) {
+        if (isAlreadySelected) {
             setSearchQuery("");
             return;
         }
 
-        if (
-            searchResults.length > 0 &&
-            searchResults[0].name.toLowerCase() ===
-                customInterestName.toLowerCase()
-        ) {
-            handleSearchResultSelect(searchResults[0]);
+        // Точное совпадение с первым результатом — просто выбирается
+        if (searchResults[0]?.name.toLowerCase() === trimmed.toLowerCase()) {
+            await handleSearchResultSelect(searchResults[0]);
             return;
         }
 
-        try {
-            const newInterest = await createInterest(customInterestName);
-            toggleInterest(newInterest);
+        // Создание кастомного интереса — только если передан обработчик
+        // Это будет окончательно реализовано в редактировании профиля
+        if (onCustomInterestAdd) {
+            const newInterest = await onCustomInterestAdd(trimmed);
+            if (newInterest) toggleInterest(newInterest);
             setSearchQuery("");
-            setShowSearchResults(false);
-        } catch (error) {
-            console.error("Failed to create custom interest:", error);
         }
     };
 
     return {
+        selectedInterests,
         searchInputRef,
         searchResultsRef,
+        addButtonRef,
         searchQuery,
         setSearchQuery,
         showSearchResults,
-        setShowSearchResults,
         searchResults,
         isLoading,
         error,
         handleSearchResultSelect,
-        handleCustomInterestAdd,
+        handleAddButtonClick,
     };
 }

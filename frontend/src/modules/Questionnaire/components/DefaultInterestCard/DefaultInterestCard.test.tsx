@@ -6,7 +6,7 @@ describe("DefaultInterestCard", () => {
         render(
             <DefaultInterestCard
                 interestName="Баскетбол"
-                iconPath="/interestsIcons/basketball.svg"
+                imgPath="/interestsIcons/basketball.svg"
                 gradient="bg-red-500"
             />,
         );

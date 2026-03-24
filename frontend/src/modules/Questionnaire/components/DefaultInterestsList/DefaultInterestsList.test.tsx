@@ -1,64 +1,71 @@
 import { render, screen } from "@testing-library/react";
 import DefaultInterestsList from "./DefaultInterestsList";
 import { type Mock, vi } from "vitest";
-import { useAtom, useAtomValue } from "jotai";
+import { useToggleInterest } from "@/hooks/useToggleInterest";
+import { useDefaultInterests } from "@/modules/Questionnaire/hooks/useDefaultInterests";
 
-vi.mock("jotai", async (importOriginal) => {
-    const actual = (await importOriginal()) as Mock<
-        Mock<typeof importOriginal>
-    >;
-    return {
-        ...actual,
-        useAtom: vi.fn(),
-        useAtomValue: vi.fn(),
-    };
-});
+vi.mock("@/hooks/useToggleInterest.ts", () => ({
+    useToggleInterest: vi.fn(),
+}));
 
-const useAtomMock = useAtom as unknown as Mock;
-const useAtomValueMock = useAtomValue as unknown as Mock;
-
-vi.mock("@/hooks/useUserInterests.ts", () => ({
-    useUserInterests: () => ({
-        toggleInterest: vi.fn(),
-    }),
+vi.mock("@/modules/Questionnaire/hooks/useDefaultInterests.ts", () => ({
+    useDefaultInterests: vi.fn(),
 }));
 
 vi.mock(
     "@/modules/Questionnaire/components/DefaultInterestCard/DefaultInterestCard.tsx",
     () => ({
-        DefaultInterestCard: ({ interestName }: { interestName: string }) => (
-            <div data-testid="interest-card">{interestName}</div>
+        DefaultInterestCard: ({
+            interestName,
+            isSelected,
+        }: {
+            interestName: string;
+            isSelected: boolean;
+        }) => (
+            <div data-testid="interest-card">
+                {`${interestName}-${isSelected ? "active" : "inactive"}`}
+            </div>
         ),
     }),
 );
 
 describe("DefaultInterestsList", () => {
     beforeEach(() => {
-        useAtomMock.mockReset();
-        useAtomValueMock.mockReset();
-    });
-
-    it("показывает состояние загрузки, пока интересы не загружены", () => {
-        useAtomMock.mockReturnValue([[], vi.fn()]);
-        useAtomValueMock.mockImplementation(() => {
-            throw new Promise(() => {});
-        });
-
-        render(<DefaultInterestsList />);
-
-        expect(screen.getByText("Загрузка интересов...")).toBeInTheDocument();
+        (useToggleInterest as unknown as Mock).mockReset();
+        (useDefaultInterests as unknown as Mock).mockReset();
     });
 
     it("рендерит карточки интересов после загрузки", () => {
-        useAtomMock.mockReturnValue([[], vi.fn()]);
-        useAtomValueMock.mockReturnValue([
-            { id: "basketball", name: "Баскетбол" },
-            { id: "music", name: "Музыка" },
-        ]);
+        (useDefaultInterests as unknown as Mock).mockReturnValue({
+            defaultInterests: [
+                { id: "basketball", name: "Баскетбол", img: "/basketball.svg" },
+                { id: "music", name: "Музыка", img: "/music.svg" },
+            ],
+        });
+        (useToggleInterest as unknown as Mock).mockReturnValue({
+            toggleInterest: vi.fn(),
+            isSelected: vi.fn().mockReturnValue(false),
+        });
 
         render(<DefaultInterestsList />);
 
         const cards = screen.getAllByTestId("interest-card");
         expect(cards).toHaveLength(2);
+    });
+
+    it("передаёт в карточку признак выбранного интереса", () => {
+        (useDefaultInterests as unknown as Mock).mockReturnValue({
+            defaultInterests: [
+                { id: "music", name: "Музыка", img: "/music.svg" },
+            ],
+        });
+        (useToggleInterest as unknown as Mock).mockReturnValue({
+            toggleInterest: vi.fn(),
+            isSelected: vi.fn().mockReturnValue(true),
+        });
+
+        render(<DefaultInterestsList />);
+
+        expect(screen.getByTestId("interest-card")).toHaveTextContent("active");
     });
 });

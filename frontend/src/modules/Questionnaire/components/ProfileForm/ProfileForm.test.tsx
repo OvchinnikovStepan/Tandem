@@ -1,13 +1,13 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ProfileForm from "./ProfileForm";
 import { MemoryRouter } from "react-router";
 import { type Mock, vi } from "vitest";
-import { useAtom } from "jotai";
+import { useSetAtom } from "jotai";
+import { useSubmitQuestionnaire } from "@/modules/Questionnaire/hooks/useSubmitQuestionnaire";
 
-const useAtomMock = useAtom as unknown as Mock;
-const saveUserProfileMock = vi.fn().mockResolvedValue(undefined);
-const navigateMock = vi.fn();
+const useSetAtomMock = useSetAtom as unknown as Mock;
+const saveQuestionnaireMock = vi.fn();
 
 vi.mock("jotai", async (importOriginal) => {
     const actual = (await importOriginal()) as Mock<
@@ -15,34 +15,28 @@ vi.mock("jotai", async (importOriginal) => {
     >;
     return {
         ...actual,
-        useAtom: vi.fn(),
+        useSetAtom: vi.fn(),
     };
 });
 
-vi.mock("react-router", async (importOriginal) => {
-    const actual = await importOriginal<typeof import("react-router")>();
-    return {
-        ...actual,
-        useNavigate: () => navigateMock,
-    };
-});
-
-vi.mock("@/api/profile", () => ({
-    saveUserProfile: (...args: unknown[]) => saveUserProfileMock(...args),
+vi.mock("@/modules/Questionnaire/hooks/useSubmitQuestionnaire", () => ({
+    useSubmitQuestionnaire: vi.fn(),
 }));
 
 describe("ProfileForm", () => {
     beforeEach(() => {
-        useAtomMock.mockReset();
-        saveUserProfileMock.mockReset();
-        navigateMock.mockReset();
-        localStorage.clear();
+        useSetAtomMock.mockReset();
+        saveQuestionnaireMock.mockReset();
+        (useSubmitQuestionnaire as unknown as Mock).mockReset();
+        (useSubmitQuestionnaire as unknown as Mock).mockReturnValue({
+            saveQuestionnaire: saveQuestionnaireMock,
+            isPending: false,
+            error: null,
+        });
     });
 
     it("отображает ошибки валидации, если обязательные поля не заполнены", async () => {
-        userEvent.setup();
-
-        useAtomMock.mockReturnValue([2, vi.fn()]);
+        useSetAtomMock.mockReturnValue(vi.fn());
 
         render(
             <MemoryRouter>
@@ -54,18 +48,17 @@ describe("ProfileForm", () => {
         fireEvent.submit(form);
 
         expect(
-            await screen.findByText("Пожалуйста, заполните обязательные поля"),
+            await screen.findByText("Пожалуйста, напишите свое имя."),
+        ).toBeInTheDocument();
+        expect(
+            await screen.findByText("Пожалуйста, напишите свою фамилию."),
         ).toBeInTheDocument();
     });
 
     it("успешно сохраняет профиль и переходит на главную страницу", async () => {
         const user = userEvent.setup();
 
-        useAtomMock.mockReturnValue([2, vi.fn()]);
-        localStorage.setItem(
-            "userInterests",
-            JSON.stringify(["music", "games"]),
-        );
+        useSetAtomMock.mockReturnValue(vi.fn());
 
         render(
             <MemoryRouter>
@@ -79,11 +72,27 @@ describe("ProfileForm", () => {
         const submitButton = screen.getByRole("button", { name: "Готово" });
         await user.click(submitButton);
 
-        await waitFor(() => {
-            expect(saveUserProfileMock).toHaveBeenCalled();
-        });
+        expect(saveQuestionnaireMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                firstName: "Иван",
+                lastName: "Иванов",
+            }),
+        );
+    });
 
-        expect(localStorage.getItem("userInterests")).toBeNull();
-        expect(navigateMock).toHaveBeenCalledWith("/");
+    it("возвращает на предыдущий шаг по кнопке 'Назад'", async () => {
+        const user = userEvent.setup();
+        const setSelectedForm = vi.fn();
+        useSetAtomMock.mockReturnValue(setSelectedForm);
+
+        render(
+            <MemoryRouter>
+                <ProfileForm />
+            </MemoryRouter>,
+        );
+
+        await user.click(screen.getByRole("button", { name: "Назад" }));
+
+        expect(setSelectedForm).toHaveBeenCalledWith(1);
     });
 });

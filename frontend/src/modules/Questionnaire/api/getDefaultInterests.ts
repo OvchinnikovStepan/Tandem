@@ -1,38 +1,200 @@
-import type { Interest } from "@/types/interests";
+import type { DefaultInterest } from "@/types/interests";
 
 // Получить список стандартных интересов
-export async function getDefaultInterests(): Promise<Interest[]> {
+export async function getDefaultInterests(
+    loc?: string,
+): Promise<DefaultInterest[]> {
     // TODO: Заменить на реальный запрос к бэкенду
-    console.log("Fetching default interests...");
+
+    // В реальном приложении:
+    // const response = await fetch(`${API_BASE_URL}/interests/tags/default/${loc}`, {
+    //   method: "GET"
+    // });
+    // if (!response.ok) {
+    //   throw new Error("Failed to get default interests");
+    // }
+
+    const names =
+        loc === "ru"
+            ? [
+                  "Баскетбол",
+                  "Футбол",
+                  "Волейбол",
+                  "Музыка",
+                  "Бег",
+                  "Чтение",
+                  "Плавание",
+                  "Аниме",
+                  "Рисование",
+                  "Кулинария",
+                  "Разработка",
+                  "Путешествия",
+                  "Фотография",
+                  "Нейросети",
+                  "Игры",
+                  "Фильмы",
+                  "Хоккей",
+                  "Велоспорт",
+                  "Астрономия",
+                  "Автомобили",
+                  "Биология",
+                  "Карьера",
+                  "Питомцы",
+                  "Садоводство",
+              ]
+            : [
+                  "Basketball",
+                  "Football",
+                  "Volleyball",
+                  "Music",
+                  "Running",
+                  "Reading",
+                  "Swimming",
+                  "Anime",
+                  "Drawing",
+                  "Cooking",
+                  "Development",
+                  "Travel",
+                  "Photography",
+                  "AI",
+                  "Games",
+                  "Movies",
+                  "Hockey",
+                  "Cycling",
+                  "Astronomy",
+                  "Cars",
+                  "Biology",
+                  "Career",
+                  "Pets",
+                  "Gardening",
+              ];
+
+    console.log("Fetching...");
 
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve([
-                { id: "basketball", name: "Баскетбол", userCount: 120 },
-                { id: "football", name: "Футбол", userCount: 95 },
-                { id: "volleyball", name: "Воллейбол", userCount: 80 },
-                { id: "music", name: "Музыка", userCount: 180 },
-                { id: "running", name: "Бег", userCount: 150 },
-                { id: "reading", name: "Чтение", userCount: 90 },
-                { id: "swimming", name: "Плавание", userCount: 110 },
-                { id: "anime", name: "Аниме", userCount: 200 },
-                { id: "drawing", name: "Рисование", userCount: 85 },
-                { id: "cooking", name: "Кулинария", userCount: 75 },
-                { id: "development", name: "Разработка", userCount: 200 },
-                { id: "travel", name: "Путешествия", userCount: 110 },
-                { id: "photography", name: "Фотография", userCount: 65 },
-                { id: "neural-networks", name: "Нейросети", userCount: 140 },
-                { id: "games", name: "Игры", userCount: 150 },
-                { id: "movies", name: "Фильмы", userCount: 140 },
-                { id: "hockey", name: "Хоккей", userCount: 70 },
-                { id: "cycling", name: "Велоспорт", userCount: 95 },
-                { id: "astronomy", name: "Астрономия", userCount: 50 },
-                { id: "cars", name: "Автомобили", userCount: 130 },
-                { id: "biology", name: "Биология", userCount: 60 },
-                { id: "career", name: "Карьера", userCount: 180 },
-                { id: "pets", name: "Питомцы", userCount: 160 },
-                { id: "gardening", name: "Садоводство", userCount: 55 },
+                {
+                    id: `basketball-${loc}`,
+                    name: names[0],
+                    img: "interestsIcons/basketball.svg",
+                },
+                {
+                    id: `football-${loc}`,
+                    name: names[1],
+                    img: "interestsIcons/football.svg",
+                },
+                {
+                    id: `volleyball-${loc}`,
+                    name: names[2],
+                    img: "interestsIcons/volleyball.svg",
+                },
+                {
+                    id: `music-${loc}`,
+                    name: names[3],
+                    img: "interestsIcons/music.svg",
+                },
+                {
+                    id: `running-${loc}`,
+                    name: names[4],
+                    img: "interestsIcons/running.svg",
+                },
+                {
+                    id: `reading-${loc}`,
+                    name: names[5],
+                    img: "interestsIcons/reading.svg",
+                },
+                {
+                    id: `swimming-${loc}`,
+                    name: names[6],
+                    img: "interestsIcons/swimming.svg",
+                },
+                {
+                    id: `anime-${loc}`,
+                    name: names[7],
+                    img: "interestsIcons/anime.svg",
+                },
+                {
+                    id: `drawing-${loc}`,
+                    name: names[8],
+                    img: "interestsIcons/drawing.svg",
+                },
+                {
+                    id: `cooking-${loc}`,
+                    name: names[9],
+                    img: "interestsIcons/cooking.svg",
+                },
+                {
+                    id: `development-${loc}`,
+                    name: names[10],
+                    img: "interestsIcons/development.svg",
+                },
+                {
+                    id: `travel-${loc}`,
+                    name: names[11],
+                    img: "interestsIcons/travel.svg",
+                },
+                {
+                    id: `photography-${loc}`,
+                    name: names[12],
+                    img: "interestsIcons/photography.svg",
+                },
+                {
+                    id: `neural-networks-${loc}`,
+                    name: names[13],
+                    img: "interestsIcons/neural-networks.svg",
+                },
+                {
+                    id: `games-${loc}`,
+                    name: names[14],
+                    img: "interestsIcons/games.svg",
+                },
+                {
+                    id: `movies-${loc}`,
+                    name: names[15],
+                    img: "interestsIcons/movies.svg",
+                },
+                {
+                    id: `hockey-${loc}`,
+                    name: names[16],
+                    img: "interestsIcons/hockey.svg",
+                },
+                {
+                    id: `cycling-${loc}`,
+                    name: names[17],
+                    img: "interestsIcons/cycling.svg",
+                },
+                {
+                    id: `astronomy-${loc}`,
+                    name: names[18],
+                    img: "interestsIcons/astronomy.svg",
+                },
+                {
+                    id: `cars-${loc}`,
+                    name: names[19],
+                    img: "interestsIcons/cars.svg",
+                },
+                {
+                    id: `biology-${loc}`,
+                    name: names[20],
+                    img: "interestsIcons/biology.svg",
+                },
+                {
+                    id: `career-${loc}`,
+                    name: names[21],
+                    img: "interestsIcons/career.svg",
+                },
+                {
+                    id: `pets-${loc}`,
+                    name: names[22],
+                    img: "interestsIcons/pets.svg",
+                },
+                {
+                    id: `gardening-${loc}`,
+                    name: names[23],
+                    img: "interestsIcons/gardening.svg",
+                },
             ]);
-        }, 500);
+        }, 890);
     });
 }

@@ -11,7 +11,7 @@ export default function Questionnaire() {
 
     return (
         <div className="min-h-screen bg-landing-bg flex">
-            <div className="bg-accent-white my-8 mx-6 w-full rounded-3xl shadow-default flex flex-col">
+            <div className="bg-accent-white 2xl:my-8 2xl:mx-6 2lg:my-4 2lg:mx-3 w-full 2lg:rounded-3xl shadow-default flex flex-col">
                 <QuestionnaireHeader />
                 {selectedForm === 0 ? (
                     <DefaultInterestsForm />

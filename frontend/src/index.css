@@ -63,12 +63,29 @@
     --font-base-regular: 400 44px/48px dsHeading;
     --font-roboto: "Roboto", sans-serif;
     --shadow-default: 0 2px 8px rgb(0 0 0 / var(--tw-shadow-opacity));
+    --shadow-side-lines:
+        inset 1px 0 0 0 var(--color-accent-gray),
+        inset -1px 0 0 0 var(--color-accent-gray);
+    --breakpoint-2lg: 87rem;
+
+    --animate-color-cycle: color-cycle 1.5s infinite ease-in-out;
+    /* Шаги анимации */
+    @keyframes color-cycle {
+        0%,
+        100% {
+            color: var(--color-icon-gray);
+        }
+        50% {
+            color: var(--color-heading-black);
+        }
+    }
 }
 
 @theme inline {
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
+    --radius-default: calc(var(--radius) + 2px);
     --radius-xl: calc(var(--radius) + 4px);
     --color-background: var(--background);
     --color-foreground: var(--foreground);

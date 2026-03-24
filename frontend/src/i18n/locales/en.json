@@ -55,38 +55,13 @@
             }
         },
         "default": {
-            "loading": "Loading interests...",
-            "interests": {
-                "basketball": "Basketball",
-                "football": "Football",
-                "volleyball": "Volleyball",
-                "music": "Music",
-                "running": "Running",
-                "reading": "Reading",
-                "swimming": "Swimming",
-                "anime": "Anime",
-                "drawing": "Drawing",
-                "cooking": "Cooking",
-                "development": "Development",
-                "travel": "Travel",
-                "photography": "Photography",
-                "neural-networks": "AI",
-                "games": "Games",
-                "movies": "Movies",
-                "hockey": "Hockey",
-                "cycling": "Cycling",
-                "astronomy": "Astronomy",
-                "cars": "Cars",
-                "biology": "Biology",
-                "career": "Career",
-                "pets": "Pets",
-                "gardening": "Gardening"
-            }
+            "loading": "Loading interests..."
         },
         "edit": {
             "no-interests": "You must select at least 1 interest!",
             "add-button": "Add",
-            "search-placeholder": "Please enter the name of your interest..."
+            "search-placeholder": "Please enter the name of your interest...",
+            "search-not-found": "Sorry, this interest was not found in the system or you have already selected it...\n\nIf you did not find the interest you were looking for, you can add it in the future when editing your profile!"
         },
         "profile": {
             "first-name": {
@@ -103,7 +78,7 @@
             },
             "birth-date": {
                 "title": "Date of Birth",
-                "placeholder": "MM / DD / YYYY"
+                "placeholder": "DD/MM/YYYY"
             },
             "gender": {
                 "title": "Gender",
@@ -112,12 +87,27 @@
                     "male": "Male",
                     "female": "Female"
                 }
+            },
+            "errors": {
+                "first-name": {
+                    "required": "Please enter your first name.",
+                    "too-long": "First name must not exceed 50 characters."
+                },
+                "last-name": {
+                    "required": "Please enter your last name.",
+                    "too-long": "Last name must not exceed 50 characters."
+                },
+                "birth-date": {
+                    "invalid-date": "Please enter a valid date (e.g., 22/05/2001)."
+                },
+                "save-error": "Something went wrong. Please try saving again."
             }
         },
         "buttons": {
             "next": "Next",
             "back": "Back",
-            "finish": "Finish"
+            "finish": "Finish",
+            "saving": "Saving..."
         }
     }
 }

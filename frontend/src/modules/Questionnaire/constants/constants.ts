@@ -24,3 +24,11 @@ export const INTERESTS_GRADIENTS: readonly string[] = [
     "bg-gradient-to-br from-[#04FFE2] to-[#8E00E0]",
     "bg-gradient-to-br from-[#44FA34] to-[#3AFF92]",
 ] as const;
+
+export const FORM_TEXT_FIELDS = [
+    { name: "firstName", required: true },
+    { name: "lastName", required: true },
+    { name: "city", required: false },
+] as const;
+
+export const GENDER_OPTIONS = ["no-select", "male", "female"] as const;
