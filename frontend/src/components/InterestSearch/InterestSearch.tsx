@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { InterestSearchResults } from "@/components/InterestSearch/InterestSearchResults.tsx";
 import { useInterestSearch } from "@/hooks/useInterestSearch.ts";
 import type { PrimitiveAtom } from "jotai";
+import { cn } from "@/lib/utils.ts";
 
 interface InterestSearchProps {
     interestsAtom: PrimitiveAtom<Interest[]>;
@@ -18,35 +19,36 @@ function InterestSearch({
 }: InterestSearchProps) {
     const { t } = useTranslation();
     const {
-        searchInputRef,
-        searchResultsRef,
-        addButtonRef,
         searchQuery,
         setSearchQuery,
         showSearchResults,
         searchResults,
         isLoading,
+        handleContainerBlur,
         handleSearchResultSelect,
         handleAddButtonClick,
     } = useInterestSearch({ interestsAtom, onCustomInterestAdd });
 
+    const isSearching = searchQuery && isLoading;
+    const hasResults = searchQuery && !isLoading && searchResults.length > 0;
+
     return (
-        <div className="flex justify-center items-center gap-5">
+        <div
+            className="flex justify-center items-center gap-5"
+            onBlur={handleContainerBlur}
+        >
             <div className="relative">
                 <div
-                    className={`${showSearchResults && "shadow-side-lines rounded-t-2xl"}`}
+                    className={cn(
+                        showSearchResults && "shadow-side-lines rounded-t-2xl",
+                    )}
                 >
                     <Search
-                        className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none size-5
-                        ${
-                            searchQuery
-                                ? isLoading
-                                    ? "animate-color-cycle"
-                                    : searchResults.length === 0
-                                      ? "text-icon-gray"
-                                      : "text-heading-black"
-                                : "text-icon-gray"
-                        }`}
+                        className={cn(
+                            "absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none size-5 text-icon-gray",
+                            isSearching && "animate-color-cycle",
+                            hasResults && "text-heading-black",
+                        )}
                     />
                     <Input
                         name="interest-search"
@@ -61,13 +63,11 @@ function InterestSearch({
                                 handleAddButtonClick();
                             }
                         }}
-                        ref={searchInputRef}
                         className="pl-10 h-10 w-93 z-0"
                     />
                 </div>
                 {showSearchResults && (
                     <InterestSearchResults
-                        ref={searchResultsRef}
                         searchResults={searchResults}
                         onSelect={handleSearchResultSelect}
                         interestsAtom={interestsAtom}
@@ -75,15 +75,13 @@ function InterestSearch({
                     />
                 )}
             </div>
-            <div ref={addButtonRef}>
-                <Button
-                    onClick={() => handleAddButtonClick()}
-                    className="h-10 w-34.5 font-bold text-base"
-                >
-                    {t("questionnaire.edit.add-button")}
-                    <Plus className="size-5" />
-                </Button>
-            </div>
+            <Button
+                onClick={() => handleAddButtonClick()}
+                className="h-10 font-bold text-base has-[>svg]:px-4.5"
+            >
+                {t("questionnaire.edit.add-button")}
+                <Plus className="size-5" />
+            </Button>
         </div>
     );
 }

@@ -27,40 +27,43 @@ export function ProfileFormFields({ disabled }: { disabled: boolean }) {
         control,
     } = useFormContext<ProfileFormValues>();
 
+    const handleKeyDown =
+        (name: string) => (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (name !== "city") return;
+
+            const isAllowedChar = /[a-zA-Zа-яА-ЯёЁ\s-]/.test(e.key);
+            if (e.key.length === 1 && !isAllowedChar) {
+                e.preventDefault();
+            }
+        };
+
     return (
         <div className="border border-accent-gray rounded-3xl 2xl:p-10 p-7.5 space-y-0.5 shadow-default">
-            {FORM_TEXT_FIELDS.map(({ name, required }) => (
-                <Field key={name}>
-                    <FieldLabel aria-required={required} htmlFor={name}>
-                        {t(
-                            `questionnaire.profile.${name.replace(/([A-Z])/g, "-$1").toLowerCase()}.title`,
-                        )}
-                    </FieldLabel>
-                    <Input
-                        id={name}
-                        placeholder={t(
-                            `questionnaire.profile.${name.replace(/([A-Z])/g, "-$1").toLowerCase()}.placeholder`,
-                        )}
-                        disabled={disabled}
-                        onKeyDown={
-                            name === "city"
-                                ? (e) => {
-                                      if (
-                                          !/[a-zA-Zа-яА-ЯёЁ\s-]/.test(e.key) &&
-                                          e.key.length === 1
-                                      ) {
-                                          e.preventDefault();
-                                      }
-                                  }
-                                : undefined
-                        }
-                        {...register(name)}
-                    />
-                    <FieldError>
-                        {errors[name] && t(errors[name].message!)}
-                    </FieldError>
-                </Field>
-            ))}
+            {FORM_TEXT_FIELDS.map(({ name, required }) => {
+                const kebabCaseName = name
+                    .replace(/([A-Z])/g, "-$1")
+                    .toLowerCase();
+
+                return (
+                    <Field key={name}>
+                        <FieldLabel aria-required={required} htmlFor={name}>
+                            {t(`questionnaire.profile.${kebabCaseName}.title`)}
+                        </FieldLabel>
+                        <Input
+                            id={name}
+                            placeholder={t(
+                                `questionnaire.profile.${kebabCaseName}.placeholder`,
+                            )}
+                            disabled={disabled}
+                            onKeyDown={handleKeyDown(name)}
+                            {...register(name)}
+                        />
+                        <FieldError>
+                            {t(errors[name]?.message as string)}
+                        </FieldError>
+                    </Field>
+                );
+            })}
 
             <Field>
                 <FieldLabel htmlFor="birthDate">

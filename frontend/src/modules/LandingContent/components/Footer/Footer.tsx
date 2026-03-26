@@ -17,7 +17,7 @@ function Footer() {
                     />
                 </div>
                 <div className="w-full mt-4 mb-2">
-                    <p className="text-[0.8125rem] font-roboto font-light leading-5 text-white/50">
+                    <p className="text-xsm font-roboto font-light leading-5 text-white/50">
                         {t("landing.footer.contact")}
                         <AppLink
                             href="mailto:tandem@t-bang.ru"
@@ -28,7 +28,7 @@ function Footer() {
                     </p>
                 </div>
                 <div className="mt-2 mb-4">
-                    <ul className="text-[0.8125rem] text-accent-white flex flex-wrap gap-x-5 gap-y-1">
+                    <ul className="text-xsm text-accent-white flex flex-wrap gap-x-5 gap-y-1">
                         {FOOTER_LINKS.map((link) => (
                             <li key={t(link.name)}>
                                 <AppLink
@@ -43,7 +43,7 @@ function Footer() {
                     </ul>
                 </div>
                 <div className="border-t border-white/15 pt-4">
-                    <p className="text-[0.8125rem] font-roboto font-light leading-5 text-white/50">
+                    <p className="text-xsm font-roboto font-light leading-5 text-white/50">
                         {t("landing.footer.company")}
                     </p>
                 </div>

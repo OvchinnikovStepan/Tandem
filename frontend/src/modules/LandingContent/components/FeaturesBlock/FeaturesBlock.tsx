@@ -52,15 +52,15 @@ function FeaturesBlock() {
                             className="flex items-center gap-5"
                         >
                             <div>
-                                <div className="size-14 md:size-16 bg-accent-white rounded-[1.25rem] flex items-center justify-center">
+                                <div className="size-14 md:size-16 bg-accent-white rounded-icon flex items-center justify-center">
                                     {feature.icon}
                                 </div>
                             </div>
                             <div className="flex flex-col">
-                                <h3 className="text-xl leading-snug md:text-[1.375rem] md:leading-7 font-roboto font-medium text-heading-black mb-2">
+                                <h3 className="text-xl leading-snug md:text-xl md:leading-7 font-roboto font-medium text-heading-black mb-2">
                                     {t(feature.titleKey)}
                                 </h3>
-                                <p className="text-sm leading-relaxed md:text-[0.9375rem] md:leading-6 font-roboto font-normal text-heading-black max-w-95">
+                                <p className="text-sm leading-relaxed md:text-md md:leading-6 font-roboto font-normal text-heading-black max-w-95">
                                     {t(feature.descriptionKey)}
                                 </p>
                             </div>

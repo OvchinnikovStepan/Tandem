@@ -19,7 +19,7 @@ function LandingHeader() {
                 </div>
                 <div className="flex items-center gap-2 sm:gap-4">
                     <LanguageSwitcher />
-                    <Button asChild variant={"secondary"} size={"sm"}>
+                    <Button variant={"secondary"} size={"sm"} asChild>
                         <Link to="/login">{t("landing.header.login")}</Link>
                     </Button>
                 </div>

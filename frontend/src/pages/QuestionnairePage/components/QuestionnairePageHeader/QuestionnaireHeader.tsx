@@ -14,7 +14,7 @@ export default function QuestionnaireHeader() {
                     draggable="false"
                     className="size-16 ml-12.5"
                 />
-                <h1 className="text-[2.75rem] leading-12 font-roboto font-bold content-center text-heading-black absolute left-1/2 -translate-x-1/2">
+                <h1 className="text-heading leading-12 font-roboto font-bold content-center text-heading-black absolute left-1/2 -translate-x-1/2">
                     {t("questionnaire.header.title")}
                 </h1>
             </div>

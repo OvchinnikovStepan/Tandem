@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { Interest, InterestSearchResult } from "@/types/interests.ts";
 import { searchInterests } from "@/api/interests.ts";
 import type { PrimitiveAtom } from "jotai";
 import { useToggleInterest } from "@/hooks/useToggleInterest.ts";
 import { useDebounce } from "@/hooks/useDebounce.ts";
 import { useQuery } from "@tanstack/react-query";
+import type { FocusEvent } from "react";
 
 interface UseInterestSearchOptions {
     interestsAtom: PrimitiveAtom<Interest[]>;
@@ -18,9 +19,6 @@ export function useInterestSearch({
     const { selectedInterests, toggleInterest } =
         useToggleInterest(interestsAtom);
     const [searchQuery, setSearchQuery] = useState("");
-    const searchInputRef = useRef<HTMLInputElement>(null);
-    const searchResultsRef = useRef<HTMLDivElement>(null);
-    const addButtonRef = useRef<HTMLDivElement>(null);
     const debouncedQuery = useDebounce(searchQuery.trim(), 350);
     const showSearchResults = searchQuery.trim().length > 0;
 
@@ -35,24 +33,12 @@ export function useInterestSearch({
         staleTime: 1000 * 60 * 2,
     });
 
-    useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (
-                searchResultsRef.current?.contains(event.target as Node) ||
-                searchInputRef.current?.contains(event.target as Node) ||
-                addButtonRef.current?.contains(event.target as Node)
-            )
-                return;
+    const handleContainerBlur = (e: FocusEvent) => {
+        if (e.currentTarget.contains(e.relatedTarget)) return;
+        setSearchQuery("");
+    };
 
-            setSearchQuery("");
-        }
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () =>
-            document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
-    const handleSearchResultSelect = async (interest: InterestSearchResult) => {
+    const handleSearchResultSelect = (interest: InterestSearchResult) => {
         toggleInterest(interest);
         setSearchQuery("");
     };
@@ -70,9 +56,8 @@ export function useInterestSearch({
             return;
         }
 
-        // Точное совпадение с первым результатом — просто выбирается
         if (searchResults[0]?.name.toLowerCase() === trimmed.toLowerCase()) {
-            await handleSearchResultSelect(searchResults[0]);
+            handleSearchResultSelect(searchResults[0]);
             return;
         }
 
@@ -87,15 +72,13 @@ export function useInterestSearch({
 
     return {
         selectedInterests,
-        searchInputRef,
-        searchResultsRef,
-        addButtonRef,
         searchQuery,
         setSearchQuery,
         showSearchResults,
         searchResults,
         isLoading,
         error,
+        handleContainerBlur,
         handleSearchResultSelect,
         handleAddButtonClick,
     };

@@ -1,20 +1,18 @@
 import { useTranslation } from "react-i18next";
 import { Globe } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils.ts";
+import { LANGUAGES } from "@/constants/languages.ts";
+import Button from "@/ui/Button.tsx";
 
 export function LanguageSwitcher() {
     const { i18n } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
-    const langFormRef = useRef<HTMLInputElement>(null);
+    const langFormRef = useRef<HTMLDivElement>(null);
     const langButtonRef = useRef<HTMLButtonElement>(null);
 
-    const languages = [
-        { code: "ru", label: "Русский" },
-        { code: "en", label: "English" },
-    ];
-
     const currentLanguage =
-        languages.find((lang) => lang.code === i18n.language) || languages[0];
+        LANGUAGES.find((lang) => lang.code === i18n.language) || LANGUAGES[0];
 
     const handleLanguageChange = (langCode: string) => {
         i18n.changeLanguage(langCode);
@@ -43,38 +41,38 @@ export function LanguageSwitcher() {
 
     return (
         <div className="relative">
-            <button
+            <Button
                 ref={langButtonRef}
-                type="button"
+                variant="link"
+                size="custom"
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-1 px-2 py-1.5 sm:px-0 sm:py-0 text-sm sm:text-base text-header-button-text hover:text-blue-700 transition-all ease-out duration-300 font-medium font-roboto"
+                className="flex gap-1 px-2 py-1.5 sm:px-0 sm:py-0 has-[>svg]:px-0 text-sm sm:text-base hover:no-underline"
                 aria-label="Change language"
+                aria-expanded={isOpen}
+                aria-haspopup="menu"
             >
                 <Globe className="size-5 sm:size-4" />
                 <span className="hidden sm:inline">
                     {currentLanguage.label}
                 </span>
-            </button>
+            </Button>
             {isOpen && (
                 <div
                     ref={langFormRef}
                     className="absolute right-0 mt-2 w-fit bg-accent-white border border-accent-gray rounded-lg shadow-default overflow-hidden"
                 >
-                    {languages.map((lang) => (
-                        <button
+                    {LANGUAGES.map((lang) => (
+                        <Button
                             key={lang.code}
-                            type="button"
+                            variant="ghost"
                             onClick={() => handleLanguageChange(lang.code)}
-                            aria-expanded={isOpen}
-                            aria-haspopup="menu"
-                            className={`w-full text-center px-4 py-2 hover:bg-accent-gray transition-colors ease-out duration-300 leading-5.5 text-[0.9375rem] font-roboto font-medium ${
-                                i18n.language === lang.code
-                                    ? "text-blue-600"
-                                    : "text-heading-black"
-                            }`}
+                            className={cn(
+                                "w-full h-fit rounded-none duration-300 px-4 py-2 text-heading-black",
+                                i18n.language === lang.code && "text-blue-600",
+                            )}
                         >
                             {lang.label}
-                        </button>
+                        </Button>
                     ))}
                 </div>
             )}

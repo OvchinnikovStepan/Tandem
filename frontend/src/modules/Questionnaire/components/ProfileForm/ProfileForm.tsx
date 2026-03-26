@@ -57,7 +57,7 @@ function ProfileForm() {
                     onClick={() => setSelectedForm(1)}
                     disabled={isPending}
                     variant="action"
-                    className="h-11.25 w-25 font-medium text-[0.9375rem] leading-5"
+                    className="h-11.25 w-25 font-medium text-md leading-5"
                 >
                     {t("questionnaire.buttons.back")}
                 </Button>

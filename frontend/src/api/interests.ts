@@ -73,11 +73,11 @@ export async function saveUserInterests(
     // Body: { interests: string[] }
 
     const response = await fetch(`api/users/${_userId}/interests`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ interests }),
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ interests }),
     });
 
     if (!response.ok) {
