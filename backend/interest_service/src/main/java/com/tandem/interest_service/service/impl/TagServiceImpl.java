@@ -1,7 +1,6 @@
 package com.tandem.interest_service.service.impl;
 
 import com.tandem.interest_service.dal.TagDal;
-import com.tandem.interest_service.integration.InterestEventPublisher;
 import com.tandem.interest_service.service.TagService;
 import com.tandem.interest_service.service.exception.TagAlreadyExistsException;
 import com.tandem.interest_service.service.exception.TagNotFoundException;
@@ -20,7 +19,6 @@ import java.util.UUID;
 public class TagServiceImpl implements TagService {
 
     private final TagDal tagDal;
-    private final InterestEventPublisher eventPublisher;
 
     @Override
     public TagResponse createTag(String name) {
@@ -33,7 +31,6 @@ public class TagServiceImpl implements TagService {
                 .build();
 
         TagResponse response = tagDal.insert(request);
-        eventPublisher.publishTagCreated(response); // публикация события в кафку
 
         log.info("Successfully created tag with id: {} and name: {}", response.getId(), response.getName());
         return response;

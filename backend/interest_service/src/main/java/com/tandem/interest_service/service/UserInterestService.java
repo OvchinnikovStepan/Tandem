@@ -10,4 +10,5 @@ public interface UserInterestService {
     List<UserInterestResponse> addUserInterest(List<UserInterestRequest> request); // Добавить интерес пользователю
     void removeUserInterest(UserInterestRequest request); // Удалить интерес по ID
     List<UserInterestResponse> getUserInterests(UUID userId); // Получить все интересы пользователя
+    List<UserInterestRequest> parseToUserInterestRequests(String message);
 }

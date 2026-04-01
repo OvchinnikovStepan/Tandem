@@ -1,16 +1,18 @@
 package com.tandem.interest_service.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tandem.interest_service.dal.UserInterestDal;
-import com.tandem.interest_service.integration.InterestEventPublisher;
+import com.tandem.interest_service.integration.model.OnboardingCompletedEvent;
 import com.tandem.interest_service.service.UserInterestService;
 import com.tandem.interest_service.service.exception.UserInterestNotFoundException;
 import com.tandem.interest_service.service.model.request.UserInterestRequest;
+import com.tandem.interest_service.service.model.response.TagResponse;
 import com.tandem.interest_service.service.model.response.UserInterestResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,10 +22,9 @@ import java.util.UUID;
 public class UserInterestServiceImpl implements UserInterestService {
 
     private final UserInterestDal userInterestDal;
-    private final InterestEventPublisher eventPublisher;
+    private final ObjectMapper objectMapper;
 
     @Override
-    @Transactional
     public List<UserInterestResponse> addUserInterest(List<UserInterestRequest> requests) {
         if (requests == null || requests.isEmpty()) {
             log.info("No interests to add - empty request list");
@@ -43,7 +44,6 @@ public class UserInterestServiceImpl implements UserInterestService {
         }
 
         List<UserInterestResponse> responses = userInterestDal.insert(requests);
-        eventPublisher.publishInterestsUpdated(responses);
 
         log.info("Successfully added {} interests for user: {}",
                 responses.size(), requests.get(0).getUserId());
@@ -90,5 +90,56 @@ public class UserInterestServiceImpl implements UserInterestService {
 
         log.info("Found {} interests for user: {}", interests.size(), userId);
         return interests;
+    }
+
+    @Override
+    public List<UserInterestRequest> parseToUserInterestRequests(String message) {
+        try {
+            // Парсим JSON в DTO
+            OnboardingCompletedEvent event = objectMapper.readValue(message, OnboardingCompletedEvent.class);
+
+            UUID userId;
+            try {
+                userId = event.getUserIdAsUUID();
+            } catch (Exception e) {
+                log.error("Invalid UUID format in message: {}", event.getUserId());
+                return List.of();
+            }
+
+            List<String> interestNames = event.getInterests();
+
+            if (interestNames.isEmpty()) {
+                return List.of();
+            }
+
+            List<TagResponse> tags = new ArrayList<>();
+            for (String interest : interestNames) {
+                try {
+                    TagResponse tag = userInterestDal.findTagByName(interest);
+                    if (tag != null) {
+                        tags.add(tag);
+                    } else {
+                        // Просто логируем, что такого тега нет, но не прерываем цикл
+                        log.warn("Tag not found in database: '{}'", interest);
+                    }
+                } catch (Exception e) {
+                    log.error("Error while searching for tag '{}': {}", interest, e.getMessage());
+                }
+            }
+
+            if (tags.isEmpty()) {
+                return List.of();
+            }
+
+            return tags.stream()
+                    .map(tag -> UserInterestRequest.builder()
+                            .userId(userId)
+                            .tagId(tag.getId())
+                            .build())
+                    .toList();
+
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 }

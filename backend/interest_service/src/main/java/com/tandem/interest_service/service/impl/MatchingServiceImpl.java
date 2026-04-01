@@ -1,6 +1,5 @@
 package com.tandem.interest_service.service.impl;
 
-import com.tandem.interest_service.dal.TagDal;
 import com.tandem.interest_service.dal.UserInterestDal;
 import com.tandem.interest_service.service.MatchingService;
 import com.tandem.interest_service.service.model.response.UserMatchingResponse;
@@ -20,7 +19,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MatchingServiceImpl implements MatchingService {
     private final UserInterestDal userInterestDal;
-    private final TagDal tagDal;
 
     @Override
     public List<UserMatchingResponse> getMatchingUsers(
@@ -88,7 +86,7 @@ public class MatchingServiceImpl implements MatchingService {
             List<String> matchingInterests = new ArrayList<>();
 
             for (UUID tagId : commonTagIds) {
-                String name = tagDal.get(tagId).getName();
+                String name = userInterestDal.findTagById(tagId).getName();
                 matchingInterests.add(name);
             }
 
