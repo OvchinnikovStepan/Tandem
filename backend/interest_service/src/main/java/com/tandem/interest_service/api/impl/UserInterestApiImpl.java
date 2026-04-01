@@ -5,13 +5,10 @@ import com.tandem.interest_service.api.mapper.UserInterestApiMapper;
 import com.tandem.interest_service.api.model.request.UserInterestCreateRequestJson;
 import com.tandem.interest_service.api.model.request.UserInterestDeleteRequestJson;
 import com.tandem.interest_service.api.model.response.UserInterestResponseJson;
-import com.tandem.interest_service.api.model.response.UserMatchingResponseJson;
 import com.tandem.interest_service.security.SecurityUtils;
 import com.tandem.interest_service.service.UserInterestService;
-import com.tandem.interest_service.service.impl.MatchingServiceImpl;
 import com.tandem.interest_service.service.model.request.UserInterestRequest;
 import com.tandem.interest_service.service.model.response.UserInterestResponse;
-import com.tandem.interest_service.service.model.response.UserMatchingResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +23,6 @@ import java.util.stream.Collectors;
 public class UserInterestApiImpl implements UserInterestApi {
 
     private final UserInterestService userInterestService;
-    private final MatchingServiceImpl matchingServiceImpl;
 
     @Override
     public ResponseEntity<List<UserInterestResponseJson>> getMyTags() {
@@ -65,21 +61,5 @@ public class UserInterestApiImpl implements UserInterestApi {
 
         String message = String.format("Tag %s successfully removed from user %s", request.getTagId(), userId);
         return ResponseEntity.ok(message);
-    }
-
-    @Override
-    public ResponseEntity<List<UserMatchingResponseJson>> getMatchUsers(
-            Integer limit, Integer minMatchCount) {
-
-        UUID userId = SecurityUtils.getCurrentUserIdOrThrow();
-
-        List<UserMatchingResponse> matches = matchingServiceImpl.getMatchingUsers(
-                userId, limit, minMatchCount);
-
-        List<UserMatchingResponseJson> response = matches.stream()
-                .map(UserInterestApiMapper::toUserMatchingResponseJson)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
     }
 }
