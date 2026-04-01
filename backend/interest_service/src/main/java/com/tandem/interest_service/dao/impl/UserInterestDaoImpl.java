@@ -2,13 +2,12 @@ package com.tandem.interest_service.dao.impl;
 
 import com.tandem.interest_service.dao.UserInterestDao;
 import com.tandem.interest_service.dao.mapper.UserInterestJdbcMapper;
+import com.tandem.interest_service.dao.mapper.UserInterestRowMapper;
 import com.tandem.interest_service.dao.queries.UserInterestQueries;
 import com.tandem.interest_service.dao.model.UserInterestEntity;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,17 +17,11 @@ import java.util.UUID;
 public class UserInterestDaoImpl implements UserInterestDao {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final UserInterestRowMapper userInterestRowMapper;
 
-    private final RowMapper<UserInterestEntity> rowMapper = (rs, rowNum) ->
-            UserInterestEntity.builder()
-                    .id(UUID.fromString(rs.getString("id")))
-                    .userId(UUID.fromString(rs.getString("user_id")))
-                    .tagId(UUID.fromString(rs.getString("tag_id")))
-                    .createdAt(rs.getObject("created_at", LocalDateTime.class))
-                    .build();
-
-    public UserInterestDaoImpl(NamedParameterJdbcTemplate jdbcTemplate) {
+    public UserInterestDaoImpl(NamedParameterJdbcTemplate jdbcTemplate, UserInterestRowMapper userInterestRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userInterestRowMapper = userInterestRowMapper;
     }
 
     @Override
@@ -53,7 +46,7 @@ public class UserInterestDaoImpl implements UserInterestDao {
         return jdbcTemplate.query(
                 UserInterestQueries.SELECT_BY_USER_ID,
                 Map.of("userId", userId),
-                rowMapper
+                userInterestRowMapper.rowMapper
         );
     }
 
@@ -65,7 +58,7 @@ public class UserInterestDaoImpl implements UserInterestDao {
                         "userId", userId,
                         "tagId", tagId
                 ),
-                rowMapper
+                userInterestRowMapper.rowMapper
         );
         return results.stream().findFirst();
     }

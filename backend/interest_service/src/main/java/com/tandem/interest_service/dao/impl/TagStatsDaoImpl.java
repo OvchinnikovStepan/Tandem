@@ -2,10 +2,10 @@ package com.tandem.interest_service.dao.impl;
 
 import com.tandem.interest_service.dao.TagStatsDao;
 
+import com.tandem.interest_service.dao.mapper.TagStatsRowMapper;
 import com.tandem.interest_service.dao.model.TagStatsEntity;
 import com.tandem.interest_service.dao.queries.TagStatsQueries;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -21,15 +21,11 @@ public class TagStatsDaoImpl implements TagStatsDao {
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private static final int DEFAULT_LIMIT = 10;
 
-    private final RowMapper<TagStatsEntity> rowMapper = (rs, rowNum) ->
-            TagStatsEntity.builder()
-                    .tagId(rs.getObject("tag_id", UUID.class))
-                    .tagName(rs.getString("tag_name"))
-                    .usageCount(rs.getInt("usage_count"))
-                    .build();
+    private final TagStatsRowMapper tagStatsRowMapper;
 
-    public TagStatsDaoImpl(NamedParameterJdbcTemplate jdbcTemplate) {
+    public TagStatsDaoImpl(NamedParameterJdbcTemplate jdbcTemplate, TagStatsRowMapper tagStatsRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.tagStatsRowMapper = tagStatsRowMapper;
     }
 
     @Override
@@ -37,7 +33,7 @@ public class TagStatsDaoImpl implements TagStatsDao {
         List<TagStatsEntity> results = jdbcTemplate.query(
                 TagStatsQueries.SELECT_STATS_BY_TAG_ID,
                 Map.of("tagId", tagId),
-                rowMapper
+                tagStatsRowMapper.rowMapper
         );
 
         return results.stream().findFirst();
@@ -64,7 +60,7 @@ public class TagStatsDaoImpl implements TagStatsDao {
         return jdbcTemplate.query(
                 TagStatsQueries.SELECT_TOP_STATS,
                 Map.of("limit", finalLimit),
-                rowMapper
+                tagStatsRowMapper.rowMapper
         );
     }
 
