@@ -70,10 +70,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/v3/api-docs") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/swagger-resources");
+    }
+
     /**
      * Извлекает userId из JWT токена
      */
-    public UUID extractUserId(String token) {
+    private UUID extractUserId(String token) {
         try {
             if (token == null || token.isEmpty()) {
                 return null;
@@ -99,13 +107,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.debug("Error parsing JWT: {}", e.getMessage());
             return null;
         }
-    }
-
-    @Override
-    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        String path = request.getServletPath();
-        return path.startsWith("/v3/api-docs") ||
-                path.startsWith("/swagger-ui") ||
-                path.startsWith("/swagger-resources");
     }
 }
