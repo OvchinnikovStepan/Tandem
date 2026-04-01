@@ -1,11 +1,15 @@
 package com.tandem.interest_service.dal.impl;
 
-import com.tandem.interest_service.dal.TagDal;
 import com.tandem.interest_service.dal.UserInterestDal;
+import com.tandem.interest_service.dal.mapper.TagEntityMapper;
 import com.tandem.interest_service.dal.mapper.UserInterestEntityMapper;
 import com.tandem.interest_service.dao.TagStatsDao;
+import com.tandem.interest_service.dao.TagDao;
 import com.tandem.interest_service.dao.UserInterestDao;
+import com.tandem.interest_service.dao.model.TagEntity;
+import com.tandem.interest_service.dao.model.TagStatsEntity;
 import com.tandem.interest_service.dao.model.UserInterestEntity;
+import com.tandem.interest_service.integration.InterestEventPublisher;
 import com.tandem.interest_service.service.model.response.TagResponse;
 import com.tandem.interest_service.service.model.request.UserInterestRequest;
 import com.tandem.interest_service.service.model.response.UserInterestResponse;
@@ -23,8 +27,9 @@ import java.util.stream.Collectors;
 public class UserInterestDalImpl implements UserInterestDal {
 
     private final UserInterestDao userInterestDao;
-    private final TagDal tagDal;
+    private final TagDao tagDao;
     private final TagStatsDao tagStatsDao;
+    private final InterestEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -40,7 +45,13 @@ public class UserInterestDalImpl implements UserInterestDal {
         Map<UUID, TagResponse> tagResponses = new HashMap<>();
         for (UUID tagId : tagIds) {
             try {
-                TagResponse tagResponse = tagDal.get(tagId);
+                TagEntity entity = tagDao.findById(tagId)
+                        .orElseThrow(() -> new RuntimeException("Tag not found with id: " + tagId));
+
+                Optional<TagStatsEntity> statsOpt = tagStatsDao.findByTagId(tagId);
+                TagStatsEntity stats = statsOpt.orElse(null);
+
+                TagResponse tagResponse = TagEntityMapper.mapToResponse(entity, stats);
                 tagResponses.put(tagId, tagResponse); // добавляем только существующие теги
             } catch (Exception e) {
                 throw new RuntimeException("Tag not found with id: " + tagId);
@@ -76,6 +87,7 @@ public class UserInterestDalImpl implements UserInterestDal {
                 .collect(Collectors.toList());
 
         log.debug("Successfully batch added {} interests for user: {}", result.size(), userId);
+        eventPublisher.publishInterestsUpdated(result);
         return result;
     }
 
@@ -103,7 +115,14 @@ public class UserInterestDalImpl implements UserInterestDal {
 
         for (UserInterestEntity entity : entities) {
             try {
-                TagResponse tagResponse = tagDal.get(entity.getTagId());
+                TagEntity entityTag = tagDao.findById(entity.getTagId())
+                        .orElseThrow(() -> new RuntimeException("Tag not found with id: " + entity.getTagId()));
+
+                Optional<TagStatsEntity> statsOpt = tagStatsDao.findByTagId(entity.getTagId());
+                TagStatsEntity stats = statsOpt.orElse(null);
+
+                TagResponse tagResponse = TagEntityMapper.mapToResponse(entityTag, stats);
+
                 result.add(UserInterestEntityMapper.toResponse(entity, tagResponse));
             } catch (Exception e) {
                 log.error("Failed to get tag with id: {}, skipping this interest",
@@ -121,7 +140,13 @@ public class UserInterestDalImpl implements UserInterestDal {
 
         TagResponse tagResponse;
         try {
-            tagResponse = tagDal.get(tagId);
+            TagEntity entity = tagDao.findById(tagId)
+                    .orElseThrow(() -> new RuntimeException("Tag not found with id: " + tagId));
+
+            Optional<TagStatsEntity> statsOpt = tagStatsDao.findByTagId(tagId);
+            TagStatsEntity stats = statsOpt.orElse(null);
+
+            tagResponse = TagEntityMapper.mapToResponse(entity, stats);
         } catch (Exception e) {
             log.error("Tag not found with id: {}", tagId);
             throw new RuntimeException("Tag not found with id: " + tagId);
@@ -183,5 +208,31 @@ public class UserInterestDalImpl implements UserInterestDal {
                     userId1, userId2, e);
             return List.of();
         }
+    }
+
+    @Override
+    public TagResponse findTagByName(String name) {
+        log.debug("Finding tag by name: {}", name);
+
+        TagEntity entity = tagDao.findByName(name)
+                .orElseThrow(() -> new RuntimeException("Tag not found with name: " + name));
+
+        TagStatsEntity stats = tagStatsDao.findByTagId(entity.getId())
+                .orElse(null);
+
+        return TagEntityMapper.mapToResponse(entity, stats);
+    }
+
+    @Override
+    public TagResponse findTagById(UUID tagId) {
+        log.debug("Finding tag by id: {}", tagId);
+
+        TagEntity entity = tagDao.findById(tagId)
+                .orElseThrow(() -> new RuntimeException("Tag not found with id: " + tagId));
+
+        TagStatsEntity stats = tagStatsDao.findByTagId(tagId)
+                .orElse(null);
+
+        return TagEntityMapper.mapToResponse(entity, stats);
     }
 }

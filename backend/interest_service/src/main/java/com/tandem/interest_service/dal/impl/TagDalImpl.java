@@ -6,6 +6,7 @@ import com.tandem.interest_service.dao.TagDao;
 import com.tandem.interest_service.dao.TagStatsDao;
 import com.tandem.interest_service.dao.model.TagEntity;
 import com.tandem.interest_service.dao.model.TagStatsEntity;
+import com.tandem.interest_service.integration.InterestEventPublisher;
 import com.tandem.interest_service.service.model.request.TagRequest;
 import com.tandem.interest_service.service.model.response.TagResponse;
 import io.micrometer.common.lang.Nullable;
@@ -27,6 +28,7 @@ public class TagDalImpl implements TagDal {
 
     private final TagDao tagDao;
     private final TagStatsDao tagStatsDao;
+    private final InterestEventPublisher eventPublisher;
 
     @Nullable
     private TagStatsEntity getStats(UUID tagId) {
@@ -43,7 +45,9 @@ public class TagDalImpl implements TagDal {
         tagDao.insert(entity);
         log.info("Inserted tag with id: {}", entity.getId());
 
-        return TagEntityMapper.mapToResponse(entity, null);
+        TagResponse response = TagEntityMapper.mapToResponse(entity, null);
+        eventPublisher.publishTagCreated(response); // публикация события в кафку
+        return response;
     }
 
     @Override
