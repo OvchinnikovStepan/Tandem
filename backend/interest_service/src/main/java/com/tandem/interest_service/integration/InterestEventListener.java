@@ -19,7 +19,6 @@ import java.util.List;
 public class InterestEventListener {
 
     private final UserInterestService userInterestService;
-    private final OnboardingEventParser eventParser;
 
     @KafkaListener(
             topics = TandemKafkaConfig.TOPIC_ONBOARDING_COMPLETED,
@@ -32,7 +31,7 @@ public class InterestEventListener {
     ) {
         log.info("EVENT: profile.onboarding.completed");
         try {
-            List<UserInterestRequest> requests = eventParser.parseToUserInterestRequests(record.value());
+            List<UserInterestRequest> requests = userInterestService.parseToUserInterestRequests(record.value());
 
             if (requests.isEmpty()) {
                 log.info("No valid interests to add, acknowledging message");
