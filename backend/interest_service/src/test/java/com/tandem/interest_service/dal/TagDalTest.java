@@ -5,6 +5,7 @@ import com.tandem.interest_service.dao.TagDao;
 import com.tandem.interest_service.dao.TagStatsDao;
 import com.tandem.interest_service.dao.model.TagEntity;
 import com.tandem.interest_service.dao.model.TagStatsEntity;
+import com.tandem.interest_service.integration.InterestEventPublisher;
 import com.tandem.interest_service.service.model.request.TagRequest;
 import com.tandem.interest_service.service.model.response.TagResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +40,9 @@ class TagDalTest {
     @Mock
     private TagStatsDao tagStatsDao;
 
+    @Mock
+    private InterestEventPublisher eventPublisher;
+
     private TagDal tagDal;
 
     // Тестовые данные
@@ -52,7 +56,7 @@ class TagDalTest {
 
     @BeforeEach
     void setUp() {
-        tagDal = new TagDalImpl(tagDao, tagStatsDao);
+        tagDal = new TagDalImpl(tagDao, tagStatsDao, eventPublisher);
         initializeTestData();
     }
 

@@ -2,10 +2,13 @@ package com.tandem.interest_service.dal;
 
 import com.tandem.interest_service.dal.impl.UserInterestDalImpl;
 import com.tandem.interest_service.dao.TagStatsDao;
+import com.tandem.interest_service.dao.TagDao;
 import com.tandem.interest_service.dao.UserInterestDao;
+import com.tandem.interest_service.dao.model.TagEntity;
+import com.tandem.interest_service.dao.model.TagStatsEntity;
 import com.tandem.interest_service.dao.model.UserInterestEntity;
+import com.tandem.interest_service.integration.InterestEventPublisher;
 import com.tandem.interest_service.service.model.request.UserInterestRequest;
-import com.tandem.interest_service.service.model.response.TagResponse;
 import com.tandem.interest_service.service.model.response.UserInterestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,24 +18,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserInterestDalTest {
@@ -41,10 +33,13 @@ class UserInterestDalTest {
     private UserInterestDao userInterestDao;
 
     @Mock
-    private TagDal tagDal;
+    private TagDao tagDao;
 
     @Mock
     private TagStatsDao tagStatsDao;
+
+    @Mock
+    private InterestEventPublisher eventPublisher;
 
     private UserInterestDal userInterestDal;
 
@@ -57,9 +52,11 @@ class UserInterestDalTest {
     private UUID interestId2;
     private LocalDateTime now;
 
-    private TagResponse tagResponse1;
-    private TagResponse tagResponse2;
-    private TagResponse tagResponse3;
+    private TagEntity tagEntity1;
+    private TagEntity tagEntity2;
+    private TagEntity tagEntity3;
+    private TagStatsEntity tagStatsEntity1;
+    private TagStatsEntity tagStatsEntity2;
 
     private UserInterestRequest request1;
     private UserInterestRequest request2;
@@ -71,7 +68,7 @@ class UserInterestDalTest {
 
     @BeforeEach
     void setUp() {
-        userInterestDal = new UserInterestDalImpl(userInterestDao, tagDal, tagStatsDao);
+        userInterestDal = new UserInterestDalImpl(userInterestDao, tagDao, tagStatsDao, eventPublisher);
         initializeTestData();
     }
 
@@ -84,22 +81,29 @@ class UserInterestDalTest {
         interestId2 = UUID.randomUUID();
         now = LocalDateTime.now();
 
-        tagResponse1 = TagResponse.builder()
+        tagEntity1 = TagEntity.builder()
                 .id(tagId1)
                 .name("gaming")
+                .build();
+
+        tagEntity2 = TagEntity.builder()
+                .id(tagId2)
+                .name("reading")
+                .build();
+
+        tagEntity3 = TagEntity.builder()
+                .id(tagId3)
+                .name("music")
+                .build();
+
+        tagStatsEntity1 = TagStatsEntity.builder()
+                .tagId(tagId1)
                 .usageCount(5)
                 .build();
 
-        tagResponse2 = TagResponse.builder()
-                .id(tagId2)
-                .name("reading")
+        tagStatsEntity2 = TagStatsEntity.builder()
+                .tagId(tagId2)
                 .usageCount(3)
-                .build();
-
-        tagResponse3 = TagResponse.builder()
-                .id(tagId3)
-                .name("music")
-                .usageCount(0)
                 .build();
 
         request1 = UserInterestRequest.builder()
@@ -144,8 +148,10 @@ class UserInterestDalTest {
     void insert_Success_WithNewInterests() {
         List<UserInterestRequest> requests = Arrays.asList(request1, request2);
 
-        when(tagDal.get(tagId1)).thenReturn(tagResponse1);
-        when(tagDal.get(tagId2)).thenReturn(tagResponse2);
+        when(tagDao.findById(tagId1)).thenReturn(Optional.of(tagEntity1));
+        when(tagDao.findById(tagId2)).thenReturn(Optional.of(tagEntity2));
+        when(tagStatsDao.findByTagId(tagId1)).thenReturn(Optional.of(tagStatsEntity1));
+        when(tagStatsDao.findByTagId(tagId2)).thenReturn(Optional.of(tagStatsEntity2));
         when(userInterestDao.findByUserId(userId)).thenReturn(Collections.emptyList());
         doNothing().when(userInterestDao).insertBatch(anyList());
         doNothing().when(tagStatsDao).refreshMaterializedView();
@@ -157,7 +163,7 @@ class UserInterestDalTest {
         assertThat(result.get(0).getTag().getId()).isEqualTo(tagId1);
         assertThat(result.get(1).getTag().getId()).isEqualTo(tagId2);
 
-        verify(tagDal, times(2)).get(any(UUID.class));
+        verify(tagDao, times(2)).findById(any(UUID.class));
         verify(userInterestDao).findByUserId(userId);
         verify(userInterestDao).insertBatch(anyList());
         verify(tagStatsDao).refreshMaterializedView();
@@ -170,9 +176,12 @@ class UserInterestDalTest {
         // У пользователя уже есть tagId1
         List<UserInterestEntity> existingEntities = List.of(entity1);
 
-        when(tagDal.get(tagId1)).thenReturn(tagResponse1);
-        when(tagDal.get(tagId2)).thenReturn(tagResponse2);
-        when(tagDal.get(tagId3)).thenReturn(tagResponse3);
+        when(tagDao.findById(tagId1)).thenReturn(Optional.of(tagEntity1));
+        when(tagDao.findById(tagId2)).thenReturn(Optional.of(tagEntity2));
+        when(tagDao.findById(tagId3)).thenReturn(Optional.of(tagEntity3));
+        when(tagStatsDao.findByTagId(tagId1)).thenReturn(Optional.of(tagStatsEntity1));
+        when(tagStatsDao.findByTagId(tagId2)).thenReturn(Optional.of(tagStatsEntity2));
+        when(tagStatsDao.findByTagId(tagId3)).thenReturn(Optional.empty());
         when(userInterestDao.findByUserId(userId)).thenReturn(existingEntities);
         doNothing().when(userInterestDao).insertBatch(anyList());
         doNothing().when(tagStatsDao).refreshMaterializedView();
@@ -198,8 +207,10 @@ class UserInterestDalTest {
         List<UserInterestRequest> requests = Arrays.asList(request1, request2);
         List<UserInterestEntity> existingEntities = Arrays.asList(entity1, entity2);
 
-        when(tagDal.get(tagId1)).thenReturn(tagResponse1);
-        when(tagDal.get(tagId2)).thenReturn(tagResponse2);
+        when(tagDao.findById(tagId1)).thenReturn(Optional.of(tagEntity1));
+        when(tagDao.findById(tagId2)).thenReturn(Optional.of(tagEntity2));
+        when(tagStatsDao.findByTagId(tagId1)).thenReturn(Optional.of(tagStatsEntity1));
+        when(tagStatsDao.findByTagId(tagId2)).thenReturn(Optional.of(tagStatsEntity2));
         when(userInterestDao.findByUserId(userId)).thenReturn(existingEntities);
 
         List<UserInterestResponse> result = userInterestDal.insert(requests);
@@ -213,7 +224,8 @@ class UserInterestDalTest {
     void insert_ShouldRefreshMaterializedView_AfterInsert() {
         List<UserInterestRequest> requests = List.of(request1);
 
-        when(tagDal.get(tagId1)).thenReturn(tagResponse1);
+        when(tagDao.findById(tagId1)).thenReturn(Optional.of(tagEntity1));
+        when(tagStatsDao.findByTagId(tagId1)).thenReturn(Optional.of(tagStatsEntity1));
         when(userInterestDao.findByUserId(userId)).thenReturn(Collections.emptyList());
         doNothing().when(userInterestDao).insertBatch(anyList());
         doNothing().when(tagStatsDao).refreshMaterializedView();
@@ -221,6 +233,20 @@ class UserInterestDalTest {
         userInterestDal.insert(requests);
 
         verify(tagStatsDao).refreshMaterializedView();
+    }
+
+    @Test
+    void insert_ThrowsException_WhenTagNotFound() {
+        List<UserInterestRequest> requests = List.of(request1);
+
+        when(tagDao.findById(tagId1)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userInterestDal.insert(requests))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Tag not found with id: " + tagId1);
+
+        verify(userInterestDao, never()).insertBatch(anyList());
+        verify(tagStatsDao, never()).refreshMaterializedView();
     }
 
     // delete
@@ -247,15 +273,16 @@ class UserInterestDalTest {
         verify(tagStatsDao).refreshMaterializedView();
     }
 
-
     // getUserInterests
     @Test
     void getUserInterests_Success_WithMultipleInterests() {
         List<UserInterestEntity> entities = Arrays.asList(entity1, entity2);
 
         when(userInterestDao.findByUserId(userId)).thenReturn(entities);
-        when(tagDal.get(tagId1)).thenReturn(tagResponse1);
-        when(tagDal.get(tagId2)).thenReturn(tagResponse2);
+        when(tagDao.findById(tagId1)).thenReturn(Optional.of(tagEntity1));
+        when(tagDao.findById(tagId2)).thenReturn(Optional.of(tagEntity2));
+        when(tagStatsDao.findByTagId(tagId1)).thenReturn(Optional.of(tagStatsEntity1));
+        when(tagStatsDao.findByTagId(tagId2)).thenReturn(Optional.of(tagStatsEntity2));
 
         List<UserInterestResponse> result = userInterestDal.getUserInterests(userId);
 
@@ -265,7 +292,8 @@ class UserInterestDalTest {
         assertThat(result.get(1).getTag().getName()).isEqualTo("reading");
 
         verify(userInterestDao).findByUserId(userId);
-        verify(tagDal, times(2)).get(any(UUID.class));
+        verify(tagDao, times(2)).findById(any(UUID.class));
+        verify(tagStatsDao, times(2)).findByTagId(any(UUID.class));
     }
 
     @Test
@@ -276,7 +304,7 @@ class UserInterestDalTest {
 
         assertThat(result).isEmpty();
         verify(userInterestDao).findByUserId(userId);
-        verify(tagDal, never()).get(any());
+        verify(tagDao, never()).findById(any());
     }
 
     @Test
@@ -284,8 +312,9 @@ class UserInterestDalTest {
         List<UserInterestEntity> entities = Arrays.asList(entity1, entity2);
 
         when(userInterestDao.findByUserId(userId)).thenReturn(entities);
-        when(tagDal.get(tagId1)).thenThrow(new RuntimeException("Tag not found"));
-        when(tagDal.get(tagId2)).thenReturn(tagResponse2);
+        when(tagDao.findById(tagId1)).thenReturn(Optional.empty());
+        when(tagDao.findById(tagId2)).thenReturn(Optional.of(tagEntity2));
+        when(tagStatsDao.findByTagId(tagId2)).thenReturn(Optional.of(tagStatsEntity2));
 
         List<UserInterestResponse> result = userInterestDal.getUserInterests(userId);
 
@@ -296,7 +325,8 @@ class UserInterestDalTest {
     // getUserInterest
     @Test
     void getUserInterest_Success() {
-        when(tagDal.get(tagId1)).thenReturn(tagResponse1);
+        when(tagDao.findById(tagId1)).thenReturn(Optional.of(tagEntity1));
+        when(tagStatsDao.findByTagId(tagId1)).thenReturn(Optional.of(tagStatsEntity1));
         when(userInterestDao.findByUserIdAndTagId(userId, tagId1))
                 .thenReturn(Optional.of(entity1));
 
@@ -307,13 +337,13 @@ class UserInterestDalTest {
         assertThat(result.getUserId()).isEqualTo(userId);
         assertThat(result.getTag().getId()).isEqualTo(tagId1);
 
-        verify(tagDal).get(tagId1);
+        verify(tagDao).findById(tagId1);
         verify(userInterestDao).findByUserIdAndTagId(userId, tagId1);
     }
 
     @Test
     void getUserInterest_ThrowsException_WhenTagNotFound() {
-        when(tagDal.get(tagId1)).thenThrow(new RuntimeException("Tag not found"));
+        when(tagDao.findById(tagId1)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userInterestDal.getUserInterest(userId, tagId1))
                 .isInstanceOf(RuntimeException.class)
@@ -324,7 +354,8 @@ class UserInterestDalTest {
 
     @Test
     void getUserInterest_ThrowsException_WhenInterestNotFound() {
-        when(tagDal.get(tagId1)).thenReturn(tagResponse1);
+        when(tagDao.findById(tagId1)).thenReturn(Optional.of(tagEntity1));
+        when(tagStatsDao.findByTagId(tagId1)).thenReturn(Optional.of(tagStatsEntity1));
         when(userInterestDao.findByUserIdAndTagId(userId, tagId1))
                 .thenReturn(Optional.empty());
 
@@ -397,6 +428,16 @@ class UserInterestDalTest {
         assertThat(result).isZero();
     }
 
+    @Test
+    void getCountUserInterests_ReturnsZero_WhenExceptionOccurs() {
+        when(userInterestDao.countUserInterests(userId)).thenThrow(new RuntimeException("Database error"));
+
+        int result = userInterestDal.getCountUserInterests(userId);
+
+        assertThat(result).isZero();
+        verify(userInterestDao).countUserInterests(userId);
+    }
+
     // getCommonTagIds
     @Test
     void getCommonTagIds_Success() {
@@ -424,5 +465,18 @@ class UserInterestDalTest {
         List<UUID> result = userInterestDal.getCommonTagIds(userId, otherUserId);
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getCommonTagIds_ReturnsEmptyList_WhenExceptionOccurs() {
+        UUID otherUserId = UUID.randomUUID();
+
+        when(userInterestDao.findCommonTagIds(userId, otherUserId))
+                .thenThrow(new RuntimeException("Database error"));
+
+        List<UUID> result = userInterestDal.getCommonTagIds(userId, otherUserId);
+
+        assertThat(result).isEmpty();
+        verify(userInterestDao).findCommonTagIds(userId, otherUserId);
     }
 }

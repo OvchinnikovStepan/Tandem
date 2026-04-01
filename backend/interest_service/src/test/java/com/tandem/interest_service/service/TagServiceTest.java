@@ -1,7 +1,6 @@
 package com.tandem.interest_service.service;
 
 import com.tandem.interest_service.dal.TagDal;
-import com.tandem.interest_service.integration.InterestEventPublisher;
 import com.tandem.interest_service.service.exception.TagAlreadyExistsException;
 import com.tandem.interest_service.service.exception.TagNotFoundException;
 import com.tandem.interest_service.service.impl.TagServiceImpl;
@@ -36,9 +35,6 @@ class TagServiceTest {
     @Mock
     private TagDal tagDal;
 
-    @Mock
-    private InterestEventPublisher eventPublisher;
-
     private TagService tagService;
 
     // Тестовые данные
@@ -51,7 +47,7 @@ class TagServiceTest {
 
     @BeforeEach
     void setUp() {
-        tagService = new TagServiceImpl(tagDal, eventPublisher);
+        tagService = new TagServiceImpl(tagDal);
         initializeTestData();
     }
 

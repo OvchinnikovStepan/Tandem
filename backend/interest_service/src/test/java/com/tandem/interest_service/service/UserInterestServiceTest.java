@@ -1,7 +1,7 @@
 package com.tandem.interest_service.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tandem.interest_service.dal.UserInterestDal;
-import com.tandem.interest_service.integration.InterestEventPublisher;
 import com.tandem.interest_service.service.impl.UserInterestServiceImpl;
 import com.tandem.interest_service.service.model.request.UserInterestRequest;
 import com.tandem.interest_service.service.model.response.TagResponse;
@@ -33,7 +33,7 @@ class UserInterestServiceTest {
     private UserInterestDal userInterestDal;
 
     @Mock
-    private InterestEventPublisher eventPublisher;
+    private ObjectMapper objectMapper;
 
     private UserInterestService userInterestService;
 
@@ -53,7 +53,7 @@ class UserInterestServiceTest {
 
     @BeforeEach
     void setUp() {
-        userInterestService = new UserInterestServiceImpl(userInterestDal, eventPublisher);
+        userInterestService = new UserInterestServiceImpl(userInterestDal, objectMapper);
         initializeTestData();
     }
 
@@ -120,7 +120,6 @@ class UserInterestServiceTest {
         assertThat(result.get(0).getTag().getId()).isEqualTo(tagId1);
 
         verify(userInterestDal).insert(requests);
-        verify(eventPublisher).publishInterestsUpdated(expectedResponses);
     }
 
     @Test
@@ -136,7 +135,6 @@ class UserInterestServiceTest {
         assertThat(result).containsExactly(response1, response2);
 
         verify(userInterestDal).insert(requests);
-        verify(eventPublisher).publishInterestsUpdated(expectedResponses);
     }
 
     @Test
@@ -145,7 +143,6 @@ class UserInterestServiceTest {
 
         assertThat(result).isEmpty();
         verify(userInterestDal, never()).insert(anyList());
-        verify(eventPublisher, never()).publishInterestsUpdated(anyList());
     }
 
     @Test
@@ -161,7 +158,6 @@ class UserInterestServiceTest {
 
         assertThat(exception.getMessage()).isEqualTo("User ID cannot be null");
         verify(userInterestDal, never()).insert(anyList());
-        verify(eventPublisher, never()).publishInterestsUpdated(anyList());
     }
 
     @Test
@@ -177,7 +173,6 @@ class UserInterestServiceTest {
 
         assertThat(exception.getMessage()).isEqualTo("Tag ID cannot be null");
         verify(userInterestDal, never()).insert(anyList());
-        verify(eventPublisher, never()).publishInterestsUpdated(anyList());
     }
 
     @Test
@@ -193,7 +188,6 @@ class UserInterestServiceTest {
 
         assertThat(exception.getMessage()).isEqualTo("User ID cannot be null");
         verify(userInterestDal, never()).insert(anyList());
-        verify(eventPublisher, never()).publishInterestsUpdated(anyList());
     }
 
     @Test
@@ -202,7 +196,6 @@ class UserInterestServiceTest {
 
         assertThat(result).isEmpty();
         verify(userInterestDal, never()).insert(any());
-        verify(eventPublisher, never()).publishInterestsUpdated(any());
     }
 
     // removeUserInterest

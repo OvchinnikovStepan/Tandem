@@ -31,9 +31,6 @@ class InterestEventListenerTest {
     private UserInterestService userInterestService;
 
     @Mock
-    private OnboardingEventParser eventParser;
-
-    @Mock
     private Acknowledgment acknowledgment;
 
     private InterestEventListener interestEventListener;
@@ -51,7 +48,7 @@ class InterestEventListenerTest {
 
     @BeforeEach
     void setUp() {
-        interestEventListener = new InterestEventListener(userInterestService, eventParser);
+        interestEventListener = new InterestEventListener(userInterestService);
         initializeTestData();
     }
 
@@ -106,12 +103,12 @@ class InterestEventListenerTest {
         List<UserInterestRequest> requests = Arrays.asList(request1, request2);
         List<UserInterestResponse> responses = Arrays.asList(response1, response2);
 
-        when(eventParser.parseToUserInterestRequests(message)).thenReturn(requests);
+        when(userInterestService.parseToUserInterestRequests(message)).thenReturn(requests);
         when(userInterestService.addUserInterest(requests)).thenReturn(responses);
 
         interestEventListener.handleOnboardingCompleted(record, acknowledgment);
 
-        verify(eventParser).parseToUserInterestRequests(message);
+        verify(userInterestService).parseToUserInterestRequests(message);
         verify(userInterestService).addUserInterest(requests);
         verify(acknowledgment).acknowledge();
     }
@@ -121,11 +118,11 @@ class InterestEventListenerTest {
         String message = "{\"userId\":\"" + userId + "\",\"data\":{\"interests\":[]}}";
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "key", message);
 
-        when(eventParser.parseToUserInterestRequests(message)).thenReturn(List.of());
+        when(userInterestService.parseToUserInterestRequests(message)).thenReturn(List.of());
 
         interestEventListener.handleOnboardingCompleted(record, acknowledgment);
 
-        verify(eventParser).parseToUserInterestRequests(message);
+        verify(userInterestService).parseToUserInterestRequests(message);
         verify(userInterestService, never()).addUserInterest(anyList());
         verify(acknowledgment).acknowledge();
     }
@@ -138,7 +135,7 @@ class InterestEventListenerTest {
         List<UserInterestRequest> requests = Arrays.asList(request1, request2);
         List<UserInterestResponse> responses = Arrays.asList(response1, response2);
 
-        when(eventParser.parseToUserInterestRequests(message)).thenReturn(requests);
+        when(userInterestService.parseToUserInterestRequests(message)).thenReturn(requests);
         when(userInterestService.addUserInterest(requests)).thenReturn(responses);
 
         interestEventListener.handleOnboardingCompleted(record, acknowledgment);

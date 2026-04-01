@@ -1,6 +1,5 @@
 package com.tandem.interest_service.service;
 
-import com.tandem.interest_service.dal.TagDal;
 import com.tandem.interest_service.dal.UserInterestDal;
 import com.tandem.interest_service.service.impl.MatchingServiceImpl;
 import com.tandem.interest_service.service.model.response.TagResponse;
@@ -30,9 +29,6 @@ class MatchingServiceTest {
     @Mock
     private UserInterestDal userInterestDal;
 
-    @Mock
-    private TagDal tagDal;
-
     private MatchingService matchingService;
 
     // Тестовые данные
@@ -52,7 +48,7 @@ class MatchingServiceTest {
 
     @BeforeEach
     void setUp() {
-        matchingService = new MatchingServiceImpl(userInterestDal, tagDal);
+        matchingService = new MatchingServiceImpl(userInterestDal);
         initializeTestData();
     }
 
@@ -123,10 +119,10 @@ class MatchingServiceTest {
                 .thenReturn(List.of(tagId1, tagId2));
 
         // Получение названий тегов
-        when(tagDal.get(tagId1)).thenReturn(tagResponse1);
-        when(tagDal.get(tagId2)).thenReturn(tagResponse2);
-        when(tagDal.get(tagId3)).thenReturn(tagResponse3);
-        when(tagDal.get(tagId4)).thenReturn(tagResponse4);
+        when(userInterestDal.findTagById(tagId1)).thenReturn(tagResponse1);
+        when(userInterestDal.findTagById(tagId2)).thenReturn(tagResponse2);
+        when(userInterestDal.findTagById(tagId3)).thenReturn(tagResponse3);
+        when(userInterestDal.findTagById(tagId4)).thenReturn(tagResponse4);
 
         List<UserMatchingResponse> result = matchingService.getMatchingUsers(
                 currentUserId, limit, minMatchCount);
@@ -170,7 +166,7 @@ class MatchingServiceTest {
         when(userInterestDal.getCommonTagIds(eq(currentUserId), any(UUID.class)))
                 .thenReturn(List.of(tagId1, tagId2));
 
-        when(tagDal.get(any(UUID.class))).thenReturn(tagResponse1);
+        when(userInterestDal.findTagById(any(UUID.class))).thenReturn(tagResponse1);
 
         List<UserMatchingResponse> result = matchingService.getMatchingUsers(
                 currentUserId, limit, minMatchCount);
@@ -220,7 +216,7 @@ class MatchingServiceTest {
                 .thenReturn(matchingData);
         when(userInterestDal.getCommonTagIds(currentUserId, otherUserId1))
                 .thenReturn(List.of(tagId1, tagId2, tagId3));
-        when(tagDal.get(any(UUID.class))).thenReturn(tagResponse1);
+        when(userInterestDal.findTagById(any(UUID.class))).thenReturn(tagResponse1);
 
         List<UserMatchingResponse> result = matchingService.getMatchingUsers(
                 currentUserId, limit, minMatchCount);
