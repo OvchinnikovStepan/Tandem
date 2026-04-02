@@ -1,4 +1,10 @@
-import {QuestionBlock, FeaturesBlock, LandingFooter, LandingHeader, LandingHero} from "@/modules/LandingContent";
+import {
+    QuestionBlock,
+    FeaturesBlock,
+    LandingFooter,
+    LandingHeader,
+    LandingHero,
+} from "@/modules/LandingContent";
 
 export default function Landing() {
     return (

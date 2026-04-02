@@ -1,12 +1,12 @@
-import {render, screen} from "@testing-library/react";
-import {MemoryRouter} from "react-router";
+import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import Landing from "./Landing";
 
 describe("Landing page", () => {
     it("рендерит все основные блоки лэндинга", () => {
         render(
             <MemoryRouter>
-                <Landing/>
+                <Landing />
             </MemoryRouter>,
         );
 
@@ -23,23 +23,22 @@ describe("Landing page", () => {
                 name: "Готовы начать с Tandem?",
             }),
         ).toBeInTheDocument();
-        expect(
-            screen.getByRole("contentinfo"),
-        ).toBeInTheDocument();
+        expect(screen.getByRole("contentinfo")).toBeInTheDocument();
     });
 
     it("имеет все основные call-to-action ссылки и кнопки", () => {
         render(
             <MemoryRouter>
-                <Landing/>
+                <Landing />
             </MemoryRouter>,
         );
 
-        const loginLinks = screen.getAllByRole("link", {name: "Войти"});
+        const loginLinks = screen.getAllByRole("link", { name: "Войти" });
         expect(loginLinks.length).toBeGreaterThanOrEqual(1);
 
-        const ctaButtons = screen.getAllByRole("button", {name: "Попробовать бесплатно"});
+        const ctaButtons = screen.getAllByRole("link", {
+            name: "Попробовать бесплатно",
+        });
         expect(ctaButtons.length).toBeGreaterThanOrEqual(2);
     });
 });
-

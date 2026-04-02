@@ -1,12 +1,12 @@
-import {render, screen} from "@testing-library/react";
-import {MemoryRouter} from "react-router";
+import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import QuestionBlock from "./QuestionBlock";
 
 describe("QuestionBlock", () => {
     const renderBlock = () =>
         render(
             <MemoryRouter>
-                <QuestionBlock/>
+                <QuestionBlock />
             </MemoryRouter>,
         );
 
@@ -27,8 +27,7 @@ describe("QuestionBlock", () => {
         ).toBeInTheDocument();
 
         expect(
-            screen.getByRole("button", {name: "Попробовать бесплатно"}),
+            screen.getByRole("link", { name: "Попробовать бесплатно" }),
         ).toBeInTheDocument();
     });
 });
-

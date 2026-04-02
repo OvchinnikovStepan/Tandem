@@ -1,9 +1,9 @@
-import {render, screen} from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import FeaturesBlock from "./FeaturesBlock";
 
 describe("FeaturesBlock", () => {
     it("отображает все преимущества из конфигурации", () => {
-        render(<FeaturesBlock/>);
+        render(<FeaturesBlock />);
 
         const titles = [
             "Безопасная связь",
@@ -14,9 +14,8 @@ describe("FeaturesBlock", () => {
 
         titles.forEach((title) => {
             expect(
-                screen.getByRole("heading", {level: 3, name: title}),
+                screen.getByRole("heading", { level: 3, name: title }),
             ).toBeInTheDocument();
         });
     });
 });
-

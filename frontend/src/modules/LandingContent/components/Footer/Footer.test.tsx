@@ -1,12 +1,12 @@
-import {render, screen, within} from "@testing-library/react";
-import {MemoryRouter} from "react-router";
+import { render, screen, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import Footer from "./Footer";
 
 describe("Footer", () => {
     const renderFooter = () =>
         render(
             <MemoryRouter>
-                <Footer/>
+                <Footer />
             </MemoryRouter>,
         );
 
@@ -14,13 +14,15 @@ describe("Footer", () => {
         renderFooter();
 
         expect(
-            screen.getByRole("img", {name: "Tandem Logo"}),
+            screen.getByRole("img", { name: "Tandem Logo" }),
         ).toBeInTheDocument();
 
         const contactText = screen.getByText(/По всем вопросам обращайтесь на/);
         expect(contactText).toBeInTheDocument();
 
-        const emailLink = screen.getByRole("link", {name: "tandem@t-bang.ru"});
+        const emailLink = screen.getByRole("link", {
+            name: "tandem@t-bang.ru",
+        });
         expect(emailLink).toBeInTheDocument();
     });
 
@@ -28,7 +30,7 @@ describe("Footer", () => {
         renderFooter();
 
         const list = screen.getByRole("list");
-        const {getAllByRole} = within(list);
+        const { getAllByRole } = within(list);
         const items = getAllByRole("listitem");
         expect(items.length).toBe(6);
 
@@ -42,7 +44,9 @@ describe("Footer", () => {
         ];
 
         expectedLinks.forEach((text) => {
-            expect(screen.getByRole("link", {name: text})).toBeInTheDocument();
+            expect(
+                screen.getByRole("link", { name: text }),
+            ).toBeInTheDocument();
         });
     });
 });
