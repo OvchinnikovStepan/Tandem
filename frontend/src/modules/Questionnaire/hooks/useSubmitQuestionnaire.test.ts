@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useNavigate } from "react-router";
 import { completeOnboarding } from "../api/completeOnbording";
-import { QUESTION_IDS } from "../types/questionnaire";
+import { QUESTION_IDS } from "../constants/constants";
 import { RESET } from "jotai/utils";
 
 vi.mock("@tanstack/react-query", () => ({

@@ -3,7 +3,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { useNavigate } from "react-router";
 import { selectedInterestsAtom } from "./../atoms/interestsAtoms";
 import { completeOnboarding } from "./../api/completeOnbording.ts";
-import { QUESTION_IDS } from "./../types/questionnaire";
+import { QUESTION_IDS } from "./../constants/constants";
 import type { ProfileFormValues } from "@/modules/Questionnaire/schemas/profileSchema";
 import { RESET } from "jotai/utils";
 import type { Interest } from "@/types/interests.ts";
