@@ -83,17 +83,26 @@ public class TagServiceImpl implements TagService {
             throw new TagNotFoundException(id);
         }
 
+        String newName;
+
         // Если имя меняется, проверяем уникальность
-        if (request.getName()!= null && !request.getName().equals(existingTag.getName())) {
+        if (request.getName() != null && !request.getName().equals(existingTag.getName())) {
             if (existsByName(request.getName())) {
                 throw new TagAlreadyExistsException(request.getName());
             }
+            newName = request.getName();
         }
         // Если имя не меняется, устанавливаем старое значение
         else {
-            request.setName(existingTag.getName());
+            newName = existingTag.getName();
         }
-        TagResponse response = tagDal.update(id, request);
+
+        TagRequest newRequest = TagRequest.builder()
+                .name(newName)
+                .imageUrl(request.getImageUrl())
+                .build();
+
+        TagResponse response = tagDal.update(id, newRequest);
 
         log.info("Successfully updated tag with id: {}", id);
         return response;

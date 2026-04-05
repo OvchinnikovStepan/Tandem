@@ -2,10 +2,8 @@ package com.tandem.interest_service.service.model.request;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 @Builder
 public class TagRequest {
     private String name;
