@@ -1,12 +1,11 @@
-package com.tandem.interest_service;
+package com.tandem.interest_service.service;
 
 import com.tandem.interest_service.dal.TagDal;
-import com.tandem.interest_service.service.TagService;
 import com.tandem.interest_service.service.exception.TagAlreadyExistsException;
 import com.tandem.interest_service.service.exception.TagNotFoundException;
 import com.tandem.interest_service.service.impl.TagServiceImpl;
-import com.tandem.interest_service.service.model.TagRequest;
-import com.tandem.interest_service.service.model.TagResponse;
+import com.tandem.interest_service.service.model.request.TagRequest;
+import com.tandem.interest_service.service.model.response.TagResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -334,7 +333,6 @@ class TagServiceTest {
     }
 
     // existsByName
-
     @Test
     void existsByName_ReturnsTrue_TagExists() {
         String tagName = "gaming";
@@ -384,5 +382,30 @@ class TagServiceTest {
 
         assertThat(result).isEmpty();
         verify(tagDal).searchByNamePrefix(prefix, limit);
+    }
+
+    // findByName
+    @Test
+    void findByName_Success_WhenTagExists() {
+        String tagName = "gaming";
+        when(tagDal.getByName(tagName)).thenReturn(tagResponse1);
+
+        TagResponse result = tagService.findByName(tagName);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(tagId1);
+        assertThat(result.getName()).isEqualTo(tagName);
+        verify(tagDal).getByName(tagName);
+    }
+
+    @Test
+    void findByName_ReturnsNull_WhenTagDoesNotExist() {
+        String tagName = "nonexistent";
+        when(tagDal.getByName(tagName)).thenThrow(new RuntimeException("Tag not found"));
+
+        TagResponse result = tagService.findByName(tagName);
+
+        assertThat(result).isNull();
+        verify(tagDal).getByName(tagName);
     }
 }

@@ -1,10 +1,10 @@
 package com.tandem.interest_service.dao.impl;
 
 import com.tandem.interest_service.dao.TagDao;
+import com.tandem.interest_service.dao.mapper.TagDaoRowMapper;
 import com.tandem.interest_service.dao.mapper.TagJdbcMapper;
 import com.tandem.interest_service.dao.queries.TagQueries;
 import com.tandem.interest_service.dao.model.TagEntity;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -21,16 +21,11 @@ public class TagDaoImpl implements TagDao {
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private static final int DEFAULT_SEARCH_LIMIT = 10;
 
-    private final RowMapper<TagEntity> rowMapper = (rs, rowNum) -> {
-        return TagEntity.builder()
-                .id(rs.getObject("id", UUID.class))
-                .name(rs.getString("name"))
-                .imageUrl(rs.getString("image_url"))
-                .build();
-    };
+    private final TagDaoRowMapper tagDaoRowMapper;
 
-    public TagDaoImpl(NamedParameterJdbcTemplate jdbcTemplate) {
+    public TagDaoImpl(NamedParameterJdbcTemplate jdbcTemplate, TagDaoRowMapper tagDaoRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.tagDaoRowMapper = tagDaoRowMapper;
     }
 
     @Override
@@ -62,7 +57,7 @@ public class TagDaoImpl implements TagDao {
         List<TagEntity> results = jdbcTemplate.query(
                 TagQueries.SELECT_BY_ID,
                 Map.of("id", id),
-                rowMapper
+                tagDaoRowMapper.rowMapper
         );
         return results.stream().findFirst();
     }
@@ -71,7 +66,7 @@ public class TagDaoImpl implements TagDao {
     public List<TagEntity> findAll() {
         return jdbcTemplate.query(
                 TagQueries.SELECT_ALL,
-                rowMapper
+                tagDaoRowMapper.rowMapper
         );
     }
 
@@ -79,7 +74,7 @@ public class TagDaoImpl implements TagDao {
     public List<TagEntity> findDefault() {
         return jdbcTemplate.query(
                 TagQueries.SELECT_DEFAULT,
-                rowMapper
+                tagDaoRowMapper.rowMapper
         );
     }
 
@@ -88,7 +83,7 @@ public class TagDaoImpl implements TagDao {
         List<TagEntity> results = jdbcTemplate.query(
                 TagQueries.SELECT_BY_NAME,
                 Map.of("name", name),
-                rowMapper
+                tagDaoRowMapper.rowMapper
         );
         return results.stream().findFirst();
     }
@@ -106,7 +101,7 @@ public class TagDaoImpl implements TagDao {
         return jdbcTemplate.query(
                 TagQueries.SEARCH_BY_PREFIX,
                 params,
-                rowMapper
+                tagDaoRowMapper.rowMapper
         );
     }
 }

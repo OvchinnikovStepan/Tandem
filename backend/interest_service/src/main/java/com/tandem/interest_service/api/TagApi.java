@@ -1,8 +1,8 @@
 package com.tandem.interest_service.api;
 
-import com.tandem.interest_service.api.model.TagCreateRequestJson;
-import com.tandem.interest_service.api.model.TagResponseJson;
-import com.tandem.interest_service.api.model.TagUpdateRequestJson;
+import com.tandem.interest_service.api.model.request.TagCreateRequestJson;
+import com.tandem.interest_service.api.model.response.TagResponseJson;
+import com.tandem.interest_service.api.model.request.TagUpdateRequestJson;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

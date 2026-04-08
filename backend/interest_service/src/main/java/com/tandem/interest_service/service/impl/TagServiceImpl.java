@@ -4,8 +4,8 @@ import com.tandem.interest_service.dal.TagDal;
 import com.tandem.interest_service.service.TagService;
 import com.tandem.interest_service.service.exception.TagAlreadyExistsException;
 import com.tandem.interest_service.service.exception.TagNotFoundException;
-import com.tandem.interest_service.service.model.TagRequest;
-import com.tandem.interest_service.service.model.TagResponse;
+import com.tandem.interest_service.service.model.request.TagRequest;
+import com.tandem.interest_service.service.model.response.TagResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -83,31 +83,43 @@ public class TagServiceImpl implements TagService {
             throw new TagNotFoundException(id);
         }
 
+        String newName;
+
         // Если имя меняется, проверяем уникальность
-        if (request.getName()!= null && !request.getName().equals(existingTag.getName())) {
+        if (request.getName() != null && !request.getName().equals(existingTag.getName())) {
             if (existsByName(request.getName())) {
                 throw new TagAlreadyExistsException(request.getName());
             }
+            newName = request.getName();
         }
         // Если имя не меняется, устанавливаем старое значение
         else {
-            request.setName(existingTag.getName());
+            newName = existingTag.getName();
         }
-        TagResponse response = tagDal.update(id, request);
+
+        TagRequest newRequest = TagRequest.builder()
+                .name(newName)
+                .imageUrl(request.getImageUrl())
+                .build();
+
+        TagResponse response = tagDal.update(id, newRequest);
 
         log.info("Successfully updated tag with id: {}", id);
         return response;
     }
 
     @Override
-    public boolean existsByName(String name) {
-        // Проверка на уникальность имени
+    public TagResponse findByName(String name) {
         try {
-            tagDal.getByName(name);
-            return true;
+            return tagDal.getByName(name);
         } catch (RuntimeException e) {
-            return false;
+            return null;
         }
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return findByName(name) != null;
     }
 
     @Override
