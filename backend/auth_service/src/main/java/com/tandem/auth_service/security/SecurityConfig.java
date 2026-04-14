@@ -32,7 +32,10 @@ public class SecurityConfig {
                                 "/api/auth/refresh",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/password/**"
+                                "/api/auth/password/check-strength",
+                                "/api/auth/password/reset/verify",
+                                "/api/auth/password/reset/request",
+                                "/api/auth/password/reset/complete"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

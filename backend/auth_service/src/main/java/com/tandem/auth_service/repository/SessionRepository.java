@@ -22,4 +22,6 @@ public interface SessionRepository {
     void updateTokensHash(UUID sessionId, String accessTokenHash, String refreshTokenHash);
 
     int deleteExpired();
+
+    int deleteUserSessions(UUID userId);
 }

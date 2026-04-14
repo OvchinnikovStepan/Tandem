@@ -13,8 +13,8 @@ spring:
     private-key: ${JWT_PRIVATE_KEY}
     public-key: ${JWT_PUBLIC_KEY}
   redis:
-    host: localhost
-    port: 6379
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
   kafka:
     bootstrap-servers: kafka:9092
     producer:

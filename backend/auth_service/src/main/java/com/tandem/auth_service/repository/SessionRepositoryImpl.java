@@ -101,4 +101,13 @@ public class SessionRepositoryImpl implements SessionRepository {
         )
         .execute();
     }
+
+    @Override
+    public int deleteUserSessions(UUID userId) {
+        return dsl.deleteFrom(SESSIONS)
+        .where(
+            SESSIONS.USER_ID.eq(userId)
+        )
+        .execute();
+    }
 }
