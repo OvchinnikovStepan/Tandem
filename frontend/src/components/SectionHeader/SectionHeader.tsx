@@ -17,27 +17,25 @@ const SectionHeader = React.forwardRef<HTMLDivElement, SectionHeaderProps>(
         ref={ref}
         className={cn(
           "flex items-center",
-          showBorder && "border-b border-[#EAECEE]",
+          showBorder && "border-b border-accent-gray",
           className
         )}
         style={{ padding: "24px 0px", gap: "16px", height: "96px" }}
         {...props}
       >
         <h3
-          className="flex-1 font-roboto font-bold text-[#333333]"
-          style={{ fontSize: "18px", lineHeight: "24px", letterSpacing: "-0.008em" }}
+          className="flex-1 font-roboto font-bold text-heading-black text-section-title"
         >
           {title}
         </h3>
         {linkText && linkHref && (
           <Link to={linkHref} className="flex items-center gap-0.5">
             <span
-              className="font-roboto font-bold text-[#126DF7] underline"
-              style={{ fontSize: "14px", lineHeight: "20px", letterSpacing: "-0.006em" }}
+              className="font-roboto font-bold text-header-button-text text-body-sm underline"
             >
               {linkText}
             </span>
-            <ArrowUpRight className="w-5 h-5 text-[#126DF7]" />
+            <ArrowUpRight className="w-5 h-5 text-header-button-text" />
           </Link>
         )}
       </div>

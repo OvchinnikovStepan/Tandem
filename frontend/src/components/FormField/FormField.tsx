@@ -71,7 +71,7 @@ const FormField = ({
       <label
         htmlFor={htmlFor}
         className={cn(
-          "font-roboto font-medium text-[#333333] flex items-center shrink-0",
+          "font-roboto font-medium text-heading-black flex items-center shrink-0",
           labelAlign === "start" && "pt-2"
         )}
         style={{

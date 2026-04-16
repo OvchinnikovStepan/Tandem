@@ -120,7 +120,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="h-screen w-screen bg-[#F6F7F8] flex overflow-hidden">
+    <div className="h-screen w-screen bg-landing-bg flex overflow-hidden">
       <LeftSidebar />
 
       <main className="flex-1 flex flex-col overflow-y-auto no-scrollbar min-w-0">
@@ -161,7 +161,7 @@ export default function Profile() {
             )
           ) : (
             <div 
-              className="bg-[#FEFEFE] overflow-hidden w-full"
+              className="bg-accent-white overflow-hidden w-full"
               style={{ 
                 boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.25)',
                 maxWidth: '975px',

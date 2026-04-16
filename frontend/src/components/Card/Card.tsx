@@ -12,9 +12,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          "bg-[#FEFEFE] overflow-hidden w-full",
+          "bg-accent-white overflow-hidden w-full",
           variant === "elevated" && "shadow-[0px_2px_8px_rgba(0,0,0,0.25)]",
-          variant === "default" && "border border-[#EAECEE]",
+          variant === "default" && "border border-accent-gray",
           className
         )}
         style={{

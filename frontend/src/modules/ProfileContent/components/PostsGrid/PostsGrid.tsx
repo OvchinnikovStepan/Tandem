@@ -18,7 +18,7 @@ interface PostsGridProps {
 function PostCard({ post }: { post: Post }) {
   return (
     <div
-      className="relative bg-[#C4C4C4] overflow-hidden cursor-pointer group aspect-square rounded-xl"
+      className="relative bg-icon-gray overflow-hidden cursor-pointer group aspect-square rounded-xl"
     >
       {post.imageUrl && (
         <img
@@ -55,7 +55,7 @@ export default function PostsGrid({ posts, isLoading }: PostsGridProps) {
     return (
       <div className="grid grid-cols-3 gap-1 w-full">
         {Array.from({ length: 9 }).map((_, index) => (
-          <div key={index} className="aspect-square bg-[#C4C4C4] rounded-xl" />
+          <div key={index} className="aspect-square bg-icon-gray rounded-xl" />
         ))}
       </div>
     );

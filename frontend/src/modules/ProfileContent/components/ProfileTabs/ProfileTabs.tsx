@@ -24,7 +24,7 @@ export default function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps
 
   return (
     <div 
-      className="border-t border-[#DBDBDB] mx-5"
+      className="border-t border-divider mx-5"
       style={{ height: '53px' }}
     >
       <div 
@@ -38,7 +38,7 @@ export default function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps
             className={cn(
               "flex items-center gap-[7px] transition-colors relative",
               activeTab === tab.id
-                ? "border-t-2 border-[#333333]"
+                ? "border-t-2 border-heading-black"
                 : ""
             )}
             style={{ padding: '16px 0', height: '52px' }}
@@ -47,7 +47,7 @@ export default function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps
               <tab.icon 
                 className={cn(
                   "w-6 h-6",
-                  activeTab === tab.id ? "text-[#333333]" : "text-[#8E8E8E]"
+                  activeTab === tab.id ? "text-heading-black" : "text-text-secondary"
                 )}
                 strokeWidth={2}
               />
@@ -55,7 +55,7 @@ export default function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps
             <span 
               className={cn(
                 "font-roboto font-semibold uppercase flex items-center text-center",
-                activeTab === tab.id ? "text-[#333333]" : "text-[#8E8E8E]"
+                activeTab === tab.id ? "text-heading-black" : "text-text-secondary"
               )}
               style={{ 
                 fontSize: tab.id === 'posts' ? '11px' : '12px', 
