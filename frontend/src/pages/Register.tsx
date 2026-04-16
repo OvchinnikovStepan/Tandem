@@ -30,20 +30,16 @@ export default function Register() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const formSchema = useMemo(
-    () =>
-      z
-        .object({
-          email: z.string().email(t("validation.invalidEmail")),
-          password: z.string().min(8, t("validation.minPassword")),
-          confirmPassword: z.string(),
-        })
-        .refine((data) => data.password === data.confirmPassword, {
-          message: t("validation.passwordsMismatch"),
-          path: ["confirmPassword"],
-        }),
-    [t]
-  );
+  const formSchema = z
+    .object({
+      email: z.string().email(t("validation.invalidEmail")),
+      password: z.string().min(8, t("validation.minPassword")),
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("validation.passwordsMismatch"),
+      path: ["confirmPassword"],
+    });
 
   const {
     register,

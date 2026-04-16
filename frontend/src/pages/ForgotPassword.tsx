@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,35 +27,23 @@ export default function ForgotPassword() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const emailSchema = useMemo(
-    () =>
-      z.object({
-        email: z.string().email(t("validation.invalidEmail")),
-      }),
-    [t]
-  );
+  const emailSchema = z.object({
+    email: z.string().email(t("validation.invalidEmail")),
+  });
 
-  const codeSchema = useMemo(
-    () =>
-      z.object({
-        code: z.string().length(6, t("validation.codeLength")),
-      }),
-    [t]
-  );
+  const codeSchema = z.object({
+    code: z.string().length(6, t("validation.codeLength")),
+  });
 
-  const newPasswordSchema = useMemo(
-    () =>
-      z
-        .object({
-          password: z.string().min(8, t("validation.minPasswordShort")),
-          confirmPassword: z.string(),
-        })
-        .refine((data) => data.password === data.confirmPassword, {
-          message: t("validation.passwordsMismatch"),
-          path: ["confirmPassword"],
-        }),
-    [t]
-  );
+  const newPasswordSchema = z
+    .object({
+      password: z.string().min(8, t("validation.minPasswordShort")),
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("validation.passwordsMismatch"),
+      path: ["confirmPassword"],
+    });
 
   const emailForm = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),

@@ -3,7 +3,7 @@ import { Input } from "@/ui/input";
 import { PasswordToggle } from "@/ui/password-toggle";
 import { LinkButton } from "@/ui/link-button";
 import { Mail, Lock } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,14 +20,10 @@ export default function QuestionBlock() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const loginSchema = useMemo(
-    () =>
-      z.object({
-        email: z.string().email(t("validation.invalidEmail")),
-        password: z.string().min(8, t("validation.minPassword")),
-      }),
-    [t]
-  );
+  const loginSchema = z.object({
+    email: z.string().email(t("validation.invalidEmail")),
+    password: z.string().min(8, t("validation.minPassword")),
+  });
 
   const {
     register,
