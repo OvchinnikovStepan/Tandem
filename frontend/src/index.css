@@ -56,6 +56,14 @@
     --color-button-yellow: #FFDD2D;
     --color-button-yellow-hover: #FFCD33;
     --color-icon-gray: #C4C4C4;
+    --color-success-green: #22C55E;
+    --color-text-dark: #262626;
+    --color-text-muted: #747474;
+    --color-light-bg: #F1F3F6;
+    --color-avatar-bg: #FAFAFA;
+    --color-divider: #DBDBDB;
+    --color-text-secondary: #8E8E8E;
+    --color-placeholder: #666666;
     --color-decoration-color: #FFFFFF80;
     --font-heading-bold: 700 44px/48px dsHeading,"dsHeading Fallback",-apple-system,BlinkMacSystemFont,"Segoe UI", Roboto,"Helvetica Neue", sans-serif;
     --font-base-regular: 400 44px/48px dsHeading;
@@ -158,6 +166,27 @@
 }
 
 @layer components {
+    .text-body-md {
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px;
+        line-height: 22px;
+        letter-spacing: -0.007em;
+    }
+
+    .text-body-sm {
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: -0.006em;
+    }
+
+    .text-section-title {
+        font-family: 'Roboto', sans-serif;
+        font-size: 18px;
+        line-height: 24px;
+        letter-spacing: -0.008em;
+    }
+
     .no-scrollbar {
         -ms-overflow-style: none;
         scrollbar-width: none;
