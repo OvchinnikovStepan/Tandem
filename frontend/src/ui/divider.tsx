@@ -8,7 +8,7 @@ const Divider = React.forwardRef<HTMLDivElement, DividerProps>(
     return (
       <div
         ref={ref}
-        className={cn("w-full border-t border-[#DBDBDB]", className)}
+        className={cn("w-full border-t border-divider", className)}
         {...props}
       />
     );

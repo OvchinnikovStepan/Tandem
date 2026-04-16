@@ -12,7 +12,7 @@ const textareaVariants = cva(
         form:
           "bg-gray-50 border-gray-200 text-black placeholder:text-gray-400 rounded-xl px-4 py-3 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20",
         profile:
-          "bg-[#FEFEFE] border-[#EAECEE] text-[#333333] placeholder:text-[#666666] rounded-xl px-4 py-3 font-roboto font-medium focus:border-[#126DF7] focus:ring-0",
+          "bg-accent-white border-accent-gray text-heading-black placeholder:text-placeholder rounded-xl px-4 py-3 font-roboto font-medium focus:border-header-button-text focus:ring-0",
       },
     },
     defaultVariants: {

@@ -7,7 +7,7 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-[rgba(18,109,247,0.1)] text-[#126DF7] border border-[rgba(18,109,247,0.5)]",
+        default: "bg-header-button-text/10 text-header-button-text border border-header-button-text/50",
         secondary: "bg-gray-100 text-gray-700",
         success: "bg-green-100 text-green-700",
         warning: "bg-yellow-100 text-yellow-700",

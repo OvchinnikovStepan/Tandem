@@ -12,7 +12,7 @@ const inputVariants = cva(
         form:
           "h-12 bg-gray-50 border-gray-200 text-black placeholder:text-gray-400 rounded-xl px-4 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20",
         profile:
-          "h-10 bg-[#FEFEFE] border-[#EAECEE] text-[#333333] placeholder:text-[#666666] rounded-xl px-4 font-roboto font-medium focus:border-[#126DF7] focus:ring-0",
+          "h-10 bg-accent-white border-accent-gray text-heading-black placeholder:text-placeholder rounded-xl px-4 font-roboto font-medium focus:border-header-button-text focus:ring-0",
       },
     },
     defaultVariants: {

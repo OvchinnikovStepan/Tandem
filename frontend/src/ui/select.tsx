@@ -13,7 +13,7 @@ const selectVariants = cva(
         form:
           "h-12 bg-gray-50 border-gray-200 text-black rounded-xl px-4 pr-12 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20",
         profile:
-          "h-10 bg-[#FEFEFE] border-[#EAECEE] text-[#333333] rounded-xl px-4 pr-12 font-roboto font-medium focus:border-[#126DF7] focus:ring-0",
+          "h-10 bg-accent-white border-accent-gray text-heading-black rounded-xl px-4 pr-12 font-roboto font-medium focus:border-header-button-text focus:ring-0",
       },
     },
     defaultVariants: {
@@ -47,7 +47,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         >
           {children}
         </select>
-        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#333333] pointer-events-none" />
+        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-heading-black pointer-events-none" />
       </div>
     );
   }

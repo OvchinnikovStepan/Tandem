@@ -68,8 +68,8 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         {showOnlineIndicator && (
           <div
             className={cn(
-              "absolute bottom-0 right-0 rounded-full border-[1.5px] border-[#FEFEFE]",
-              isOnline ? "bg-[#22C55E]" : "bg-gray-400"
+              "absolute bottom-0 right-0 rounded-full border-[1.5px] border-accent-white",
+              isOnline ? "bg-success-green" : "bg-gray-400"
             )}
             style={indicatorSizes[size]}
           />

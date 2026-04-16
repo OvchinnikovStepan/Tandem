@@ -21,7 +21,7 @@ const Tag = React.forwardRef<HTMLDivElement, TagProps>(
         ref={ref}
         className={cn(
           "flex items-center rounded-3xl",
-          variant === "outline" && "bg-[#FEFEFE] border border-[#EAECEE]",
+          variant === "outline" && "bg-accent-white border border-accent-gray",
           variant === "default" && "bg-gray-100",
           className
         )}
@@ -34,16 +34,11 @@ const Tag = React.forwardRef<HTMLDivElement, TagProps>(
         {...props}
       >
         <div
-          className="flex items-center flex-1 border-r border-[#EAECEE]"
+          className="flex items-center flex-1 border-r border-accent-gray"
           style={{ height: "22px", paddingLeft: "8px", paddingRight: "12px" }}
         >
           <span
-            className="font-roboto font-bold text-[#333333]"
-            style={{
-              fontSize: "16px",
-              lineHeight: "22px",
-              letterSpacing: "-0.007em",
-            }}
+            className="font-roboto font-bold text-heading-black text-body-md"
           >
             {label}
           </span>
@@ -54,7 +49,7 @@ const Tag = React.forwardRef<HTMLDivElement, TagProps>(
             className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors ml-2"
             type="button"
           >
-            <RemoveIcon className="w-5 h-5 text-[#C4C4C4]" />
+            <RemoveIcon className="w-5 h-5 text-icon-gray" />
           </button>
         )}
       </div>

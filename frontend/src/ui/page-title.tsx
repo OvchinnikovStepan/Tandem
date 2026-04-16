@@ -11,7 +11,7 @@ const PageTitle = React.forwardRef<HTMLHeadingElement, PageTitleProps>(
       <h1
         ref={ref}
         className={cn(
-          "font-roboto font-bold text-[#333333] flex items-center justify-center",
+          "font-roboto font-bold text-heading-black flex items-center justify-center",
           className
         )}
         style={{
