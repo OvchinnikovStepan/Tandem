@@ -1,5 +1,6 @@
 import { getDefaultAvatarUrl } from "@/lib/avatar";
 import { useTranslation } from "react-i18next";
+import { Button } from "@/ui";
 
 interface UserProfile {
   id: string;
@@ -25,114 +26,67 @@ export default function ProfileInfo({ user, onEditProfile }: ProfileInfoProps) {
 
   return (
     <div 
-      className="relative w-full"
-      style={{ height: '176px', margin: '30px 20px 0 20px' }}
+      className="flex w-full gap-8"
+      style={{ padding: '30px 20px 0 20px' }}
     >
       <div 
-        className="absolute rounded-full overflow-hidden bg-[#FAFAFA] flex items-center justify-center"
-        style={{ width: '150px', height: '150px', left: '0px', top: '13px' }}
+        className="rounded-full overflow-hidden bg-avatar-bg flex items-center justify-center shrink-0"
+        style={{ width: '150px', height: '150px' }}
       >
-        {user.avatar ? (
-          <img
-            src={user.avatar}
-            alt={user.name}
-            className="w-full h-full object-cover rounded-full"
-          />
-        ) : (
-          <img
-            src={getDefaultAvatarUrl(200)}
-            alt={user.name}
-            className="w-full h-full object-cover rounded-full"
-          />
-        )}
+        <img
+          src={user.avatar || getDefaultAvatarUrl(200)}
+          alt={user.name}
+          className="w-full h-full object-cover rounded-full"
+        />
       </div>
 
-      <div 
-        className="absolute"
-        style={{ width: '613px', height: '176px', left: '321px', top: '0px' }}
-      >
+      <div className="flex flex-col flex-1 gap-4">
 
-        <div 
-          className="absolute flex items-center"
-          style={{ gap: '15px', height: '32px', left: '0px', top: '4px' }}
-        >
+        <div className="flex items-center gap-4">
           <h1 
-            className="font-roboto font-bold text-[#333333] flex items-center"
-            style={{ fontSize: '16px', lineHeight: '22px', letterSpacing: '-0.007em' }}
+            className="font-roboto font-bold text-heading-black text-body-md"
           >
             {user.name}
           </h1>
           {user.isOwnProfile && (
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={onEditProfile}
-              className="font-roboto font-normal text-[#126DF7] bg-[#F1F3F6] flex items-center justify-center text-center"
-              style={{ 
-                fontSize: '14px', 
-                lineHeight: '18px',
-                padding: '7px 17px 7px 16px',
-                height: '32px',
-                borderRadius: '8px'
-              }}
             >
               {t("profile.info.editProfile")}
-            </button>
+            </Button>
           )}
         </div>
 
-        <div 
-          className="absolute flex items-start"
-          style={{ gap: '40px', height: '24px', left: '0px', top: '52px' }}
-        >
-          <span 
-            className="font-roboto font-semibold text-[#262626] flex items-center"
-            style={{ fontSize: '14px', lineHeight: '24px' }}
-          >
+        <div className="flex items-start gap-10">
+          <span className="font-roboto font-semibold text-text-dark text-body-sm">
             {user.postsCount} {t("profile.info.posts")}
           </span>
-          <span 
-            className="font-roboto font-semibold text-[#262626] flex items-center"
-            style={{ fontSize: '15px', lineHeight: '24px' }}
-          >
+          <span className="font-roboto font-semibold text-text-dark text-body-sm">
             {user.followersCount} {t("profile.info.followers")}
           </span>
-          <span 
-            className="font-roboto font-semibold text-[#262626] flex items-center"
-            style={{ fontSize: '15px', lineHeight: '24px' }}
-          >
+          <span className="font-roboto font-semibold text-text-dark text-body-sm">
             {user.friendsCount} {t("profile.info.friends")}
           </span>
         </div>
 
-        <div 
-          className="absolute flex flex-col"
-          style={{ width: '613px', height: '76px', left: '0px', top: '92px' }}
-        >
-          <div className="flex flex-col" style={{ paddingBottom: '4px' }}>
-            <p 
-              className="font-roboto font-semibold text-[#333333] flex items-center"
-              style={{ fontSize: '14px', lineHeight: '18px' }}
-            >
-              {user.location}
-            </p>
-            <p 
-              className="font-roboto font-medium text-[#747474] flex items-center"
-              style={{ fontSize: '13px', lineHeight: '18px' }}
-            >
-              {user.occupation}
-            </p>
-            <p 
-              className="font-roboto font-normal text-[#333333] flex items-center"
-              style={{ fontSize: '14px', lineHeight: '18px' }}
-            >
-              {user.bio}
-            </p>
-          </div>
-          <button 
-            className="font-roboto font-normal text-[#126DF7] flex items-center hover:underline"
-            style={{ fontSize: '14px', lineHeight: '18px', width: '84px' }}
+        <div className="flex flex-col">
+          <p className="font-roboto font-semibold text-heading-black text-body-sm">
+            {user.location}
+          </p>
+          <p className="font-roboto font-medium text-text-muted text-body-sm" style={{ fontSize: '13px' }}>
+            {user.occupation}
+          </p>
+          <p className="font-roboto font-normal text-heading-black text-body-sm">
+            {user.bio}
+          </p>
+          <Button
+            variant="link"
+            className="p-0 h-auto font-roboto font-normal text-header-button-text text-body-sm justify-start"
           >
             {t("profile.info.more")}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

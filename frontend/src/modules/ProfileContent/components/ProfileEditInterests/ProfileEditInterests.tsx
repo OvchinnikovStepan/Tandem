@@ -70,26 +70,25 @@ export default function ProfileEditInterests({
 
   return (
     <div
-      className="bg-[#FEFEFE] overflow-hidden w-full"
+      className="bg-accent-white overflow-hidden w-full flex flex-col"
       style={{
         boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.25)",
         maxWidth: "975px",
         borderRadius: "24px",
-        height: "559px",
-        position: "relative",
+        minHeight: "559px",
       }}
     >
 
       <div
-        className="absolute"
-        style={{ left: "50%", transform: "translateX(-50%)", top: "26px" }}
+        className="flex justify-center"
+        style={{ paddingTop: "26px" }}
       >
         <PageTitle>{t("profile.interests.title")}</PageTitle>
       </div>
 
       <div
-        className="absolute flex items-center gap-4"
-        style={{ left: "50%", transform: "translateX(-50%)", top: "119px" }}
+        className="flex items-center justify-center gap-4"
+        style={{ paddingTop: "24px", paddingBottom: "24px" }}
       >
 
         <Controller
@@ -108,17 +107,17 @@ export default function ProfileEditInterests({
           className="w-[138px] h-10 rounded-xl gap-1.5"
         >
           <span>{t("profile.interests.add")}</span>
-          <Plus className="w-5 h-5 text-[#333333]" />
+          <Plus className="w-5 h-5 text-heading-black" />
         </Button>
       </div>
 
-      <div className="absolute" style={{ width: "935px", left: "20px", top: "198px" }}>
+      <div className="px-5">
         <Divider />
       </div>
 
       <div
-        className="absolute flex justify-center items-start"
-        style={{ width: "100%", left: "0", top: "238px" }}
+        className="flex justify-center items-start flex-1"
+        style={{ padding: "40px 20px" }}
       >
         <div className="grid grid-cols-2 gap-x-10 gap-y-5 place-items-center">
           {selectedInterests.map((interest) => (
@@ -132,13 +131,13 @@ export default function ProfileEditInterests({
         </div>
       </div>
 
-      <div className="absolute" style={{ width: "935px", left: "20px", top: "461px" }}>
+      <div className="px-5">
         <Divider />
       </div>
 
       <div
-        className="absolute"
-        style={{ left: "50%", transform: "translateX(-50%)", top: "488px" }}
+        className="flex justify-center"
+        style={{ padding: "24px 0" }}
       >
         <Button
           variant="primary"

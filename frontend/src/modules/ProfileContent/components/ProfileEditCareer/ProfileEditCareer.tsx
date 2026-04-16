@@ -24,7 +24,8 @@ const defaultCareer: CareerData = {
   position: "",
 };
 
-const years = Array.from({ length: 76 }, (_, i) => String(2026 - i));
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 76 }, (_, i) => String(currentYear - i));
 
 export default function ProfileEditCareer({
   career = defaultCareer,
@@ -44,40 +45,34 @@ export default function ProfileEditCareer({
 
   return (
     <div
-      className="bg-[#FEFEFE] overflow-hidden w-full"
+      className="bg-accent-white overflow-hidden w-full flex flex-col"
       style={{
         boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.25)",
         maxWidth: "975px",
         borderRadius: "24px",
-        height: "504px",
-        position: "relative",
       }}
     >
 
       <div
-        className="absolute"
-        style={{ left: "50%", transform: "translateX(-50%)", top: "26px" }}
+        className="flex justify-center"
+        style={{ paddingTop: "26px", paddingBottom: "24px" }}
       >
         <PageTitle>{t("profile.career.title")}</PageTitle>
       </div>
 
-      <div className="absolute" style={{ width: "935px", left: "20px", top: "113px" }}>
+      <div className="px-5">
         <Divider />
       </div>
 
       <div
-        className="absolute flex flex-col justify-center items-center"
+        className="flex flex-col justify-center items-center flex-1"
         style={{
-          width: "935px",
-          height: "292px",
-          left: "20px",
-          top: "114px",
-          padding: "39px 0",
+          padding: "39px 20px",
         }}
       >
         <div
           className="flex flex-col justify-center items-end gap-[18px]"
-          style={{ width: "935px", paddingRight: "263px" }}
+          style={{ width: "100%", maxWidth: "672px" }}
         >
 
           <FormProvider {...methods}>
@@ -144,13 +139,13 @@ export default function ProfileEditCareer({
         </div>
       </div>
 
-      <div className="absolute" style={{ width: "935px", left: "20px", top: "406px" }}>
+      <div className="px-5">
         <Divider />
       </div>
 
       <div
-        className="absolute"
-        style={{ left: "50%", transform: "translateX(-50%)", top: "433px" }}
+        className="flex justify-center"
+        style={{ padding: "24px 0" }}
       >
         <Button
           variant="primary"

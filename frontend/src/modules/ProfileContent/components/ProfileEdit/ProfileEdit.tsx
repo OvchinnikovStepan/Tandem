@@ -40,31 +40,26 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
   return (
     <FormProvider {...methods}>
       <div
-        className="bg-[#FEFEFE] overflow-hidden w-full"
+        className="bg-accent-white overflow-hidden w-full flex flex-col"
         style={{
           boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.25)",
           maxWidth: "975px",
           borderRadius: "24px",
-          height: "763px",
-          position: "relative",
         }}
       >
       <div
-        className="absolute"
-        style={{ left: "50%", transform: "translateX(-50%)", top: "26px" }}
+        className="flex justify-center"
+        style={{ paddingTop: "26px" }}
       >
         <PageTitle>{t("profile.edit.title")}</PageTitle>
       </div>
+
       <div
-        className="absolute"
-        style={{ width: "935px", height: "176px", left: "20px", top: "74px" }}
+        className="flex items-center gap-6 justify-center"
+        style={{ padding: "24px 20px" }}
       >
         <div
-          className="absolute cursor-pointer group"
-          style={{
-            left: "calc(50% - 100px/2 - 345.5px)",
-            top: "38px",
-          }}
+          className="cursor-pointer group relative shrink-0"
         >
           <Avatar src={avatar || getDefaultAvatarUrl(200)} alt="Avatar" size="xl" />
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
@@ -73,13 +68,7 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
         </div>
 
         <div
-          className="absolute flex flex-col items-start gap-[18px]"
-          style={{
-            width: "410px",
-            height: "98px",
-            left: "calc(50% - 410px/2 - 0.5px)",
-            top: "calc(50% - 98px/2)",
-          }}
+          className="flex flex-col items-start gap-[18px]"
         >
           <FormField label={t("profile.edit.firstName")} name="firstName">
             <Controller
@@ -103,24 +92,20 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
         </div>
       </div>
 
-      <div className="absolute" style={{ width: "935px", left: "20px", top: "250px" }}>
+      <div className="px-5">
         <Divider />
       </div>
 
       <div
-        className="absolute flex flex-col justify-center items-center"
+        className="flex flex-col justify-center items-center flex-1"
         style={{
-          width: "935px",
-          height: "414px",
-          left: "20px",
-          top: "251px",
-          padding: "39px 0",
+          padding: "39px 20px",
           gap: "16px",
         }}
       >
         <div
           className="flex flex-col justify-center items-end gap-[18px]"
-          style={{ width: "935px", paddingRight: "263px" }}
+          style={{ width: "100%", maxWidth: "672px" }}
         >
 
           <FormField label={t("profile.edit.gender")} name="gender">
@@ -146,7 +131,7 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
                   variant="profile"
                   type="text"
                   placeholder={t("profile.edit.birthDatePlaceholder")}
-                  icon={<Calendar className="w-5 h-5 text-[#333333]" />}
+                  icon={<Calendar className="w-5 h-5 text-heading-black" />}
                   className="w-[326px]"
                   {...field}
                 />
@@ -191,13 +176,13 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
         </div>
       </div>
 
-      <div className="absolute" style={{ width: "935px", left: "20px", top: "665px" }}>
+      <div className="px-5">
         <Divider />
       </div>
 
       <div
-        className="absolute"
-        style={{ left: "50%", transform: "translateX(-50%)", top: "692px" }}
+        className="flex justify-center"
+        style={{ padding: "24px 0" }}
       >
         <Button
           variant="primary"
