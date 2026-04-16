@@ -2,6 +2,8 @@ import { Bell, Settings } from "lucide-react";
 import { getDefaultAvatarUrl } from "@/lib/avatar";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher/LanguageSwitcher";
+import { Avatar, IconButton } from "@/ui";
+import { cn } from "@/lib/utils";
 
 export type EditSection = "profile" | "interests" | "career";
 
@@ -35,7 +37,7 @@ export default function RightSidebarEdit({
 
   return (
     <aside
-      className="bg-[#FEFEFE] flex flex-col shrink-0 overflow-hidden h-full"
+      className="bg-accent-white flex flex-col shrink-0 overflow-hidden h-full"
       style={{ width: "312px" }}
     >
       {/* Header - Avatar and Actions */}
@@ -44,69 +46,44 @@ export default function RightSidebarEdit({
         style={{ padding: '20px 24px', gap: '12px', minHeight: '88px' }}
       >
         {/* Avatar with online indicator */}
-        <div className="relative shrink-0" style={{ width: '48px', height: '48px' }}>
-          <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden">
-            {currentUser.avatar ? (
-              <img
-                src={currentUser.avatar}
-                alt={currentUser.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <img
-                src={getDefaultAvatarUrl(100)}
-                alt={currentUser.name}
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
-          {/* Online indicator */}
-          <div 
-            className="absolute bottom-0 right-0 bg-[#22C55E] border-[1.5px] border-[#FEFEFE] rounded-full"
-            style={{ width: '12px', height: '12px' }}
-          />
-        </div>
+        <Avatar
+          src={currentUser.avatar || getDefaultAvatarUrl(100)}
+          alt={currentUser.name}
+          size="md"
+          showOnlineIndicator
+          isOnline
+          className="shrink-0"
+        />
 
         {/* Action buttons */}
         <div className="ml-auto flex items-center shrink-0" style={{ gap: '8px' }}>
           <LanguageSwitcher />
-          <button 
-            className="flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-            style={{ width: '48px', height: '48px', padding: '16px' }}
-          >
-            <Bell className="w-7 h-7 text-[#333333]" />
-          </button>
-          <button 
-            className="flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-            style={{ width: '48px', height: '48px', padding: '16px' }}
-          >
-            <Settings className="w-7 h-7 text-[#333333]" />
-          </button>
+          <IconButton size="md">
+            <Bell className="w-7 h-7 text-heading-black" />
+          </IconButton>
+          <IconButton size="md">
+            <Settings className="w-7 h-7 text-heading-black" />
+          </IconButton>
         </div>
       </div>
 
       {/* Content Section */}
       <div 
-        className="flex flex-col bg-[#FEFEFE]"
+        className="flex flex-col bg-accent-white"
         style={{ padding: '0px 24px 24px', gap: '32px' }}
       >
         {/* Menu Container */}
         <div
-          className="flex flex-col items-start w-full border-t border-[#EAECEE]"
+          className="flex flex-col items-start w-full border-t border-accent-gray"
           style={{ height: "240px" }}
         >
           {/* Header */}
           <div
-            className="flex items-center w-full border-b border-[#EAECEE]"
+            className="flex items-center w-full border-b border-accent-gray"
             style={{ padding: "24px 0px", gap: "16px", height: "72px" }}
           >
             <h2
-              className="flex-1 font-roboto font-bold text-[#333333] text-center"
-              style={{
-                fontSize: "18px",
-                lineHeight: "24px",
-                letterSpacing: "-0.008em",
-              }}
+              className="flex-1 font-roboto font-bold text-heading-black text-center text-section-title"
             >
               {t("profile.rightSidebarEdit.title")}
             </h2>
@@ -118,19 +95,16 @@ export default function RightSidebarEdit({
               <button
                 key={item.id}
                 onClick={() => onSectionChange(item.id)}
-                className="flex items-center justify-center w-full border-b border-[#EAECEE] cursor-pointer transition-colors"
+                className={cn(
+                  "flex items-center justify-center w-full border-b border-accent-gray cursor-pointer transition-colors",
+                  activeSection === item.id && "bg-light-bg"
+                )}
                 style={{
                   height: "56px",
-                  background: activeSection === item.id ? "#F5F5F5" : "#FEFEFE",
                 }}
               >
                 <span
-                  className="font-roboto font-bold text-[#333333] text-center"
-                  style={{
-                    fontSize: "14px",
-                    lineHeight: "20px",
-                    letterSpacing: "-0.006em",
-                  }}
+                  className="font-roboto font-bold text-heading-black text-center text-body-sm"
                 >
                   {item.label}
                 </span>

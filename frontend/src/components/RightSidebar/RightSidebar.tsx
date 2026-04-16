@@ -68,7 +68,7 @@ export default function RightSidebar({
 
   return (
     <aside 
-      className="bg-[#FEFEFE] flex flex-col shrink-0 overflow-hidden h-full"
+      className="bg-accent-white flex flex-col shrink-0 overflow-hidden h-full"
       style={{ width: '312px' }}
     >
       {/* Header */}
@@ -90,21 +90,21 @@ export default function RightSidebar({
         <div className="ml-auto flex items-center gap-2 shrink-0">
           <LanguageSwitcher />
           <IconButton size="md">
-            <Bell className="w-7 h-7 text-[#333333]" />
+            <Bell className="w-7 h-7 text-heading-black" />
           </IconButton>
           <IconButton size="md">
-            <Settings className="w-7 h-7 text-[#333333]" />
+            <Settings className="w-7 h-7 text-heading-black" />
           </IconButton>
         </div>
       </div>
 
       {/* Content Section */}
       <div 
-        className="flex flex-col bg-[#FEFEFE]"
+        className="flex flex-col bg-accent-white"
         style={{ padding: '0px 24px 24px', gap: '32px' }}
       >
         {/* Suggested Friends Section */}
-        <div className="flex flex-col border-t border-[#EAECEE]">
+        <div className="flex flex-col border-t border-accent-gray">
           <SectionHeader
             title={t("profile.rightSidebar.suggestedFriends")}
             linkText={t("profile.rightSidebar.view")}
@@ -116,7 +116,7 @@ export default function RightSidebar({
             {suggestedFriends.map((friend) => (
               <div 
                 key={friend.id} 
-                className="flex items-center bg-[#FEFEFE] border-b border-[#EAECEE]"
+                className="flex items-center bg-accent-white border-b border-accent-gray"
                 style={{ padding: '12px 0px', gap: '12px', height: '72px', minHeight: '72px' }}
               >
                 {/* Avatar */}
@@ -139,13 +139,12 @@ export default function RightSidebar({
                   style={{ width: '180px', height: '42px' }}
                 >
                   <p 
-                    className="font-roboto font-bold text-[#333333] truncate"
-                    style={{ fontSize: '14px', lineHeight: '20px', letterSpacing: '-0.006em' }}
+                    className="font-roboto font-bold text-heading-black text-body-sm truncate"
                   >
                     {friend.name}
                   </p>
                   <p 
-                    className="font-roboto font-normal text-[#126DF7] truncate"
+                    className="font-roboto font-normal text-header-button-text truncate"
                     style={{ fontSize: '14px', lineHeight: '22px' }}
                   >
                     @{friend.username}
@@ -153,9 +152,9 @@ export default function RightSidebar({
                 </div>
                 
                 {/* Add button */}
-                <button className="text-[rgba(51,51,51,0.5)] hover:text-[#333333] transition-colors">
+                <IconButton size="sm">
                   <Plus className="w-5 h-5" />
-                </button>
+                </IconButton>
               </div>
             ))}
           </div>
@@ -166,32 +165,31 @@ export default function RightSidebar({
           {/* Header */}
           <div className="flex items-center" style={{ gap: '16px' }}>
             <h3 
-              className="flex-1 font-roboto font-bold text-[#333333]"
-              style={{ fontSize: '18px', lineHeight: '24px', letterSpacing: '-0.008em' }}
+              className="flex-1 font-roboto font-bold text-heading-black text-section-title"
             >
               {t("profile.rightSidebar.profileActivity")}
             </h3>
-            <button className="text-[rgba(51,51,51,0.5)] hover:text-[#333333] transition-colors">
+            <IconButton size="sm">
               <MoreHorizontal className="w-6 h-6" />
-            </button>
+            </IconButton>
           </div>
 
           {/* Activity Card */}
           <div 
-            className="flex flex-col bg-[#EAECEE] border border-[#EAECEE]"
+            className="flex flex-col bg-accent-gray border border-accent-gray"
             style={{ padding: '24px 16px', gap: '20px', borderRadius: '24px' }}
           >
             {/* Avatar Group */}
             <div className="flex" style={{ marginLeft: '12px' }}>
-              {resolvedProfileActivity.recentFollowers.slice(0, 7).map((follower, index) => (
+              {resolvedProfileActivity.recentFollowers.slice(0, 7).map((follower, index, arr) => (
                 <div
                   key={follower.id}
-                  className="rounded-full border-2 border-[#FEFEFE] overflow-hidden"
+                  className="rounded-full border-2 border-accent-white overflow-hidden"
                   style={{ 
                     width: '40px', 
                     height: '40px',
-                    marginLeft: index === 0 ? '-12px' : '-12px',
-                    zIndex: 7 - index
+                    marginLeft: '-12px',
+                    zIndex: arr.length - index
                   }}
                 >
                   {follower.avatar ? (
@@ -219,14 +217,14 @@ export default function RightSidebar({
               {/* Main stat row */}
               <div className="flex items-end" style={{ gap: '4px' }}>
                 <span 
-                  className="font-bold text-[#333333]"
+                  className="font-bold text-heading-black"
                   style={{ fontFamily: 'Plus Jakarta Sans', fontSize: '24px', lineHeight: '32px', letterSpacing: '-0.012em' }}
                 >
                   +{resolvedProfileActivity.followersCount.toLocaleString()}
                 </span>
                 <span 
-                  className="font-roboto font-medium text-[#333333]"
-                  style={{ fontSize: '16px', lineHeight: '22px', letterSpacing: '-0.007em', paddingBottom: '2px' }}
+                  className="font-roboto font-medium text-heading-black text-body-md"
+                  style={{ paddingBottom: '2px' }}
                 >
                   {t("profile.rightSidebar.followers")}
                 </span>
@@ -235,17 +233,15 @@ export default function RightSidebar({
               {/* Trend row */}
               <div className="flex items-center" style={{ gap: '4px' }}>
                 <div className="flex items-center" style={{ gap: '4px' }}>
-                  <TrendingUp className="w-5 h-5 text-[#22C55E]" />
+                  <TrendingUp className="w-5 h-5 text-success-green" />
                   <span 
-                    className="font-roboto font-bold text-[#22C55E] text-center"
-                    style={{ fontSize: '14px', lineHeight: '20px', letterSpacing: '-0.006em' }}
+                    className="font-roboto font-bold text-success-green text-center text-body-sm"
                   >
                     100%
                   </span>
                 </div>
                 <span 
-                  className="font-roboto font-medium text-[#333333]"
-                  style={{ fontSize: '16px', lineHeight: '22px', letterSpacing: '-0.007em' }}
+                  className="font-roboto font-medium text-heading-black text-body-md"
                 >
                   {resolvedProfileActivity.period}
                 </span>
@@ -254,8 +250,7 @@ export default function RightSidebar({
 
             {/* Message */}
             <p 
-              className="font-roboto font-medium text-[#333333]"
-              style={{ fontSize: '16px', lineHeight: '22px', letterSpacing: '-0.007em' }}
+              className="font-roboto font-medium text-heading-black text-body-md"
             >
               {resolvedProfileActivity.message}
             </p>
