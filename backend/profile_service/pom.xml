@@ -22,7 +22,10 @@
 		<java.version>17</java.version>
 		<flyway.version>9.22.3</flyway.version>
 		<jacoco.version>0.8.11</jacoco.version>
-                <allure.version>2.30.0</allure.version>
+		<allure.version>2.30.0</allure.version>
+	</properties>
+
+	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -112,12 +115,16 @@
 			<scope>test</scope>
 		</dependency>
 
-                <dependency>
-                        <groupId>io.qameta.allure</groupId>
-                        <artifactId>allure-junit5</artifactId>
-                        <version>${allure.version}</version>
-                        <scope>test</scope>
-                </dependency>
+		<dependency>
+			<groupId>io.qameta.allure</groupId>
+			<artifactId>allure-junit5</artifactId>
+			<version>${allure.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
