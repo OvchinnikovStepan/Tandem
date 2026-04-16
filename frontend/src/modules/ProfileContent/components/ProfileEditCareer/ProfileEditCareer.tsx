@@ -65,14 +65,14 @@ export default function ProfileEditCareer({
       </div>
 
       <div
-        className="flex flex-col justify-center items-center flex-1"
+        className="flex flex-col justify-center items-center"
         style={{
           padding: "39px 20px",
         }}
       >
         <div
           className="flex flex-col justify-center items-end gap-[18px]"
-          style={{ width: "100%", maxWidth: "672px" }}
+          style={{ width: "100%", maxWidth: "400px" }}
         >
 
           <FormProvider {...methods}>
@@ -148,9 +148,9 @@ export default function ProfileEditCareer({
         style={{ padding: "24px 0" }}
       >
         <Button
-          variant="primary"
+          variant="action"
           onClick={handleSave}
-          className="w-[100px] h-[45px] rounded-lg text-[15px]"
+          className="w-[100px] h-[45px] rounded-lg text-[15px] font-medium"
         >
           {t("profile.career.save")}
         </Button>

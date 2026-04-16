@@ -10,6 +10,7 @@ export interface FormFieldProps extends HTMLAttributes<HTMLDivElement> {
   name?: string;
   children: ReactNode;
   labelAlign?: "center" | "start";
+  labelWidth?: string;
 }
 
 function getNestedErrorMessage(
@@ -50,6 +51,7 @@ const FormField = ({
   name,
   children,
   labelAlign = "center",
+  labelWidth,
   ...props
 }: FormFieldProps) => {
   const formContext = useFormContext();
@@ -78,6 +80,7 @@ const FormField = ({
           fontSize: "16px",
           lineHeight: "22px",
           letterSpacing: "-0.007em",
+          ...(labelWidth ? { width: labelWidth } : {}),
         }}
       >
         {label}

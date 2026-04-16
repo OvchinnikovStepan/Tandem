@@ -130,7 +130,7 @@ export default function Profile() {
         />
 
         <div 
-          className="flex justify-center flex-1"
+          className="flex justify-center"
           style={{ padding: '24px 32px', gap: '16px' }}
         >
           {isEditing ? (

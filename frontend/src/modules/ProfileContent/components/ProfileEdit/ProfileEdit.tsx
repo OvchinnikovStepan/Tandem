@@ -55,11 +55,12 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
       </div>
 
       <div
-        className="flex items-center gap-6 justify-center"
-        style={{ padding: "24px 20px" }}
+        className="relative flex justify-center"
+        style={{ padding: "24px 20px", minHeight: "176px" }}
       >
         <div
-          className="cursor-pointer group relative shrink-0"
+          className="absolute cursor-pointer group"
+          style={{ left: "70px", top: "50%", transform: "translateY(-50%)" }}
         >
           <Avatar src={avatar || getDefaultAvatarUrl(200)} alt="Avatar" size="xl" />
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
@@ -68,7 +69,8 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
         </div>
 
         <div
-          className="flex flex-col items-start gap-[18px]"
+          className="flex flex-col items-end gap-[18px]"
+          style={{ width: "100%", maxWidth: "400px" }}
         >
           <FormField label={t("profile.edit.firstName")} name="firstName">
             <Controller
@@ -105,7 +107,7 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
       >
         <div
           className="flex flex-col justify-center items-end gap-[18px]"
-          style={{ width: "100%", maxWidth: "672px" }}
+          style={{ width: "100%", maxWidth: "400px" }}
         >
 
           <FormField label={t("profile.edit.gender")} name="gender">
@@ -185,9 +187,9 @@ export default function ProfileEdit({ user, onSave, onCancel: _onCancel }: Profi
         style={{ padding: "24px 0" }}
       >
         <Button
-          variant="primary"
+          variant="action"
           onClick={handleSubmit}
-          className="w-[100px] h-[45px] rounded-lg text-[15px]"
+          className="w-[100px] h-[45px] rounded-lg text-[15px] font-medium"
         >
           {t("profile.edit.save")}
         </Button>

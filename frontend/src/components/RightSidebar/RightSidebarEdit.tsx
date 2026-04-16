@@ -37,7 +37,7 @@ export default function RightSidebarEdit({
 
   return (
     <aside
-      className="bg-accent-white flex flex-col shrink-0 overflow-hidden h-full"
+      className="bg-accent-white hidden xl:flex flex-col shrink-0 overflow-hidden h-full"
       style={{ width: "312px" }}
     >
       {/* Header - Avatar and Actions */}

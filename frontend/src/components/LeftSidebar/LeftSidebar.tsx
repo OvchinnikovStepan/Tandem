@@ -51,7 +51,7 @@ export default function LeftSidebar({
 
   return (
     <aside 
-      className="bg-accent-white flex flex-col justify-between items-start shrink-0 h-full"
+      className="bg-accent-white hidden lg:flex flex-col justify-between items-start shrink-0 h-full"
       style={{ width: '312px', padding: '32px 16px', gap: '32px' }}
     >
       {/* Top section: Logo + Navigation */}

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Plus } from "lucide-react";
 import { SearchInput, Tag, PageTitle, Divider, Button } from "@/ui";
 import { Controller, useForm } from "react-hook-form";
@@ -35,12 +35,15 @@ export default function ProfileEditInterests({
   onBack: _onBack,
 }: ProfileEditInterestsProps) {
   const { t } = useTranslation();
-  const resolvedInterests =
-    interests ??
-    defaultInterestKeys.map((item) => ({
-      id: item.id,
-      label: t(`profile.interests.defaults.${item.key}`),
-    }));
+  const resolvedInterests = useMemo(
+    () =>
+      interests ??
+      defaultInterestKeys.map((item) => ({
+        id: item.id,
+        label: t(`profile.interests.defaults.${item.key}`),
+      })),
+    [interests, t]
+  );
 
   const methods = useForm<InterestsFormData>({
     defaultValues: {
@@ -75,7 +78,6 @@ export default function ProfileEditInterests({
         boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.25)",
         maxWidth: "975px",
         borderRadius: "24px",
-        minHeight: "559px",
       }}
     >
 
@@ -116,10 +118,10 @@ export default function ProfileEditInterests({
       </div>
 
       <div
-        className="flex justify-center items-start flex-1"
-        style={{ padding: "40px 20px" }}
+        className="flex justify-center items-start"
+        style={{ padding: "20px" }}
       >
-        <div className="grid grid-cols-2 gap-x-10 gap-y-5 place-items-center">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4 place-items-center">
           {selectedInterests.map((interest) => (
             <Tag
               key={interest.id}
@@ -140,9 +142,9 @@ export default function ProfileEditInterests({
         style={{ padding: "24px 0" }}
       >
         <Button
-          variant="primary"
+          variant="action"
           onClick={handleSave}
-          className="w-[100px] h-[45px] rounded-lg text-[15px]"
+          className="w-[100px] h-[45px] rounded-lg text-[15px] font-medium"
         >
           {t("profile.interests.save")}
         </Button>
