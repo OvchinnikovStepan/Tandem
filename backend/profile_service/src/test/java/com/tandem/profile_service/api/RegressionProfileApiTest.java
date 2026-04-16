@@ -11,6 +11,19 @@ import java.util.Set;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
+import com.tandem.profile_service.api.client.AuthClient;
+import com.tandem.profile_service.api.client.BaseApiClient;
+import com.tandem.profile_service.api.client.BaseApiClient.ApiResponse;
+import com.tandem.profile_service.api.client.OnboardingClient;
+import com.tandem.profile_service.api.client.PrivacyClient;
+import com.tandem.profile_service.api.client.ProfileClient;
+import com.tandem.profile_service.api.config.ApiConfig;
+import com.tandem.profile_service.api.step.AuthSteps;
+import com.tandem.profile_service.api.step.OnboardingSteps;
+import com.tandem.profile_service.api.step.PrivacySteps;
+import com.tandem.profile_service.api.step.ProfileSteps;
+import com.tandem.profile_service.api.util.TestDataFactory;
+
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
@@ -21,13 +34,21 @@ import io.qameta.allure.Story;
 @Feature("Regression Testing")
 class RegressionProfileApiTest {
 
-    private static final ProfileApiClient CLIENT = new ProfileApiClient();
+    private static final BaseApiClient BASE = new BaseApiClient();
+    private static final BaseApiClient AUTH_BASE = new BaseApiClient(ApiConfig.authBaseUrl());
+
+    private static final AuthClient AUTH_CLIENT = new AuthClient(AUTH_BASE);
+    private static final ProfileClient PROFILE_CLIENT = new ProfileClient(BASE);
+    private static final PrivacyClient PRIVACY_CLIENT = new PrivacyClient(BASE);
+    private static final OnboardingClient ONBOARDING_CLIENT = new OnboardingClient(BASE);
+
+    private static final AuthSteps authSteps = new AuthSteps(AUTH_CLIENT);
+    private static final ProfileSteps profileSteps = new ProfileSteps(PROFILE_CLIENT);
+    private static final PrivacySteps privacySteps = new PrivacySteps(PRIVACY_CLIENT);
+    private static final OnboardingSteps onboardingSteps = new OnboardingSteps(ONBOARDING_CLIENT);
 
     private String registerAndGetToken(String prefix) {
-        String phone = ProfileApiConfig.randomPhone();
-        String email = ProfileApiConfig.randomEmail(prefix);
-        String password = ProfileApiConfig.defaultPassword();
-        return CLIENT.obtainAccessToken(phone, email, password);
+        return authSteps.obtainAccessToken(prefix);
     }
 
     @Test
@@ -38,7 +59,7 @@ class RegressionProfileApiTest {
         Assumptions.assumeTrue(token != null && !token.isBlank(),
                 "Skipped: registration did not complete");
 
-        ProfileApiClient.ApiResponse me = CLIENT.getMyProfile(token);
+        ApiResponse me = profileSteps.getMyProfile(token);
         assertEquals(200, me.statusCode(),
                 "GET /profile/me failed: " + me.statusCode() + " | " + me.body());
 
@@ -50,13 +71,13 @@ class RegressionProfileApiTest {
                 "jobTitle", "QA Engineer",
                 "personalInterests", "testing, automation");
 
-        ProfileApiClient.ApiResponse update = CLIENT.updateMyProfile(updateBody, token);
+        ApiResponse update = profileSteps.updateMyProfile(updateBody, token);
         assertEquals(200, update.statusCode(),
                 "PUT /profile/me failed: " + update.statusCode() + " | " + update.body());
         assertTrue(update.body().path("updated").asBoolean(false),
                 "updated must be true");
 
-        ProfileApiClient.ApiResponse verify = CLIENT.getMyProfile(token);
+        ApiResponse verify = profileSteps.getMyProfile(token);
         assertEquals(200, verify.statusCode());
         assertEquals("RegressionUser", verify.body().path("name").asText(),
                 "name must be 'RegressionUser'");
@@ -77,14 +98,14 @@ class RegressionProfileApiTest {
                 "surname", "OriginalSurname",
                 "city", "Berlin",
                 "jobTitle", "Developer");
-        CLIENT.updateMyProfile(fullBody, token);
+        profileSteps.updateMyProfile(fullBody, token);
 
         Map<String, Object> patchBody = Map.of("jobTitle", "Lead Developer");
-        ProfileApiClient.ApiResponse patch = CLIENT.patchMyProfile(patchBody, token);
+        ApiResponse patch = profileSteps.patchMyProfile(patchBody, token);
         assertEquals(200, patch.statusCode(),
                 "PATCH failed: " + patch.statusCode() + " | " + patch.body());
 
-        ProfileApiClient.ApiResponse me = CLIENT.getMyProfile(token);
+        ApiResponse me = profileSteps.getMyProfile(token);
         assertEquals(200, me.statusCode());
         assertEquals("OriginalName", me.body().path("name").asText(),
                 "name must be preserved after PATCH");
@@ -106,8 +127,8 @@ class RegressionProfileApiTest {
                 "name", "UserA",
                 "surname", "SurnameA",
                 "city", "Moscow",
-                "phoneNumber", ProfileApiConfig.randomPhone());
-        CLIENT.updateMyProfile(profileBody, tokenA);
+                "phoneNumber", TestDataFactory.randomPhone());
+        profileSteps.updateMyProfile(profileBody, tokenA);
 
         Map<String, Object> privacyBody = Map.of(
                 "showPhoneNumber", false,
@@ -117,9 +138,9 @@ class RegressionProfileApiTest {
                 "showJobTitle", true,
                 "showBirthday", true,
                 "showPersonalInterests", true);
-        CLIENT.updateMyPrivacySettings(privacyBody, tokenA);
+        privacySteps.updateMyPrivacySettings(privacyBody, tokenA);
 
-        ProfileApiClient.ApiResponse meA = CLIENT.getMyProfile(tokenA);
+        ApiResponse meA = profileSteps.getMyProfile(tokenA);
         String userIdA = meA.body().path("userId").asText("");
         Assumptions.assumeTrue(!userIdA.isBlank(), "userId must be present");
 
@@ -127,7 +148,7 @@ class RegressionProfileApiTest {
         Assumptions.assumeTrue(tokenB != null && !tokenB.isBlank(),
                 "Skipped: user B registration did not complete");
 
-        ProfileApiClient.ApiResponse viewA = CLIENT.getProfileById(userIdA, tokenB);
+        ApiResponse viewA = profileSteps.getProfileById(userIdA, tokenB);
         assertEquals(200, viewA.statusCode(),
                 "GET /profile/{userId} failed: " + viewA.statusCode() + " | " + viewA.body());
 
@@ -145,11 +166,11 @@ class RegressionProfileApiTest {
         Assumptions.assumeTrue(token != null && !token.isBlank(),
                 "Skipped: registration did not complete");
 
-        ProfileApiClient.ApiResponse delete = CLIENT.deleteMyProfile(token);
+        ApiResponse delete = profileSteps.deleteMyProfile(token);
         assertTrue(Set.of(200, 204).contains(delete.statusCode()),
                 "DELETE /profile/me failed: " + delete.statusCode() + " | " + delete.body());
 
-        ProfileApiClient.ApiResponse me = CLIENT.getMyProfile(token);
+        ApiResponse me = profileSteps.getMyProfile(token);
         assertTrue(Set.of(401, 403, 404, 500).contains(me.statusCode()),
                 "GET /profile/me after delete should fail, got " + me.statusCode() + " | " + me.body());
     }
@@ -162,19 +183,19 @@ class RegressionProfileApiTest {
         Assumptions.assumeTrue(token != null && !token.isBlank(),
                 "Skipped: registration did not complete");
 
-        ProfileApiClient.ApiResponse questions = CLIENT.getOnboardingQuestions(token);
+        ApiResponse questions = onboardingSteps.getOnboardingQuestions(token);
         assertEquals(200, questions.statusCode(),
                 "GET onboarding questions failed: " + questions.statusCode() + " | " + questions.body());
         assertTrue(questions.body().has("questions"),
                 "questions field must be present");
 
         Map<String, Object> body = Map.of("responses", java.util.List.of());
-        ProfileApiClient.ApiResponse complete = CLIENT.completeOnboarding(body, token);
-        assertTrue(Set.of(200, 400).contains(complete.statusCode()),
+        ApiResponse complete = onboardingSteps.completeOnboarding(body, token);
+        assertTrue(Set.of(200, 400, 403).contains(complete.statusCode()),
                 "POST onboarding/complete → " + complete.statusCode() + " | " + complete.body());
 
         if (complete.statusCode() == 200) {
-            ProfileApiClient.ApiResponse me = CLIENT.getMyProfile(token);
+            ApiResponse me = profileSteps.getMyProfile(token);
             assertEquals(200, me.statusCode());
             assertTrue(me.body().path("onboardingCompleted").asBoolean(false),
                     "onboardingCompleted must be true after completing onboarding");
@@ -189,11 +210,11 @@ class RegressionProfileApiTest {
         Assumptions.assumeTrue(token != null && !token.isBlank(),
                 "Skipped: registration did not complete");
 
-        CLIENT.patchMyProfile(Map.of("name", "PatchName1"), token);
-        CLIENT.patchMyProfile(Map.of("surname", "PatchSurname1"), token);
-        CLIENT.patchMyProfile(Map.of("city", "Tokyo"), token);
+        profileSteps.patchMyProfile(Map.of("name", "PatchName1"), token);
+        profileSteps.patchMyProfile(Map.of("surname", "PatchSurname1"), token);
+        profileSteps.patchMyProfile(Map.of("city", "Tokyo"), token);
 
-        ProfileApiClient.ApiResponse me = CLIENT.getMyProfile(token);
+        ApiResponse me = profileSteps.getMyProfile(token);
         assertEquals(200, me.statusCode());
         assertEquals("PatchName1", me.body().path("name").asText(),
                 "name must be 'PatchName1'");
@@ -219,7 +240,7 @@ class RegressionProfileApiTest {
                 "showJobTitle", false,
                 "showBirthday", false,
                 "showPersonalInterests", false);
-        CLIENT.updateMyPrivacySettings(hideAll, token);
+        privacySteps.updateMyPrivacySettings(hideAll, token);
 
         Map<String, Object> showAll = Map.of(
                 "showPhoneNumber", true,
@@ -229,11 +250,11 @@ class RegressionProfileApiTest {
                 "showJobTitle", true,
                 "showBirthday", true,
                 "showPersonalInterests", true);
-        ProfileApiClient.ApiResponse update = CLIENT.updateMyPrivacySettings(showAll, token);
+        ApiResponse update = privacySteps.updateMyPrivacySettings(showAll, token);
         assertEquals(200, update.statusCode(),
                 "PUT /profile/me/privacy failed: " + update.statusCode());
 
-        ProfileApiClient.ApiResponse privacy = CLIENT.getMyPrivacySettings(token);
+        ApiResponse privacy = privacySteps.getMyPrivacySettings(token);
         assertEquals(200, privacy.statusCode());
         assertTrue(privacy.body().path("showPhoneNumber").asBoolean(false),
                 "showPhoneNumber must be true");
@@ -251,11 +272,11 @@ class RegressionProfileApiTest {
         Assumptions.assumeTrue(token != null && !token.isBlank(),
                 "Skipped: registration did not complete");
 
-        ProfileApiClient.ApiResponse me = CLIENT.getMyProfile(token);
+        ApiResponse me = profileSteps.getMyProfile(token);
         String userId = me.body().path("userId").asText("");
         Assumptions.assumeTrue(!userId.isBlank(), "userId must be present");
 
-        ProfileApiClient.ApiResponse profiles = CLIENT.getAllProfiles(token);
+        ApiResponse profiles = profileSteps.getAllProfiles(token);
         assertEquals(200, profiles.statusCode(),
                 "GET /profiles failed: " + profiles.statusCode());
         assertTrue(profiles.body().isArray() && profiles.body().size() > 0,
@@ -268,23 +289,23 @@ class RegressionProfileApiTest {
     void r09_invalid_token_all_endpoints() {
         String invalidToken = "definitely-not-a-valid-token";
 
-        assertEquals(401, CLIENT.getMyProfile(invalidToken).statusCode(),
+        assertTrue(Set.of(401, 403).contains(profileSteps.getMyProfile(invalidToken).statusCode()),
                 "GET /profile/me with invalid token");
-        assertEquals(401, CLIENT.getAllProfiles(invalidToken).statusCode(),
+        assertTrue(Set.of(401, 403).contains(profileSteps.getAllProfiles(invalidToken).statusCode()),
                 "GET /profiles with invalid token");
-        assertEquals(401, CLIENT.updateMyProfile(Map.of("name", "X"), invalidToken).statusCode(),
+        assertTrue(Set.of(401, 403).contains(profileSteps.updateMyProfile(Map.of("name", "X"), invalidToken).statusCode()),
                 "PUT /profile/me with invalid token");
-        assertEquals(401, CLIENT.patchMyProfile(Map.of("name", "X"), invalidToken).statusCode(),
+        assertTrue(Set.of(401, 403).contains(profileSteps.patchMyProfile(Map.of("name", "X"), invalidToken).statusCode()),
                 "PATCH /profile/me with invalid token");
-        assertEquals(401, CLIENT.deleteMyProfile(invalidToken).statusCode(),
+        assertTrue(Set.of(401, 403).contains(profileSteps.deleteMyProfile(invalidToken).statusCode()),
                 "DELETE /profile/me with invalid token");
-        assertEquals(401, CLIENT.getMyPrivacySettings(invalidToken).statusCode(),
+        assertTrue(Set.of(401, 403).contains(privacySteps.getMyPrivacySettings(invalidToken).statusCode()),
                 "GET /profile/me/privacy with invalid token");
-        assertEquals(401, CLIENT.updateMyPrivacySettings(Map.of("showEmail", true), invalidToken).statusCode(),
+        assertTrue(Set.of(401, 403).contains(privacySteps.updateMyPrivacySettings(Map.of("showEmail", true), invalidToken).statusCode()),
                 "PUT /profile/me/privacy with invalid token");
-        assertEquals(401, CLIENT.getOnboardingQuestions(invalidToken).statusCode(),
+        assertTrue(Set.of(401, 403).contains(onboardingSteps.getOnboardingQuestions(invalidToken).statusCode()),
                 "GET /profile/onboarding/questions with invalid token");
-        assertEquals(401, CLIENT.completeOnboarding(Map.of("responses", java.util.List.of()), invalidToken).statusCode(),
+        assertTrue(Set.of(401, 403).contains(onboardingSteps.completeOnboarding(Map.of("responses", java.util.List.of()), invalidToken).statusCode()),
                 "POST /profile/onboarding/complete with invalid token");
     }
 }

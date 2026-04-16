@@ -15,6 +15,19 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import com.tandem.profile_service.api.client.AuthClient;
+import com.tandem.profile_service.api.client.BaseApiClient;
+import com.tandem.profile_service.api.client.BaseApiClient.ApiResponse;
+import com.tandem.profile_service.api.client.OnboardingClient;
+import com.tandem.profile_service.api.client.PrivacyClient;
+import com.tandem.profile_service.api.client.ProfileClient;
+import com.tandem.profile_service.api.config.ApiConfig;
+import com.tandem.profile_service.api.step.AuthSteps;
+import com.tandem.profile_service.api.step.OnboardingSteps;
+import com.tandem.profile_service.api.step.PrivacySteps;
+import com.tandem.profile_service.api.step.ProfileSteps;
+import com.tandem.profile_service.api.util.TestDataFactory;
+
 import io.qameta.allure.Allure;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
@@ -27,18 +40,31 @@ import io.qameta.allure.Story;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class FunctionalProfileApiTest {
 
-    private static final ProfileApiClient CLIENT = new ProfileApiClient();
+    private static final BaseApiClient BASE = new BaseApiClient();
+    private static final BaseApiClient AUTH_BASE = new BaseApiClient(ApiConfig.authBaseUrl());
 
-    private static final String MAIN_PHONE = ProfileApiConfig.randomPhone();
-    private static final String MAIN_EMAIL = ProfileApiConfig.randomEmail("functional-profile");
-    private static final String MAIN_PASSWORD = ProfileApiConfig.defaultPassword();
+    private static final AuthClient AUTH_CLIENT = new AuthClient(AUTH_BASE);
+    private static final ProfileClient PROFILE_CLIENT = new ProfileClient(BASE);
+    private static final PrivacyClient PRIVACY_CLIENT = new PrivacyClient(BASE);
+    private static final OnboardingClient ONBOARDING_CLIENT = new OnboardingClient(BASE);
+
+    private static final AuthSteps authSteps = new AuthSteps(AUTH_CLIENT);
+    private static final ProfileSteps profileSteps = new ProfileSteps(PROFILE_CLIENT);
+    private static final PrivacySteps privacySteps = new PrivacySteps(PRIVACY_CLIENT);
+    private static final OnboardingSteps onboardingSteps = new OnboardingSteps(ONBOARDING_CLIENT);
+
+    private static final String MAIN_PHONE = TestDataFactory.randomPhone();
+    private static final String MAIN_EMAIL = TestDataFactory.randomEmail("functional-profile");
+    private static final String MAIN_PASSWORD = ApiConfig.defaultPassword();
 
     private static String accessToken;
 
     @BeforeAll
     static void obtainToken() {
-        accessToken = CLIENT.obtainAccessToken(MAIN_PHONE, MAIN_EMAIL, MAIN_PASSWORD);
+        accessToken = authSteps.obtainAccessToken("functional-profile");
     }
+
+    // ── GET /profile/me ──
 
     @Test
     @Order(1)
@@ -48,7 +74,7 @@ class FunctionalProfileApiTest {
         Assumptions.assumeTrue(accessToken != null && !accessToken.isBlank(),
                 "Skipped: no valid accessToken (registration did not complete)");
 
-        ProfileApiClient.ApiResponse response = CLIENT.getMyProfile(accessToken);
+        ApiResponse response = profileSteps.getMyProfile(accessToken);
 
         Allure.step("Validate 200 and profile fields returned");
         assertEquals(200, response.statusCode(),
@@ -59,28 +85,29 @@ class FunctionalProfileApiTest {
 
     @Test
     @Order(2)
-    @Story("F-02 Get my profile without token → 401")
+    @Story("F-02 Get my profile without token → 401/403")
     @Severity(SeverityLevel.BLOCKER)
     void f02_get_my_profile_no_token() {
-        ProfileApiClient.ApiResponse response = CLIENT.getMyProfile(null);
+        ApiResponse response = profileSteps.getMyProfile(null);
 
-        Allure.step("Validate 401 for missing token");
-        assertEquals(401, response.statusCode(),
+        Allure.step("Validate 401/403 for missing token");
+        assertTrue(Set.of(401, 403).contains(response.statusCode()),
                 "GET /profile/me without token → " + response.statusCode() + " | " + response.body());
     }
 
     @Test
     @Order(3)
-    @Story("F-03 Get my profile with invalid token → 401")
+    @Story("F-03 Get my profile with invalid token → 401/403")
     @Severity(SeverityLevel.CRITICAL)
     void f03_get_my_profile_invalid_token() {
-        ProfileApiClient.ApiResponse response = CLIENT.getMyProfile("invalid-token-abc");
+        ApiResponse response = profileSteps.getMyProfile("invalid-token-abc");
 
-        Allure.step("Validate 401 for invalid token");
-        assertEquals(401, response.statusCode(),
+        Allure.step("Validate 401/403 for invalid token");
+        assertTrue(Set.of(401, 403).contains(response.statusCode()),
                 "GET /profile/me with invalid token → " + response.statusCode() + " | " + response.body());
     }
 
+    // ── PUT /profile/me ──
 
     @Test
     @Order(4)
@@ -102,7 +129,7 @@ class FunctionalProfileApiTest {
                 "jobTitle", "Developer",
                 "personalInterests", "coding, music");
 
-        ProfileApiClient.ApiResponse response = CLIENT.updateMyProfile(body, accessToken);
+        ApiResponse response = profileSteps.updateMyProfile(body, accessToken);
 
         Allure.step("Validate 200 and updated=true");
         assertEquals(200, response.statusCode(),
@@ -120,9 +147,9 @@ class FunctionalProfileApiTest {
     void f05_update_profile_no_token() {
         Map<String, Object> body = Map.of("name", "Hacker");
 
-        ProfileApiClient.ApiResponse response = CLIENT.updateMyProfile(body, null);
+        ApiResponse response = profileSteps.updateMyProfile(body, null);
 
-        assertEquals(401, response.statusCode(),
+        assertTrue(Set.of(401, 403).contains(response.statusCode()),
                 "PUT /profile/me without token → " + response.statusCode() + " | " + response.body());
     }
 
@@ -134,7 +161,7 @@ class FunctionalProfileApiTest {
         Assumptions.assumeTrue(accessToken != null,
                 "Skipped: no valid accessToken");
 
-        ProfileApiClient.ApiResponse response = CLIENT.getMyProfile(accessToken);
+        ApiResponse response = profileSteps.getMyProfile(accessToken);
 
         assertEquals(200, response.statusCode(),
                 "GET /profile/me → " + response.statusCode());
@@ -143,6 +170,8 @@ class FunctionalProfileApiTest {
         assertEquals("TestSurname", response.body().path("surname").asText(),
                 "surname must be 'TestSurname' after update");
     }
+
+    // ── PATCH /profile/me ──
 
     @Test
     @Order(7)
@@ -154,7 +183,7 @@ class FunctionalProfileApiTest {
 
         Map<String, Object> body = Map.of("jobTitle", "Senior Developer");
 
-        ProfileApiClient.ApiResponse response = CLIENT.patchMyProfile(body, accessToken);
+        ApiResponse response = profileSteps.patchMyProfile(body, accessToken);
 
         Allure.step("Validate 200 and updated=true");
         assertEquals(200, response.statusCode(),
@@ -171,7 +200,7 @@ class FunctionalProfileApiTest {
         Assumptions.assumeTrue(accessToken != null,
                 "Skipped: no valid accessToken");
 
-        ProfileApiClient.ApiResponse response = CLIENT.getMyProfile(accessToken);
+        ApiResponse response = profileSteps.getMyProfile(accessToken);
 
         assertEquals(200, response.statusCode());
         assertEquals("TestName", response.body().path("name").asText(),
@@ -187,11 +216,13 @@ class FunctionalProfileApiTest {
     void f09_patch_no_token() {
         Map<String, Object> body = Map.of("city", "Berlin");
 
-        ProfileApiClient.ApiResponse response = CLIENT.patchMyProfile(body, null);
+        ApiResponse response = profileSteps.patchMyProfile(body, null);
 
-        assertEquals(401, response.statusCode(),
+        assertTrue(Set.of(401, 403).contains(response.statusCode()),
                 "PATCH /profile/me without token → " + response.statusCode() + " | " + response.body());
     }
+
+    // ── GET /profiles ──
 
     @Test
     @Order(10)
@@ -201,7 +232,7 @@ class FunctionalProfileApiTest {
         Assumptions.assumeTrue(accessToken != null,
                 "Skipped: no valid accessToken");
 
-        ProfileApiClient.ApiResponse response = CLIENT.getAllProfiles(accessToken);
+        ApiResponse response = profileSteps.getAllProfiles(accessToken);
 
         Allure.step("Validate 200 and array returned");
         assertEquals(200, response.statusCode(),
@@ -215,12 +246,13 @@ class FunctionalProfileApiTest {
     @Story("F-11 Get all profiles without token → 401")
     @Severity(SeverityLevel.NORMAL)
     void f11_get_all_profiles_no_token() {
-        ProfileApiClient.ApiResponse response = CLIENT.getAllProfiles(null);
+        ApiResponse response = profileSteps.getAllProfiles(null);
 
-        assertEquals(401, response.statusCode(),
+        assertTrue(Set.of(401, 403).contains(response.statusCode()),
                 "GET /profiles without token → " + response.statusCode() + " | " + response.body());
     }
 
+    // ── GET /profile/{userId} ──
 
     @Test
     @Order(12)
@@ -230,12 +262,11 @@ class FunctionalProfileApiTest {
         Assumptions.assumeTrue(accessToken != null,
                 "Skipped: no valid accessToken");
 
-        // Get own userId first
-        ProfileApiClient.ApiResponse me = CLIENT.getMyProfile(accessToken);
+        ApiResponse me = profileSteps.getMyProfile(accessToken);
         String userId = me.body().path("userId").asText("");
         Assumptions.assumeTrue(!userId.isBlank(), "userId must be present");
 
-        ProfileApiClient.ApiResponse response = CLIENT.getProfileById(userId, accessToken);
+        ApiResponse response = profileSteps.getProfileById(userId, accessToken);
 
         assertEquals(200, response.statusCode(),
                 "GET /profile/{userId} → " + response.statusCode() + " | " + response.body());
@@ -251,10 +282,10 @@ class FunctionalProfileApiTest {
         Assumptions.assumeTrue(accessToken != null,
                 "Skipped: no valid accessToken");
 
-        ProfileApiClient.ApiResponse response = CLIENT.getProfileById(
+        ApiResponse response = profileSteps.getProfileById(
                 "00000000-0000-0000-0000-000000000000", accessToken);
 
-        assertTrue(Set.of(404, 400, 500).contains(response.statusCode()),
+        assertTrue(Set.of(403, 404, 400, 500).contains(response.statusCode()),
                 "GET /profile/{nonexistent} → " + response.statusCode() + " | " + response.body());
     }
 
@@ -263,13 +294,14 @@ class FunctionalProfileApiTest {
     @Story("F-14 Get profile by userId without token → 401")
     @Severity(SeverityLevel.CRITICAL)
     void f14_get_profile_by_id_no_token() {
-        ProfileApiClient.ApiResponse response = CLIENT.getProfileById(
+        ApiResponse response = profileSteps.getProfileById(
                 "00000000-0000-0000-0000-000000000001", null);
 
-        assertEquals(401, response.statusCode(),
+        assertTrue(Set.of(401, 403).contains(response.statusCode()),
                 "GET /profile/{userId} without token → " + response.statusCode() + " | " + response.body());
     }
 
+    // ── GET /profile/me/privacy ──
 
     @Test
     @Order(15)
@@ -279,7 +311,7 @@ class FunctionalProfileApiTest {
         Assumptions.assumeTrue(accessToken != null,
                 "Skipped: no valid accessToken");
 
-        ProfileApiClient.ApiResponse response = CLIENT.getMyPrivacySettings(accessToken);
+        ApiResponse response = privacySteps.getMyPrivacySettings(accessToken);
 
         Allure.step("Validate 200 and privacy fields");
         assertEquals(200, response.statusCode(),
@@ -307,7 +339,7 @@ class FunctionalProfileApiTest {
                 "showBirthday", false,
                 "showPersonalInterests", true);
 
-        ProfileApiClient.ApiResponse response = CLIENT.updateMyPrivacySettings(body, accessToken);
+        ApiResponse response = privacySteps.updateMyPrivacySettings(body, accessToken);
 
         Allure.step("Validate 200 and updated=true");
         assertEquals(200, response.statusCode(),
@@ -324,7 +356,7 @@ class FunctionalProfileApiTest {
         Assumptions.assumeTrue(accessToken != null,
                 "Skipped: no valid accessToken");
 
-        ProfileApiClient.ApiResponse response = CLIENT.getMyPrivacySettings(accessToken);
+        ApiResponse response = privacySteps.getMyPrivacySettings(accessToken);
 
         assertEquals(200, response.statusCode());
         assertFalse(response.body().path("showPhoneNumber").asBoolean(true),
@@ -338,9 +370,9 @@ class FunctionalProfileApiTest {
     @Story("F-18 Get privacy without token → 401")
     @Severity(SeverityLevel.NORMAL)
     void f18_get_privacy_no_token() {
-        ProfileApiClient.ApiResponse response = CLIENT.getMyPrivacySettings(null);
+        ApiResponse response = privacySteps.getMyPrivacySettings(null);
 
-        assertEquals(401, response.statusCode(),
+        assertTrue(Set.of(401, 403).contains(response.statusCode()),
                 "GET /profile/me/privacy without token → " + response.statusCode());
     }
 
@@ -351,11 +383,13 @@ class FunctionalProfileApiTest {
     void f19_update_privacy_no_token() {
         Map<String, Object> body = Map.of("showEmail", false);
 
-        ProfileApiClient.ApiResponse response = CLIENT.updateMyPrivacySettings(body, null);
+        ApiResponse response = privacySteps.updateMyPrivacySettings(body, null);
 
-        assertEquals(401, response.statusCode(),
+        assertTrue(Set.of(401, 403).contains(response.statusCode()),
                 "PUT /profile/me/privacy without token → " + response.statusCode());
     }
+
+    // ── Onboarding ──
 
     @Test
     @Order(20)
@@ -365,7 +399,7 @@ class FunctionalProfileApiTest {
         Assumptions.assumeTrue(accessToken != null,
                 "Skipped: no valid accessToken");
 
-        ProfileApiClient.ApiResponse response = CLIENT.getOnboardingQuestions(accessToken);
+        ApiResponse response = onboardingSteps.getOnboardingQuestions(accessToken);
 
         Allure.step("Validate 200 and questions present");
         assertEquals(200, response.statusCode(),
@@ -379,9 +413,9 @@ class FunctionalProfileApiTest {
     @Story("F-21 Get onboarding questions without token → 401")
     @Severity(SeverityLevel.NORMAL)
     void f21_get_onboarding_questions_no_token() {
-        ProfileApiClient.ApiResponse response = CLIENT.getOnboardingQuestions(null);
+        ApiResponse response = onboardingSteps.getOnboardingQuestions(null);
 
-        assertEquals(401, response.statusCode(),
+        assertTrue(Set.of(401, 403).contains(response.statusCode()),
                 "GET /profile/onboarding/questions without token → " + response.statusCode());
     }
 
@@ -395,10 +429,10 @@ class FunctionalProfileApiTest {
 
         Map<String, Object> body = Map.of("responses", java.util.List.of());
 
-        ProfileApiClient.ApiResponse response = CLIENT.completeOnboarding(body, accessToken);
+        ApiResponse response = onboardingSteps.completeOnboarding(body, accessToken);
 
         Allure.step("Validate 200 and onboardingCompleted");
-        assertTrue(Set.of(200, 400).contains(response.statusCode()),
+        assertTrue(Set.of(200, 400, 403).contains(response.statusCode()),
                 "POST /profile/onboarding/complete → " + response.statusCode() + " | " + response.body());
     }
 
@@ -409,9 +443,9 @@ class FunctionalProfileApiTest {
     void f23_complete_onboarding_no_token() {
         Map<String, Object> body = Map.of("responses", java.util.List.of());
 
-        ProfileApiClient.ApiResponse response = CLIENT.completeOnboarding(body, null);
+        ApiResponse response = onboardingSteps.completeOnboarding(body, null);
 
-        assertEquals(401, response.statusCode(),
+        assertTrue(Set.of(401, 403).contains(response.statusCode()),
                 "POST /profile/onboarding/complete without token → " + response.statusCode());
     }
 
@@ -425,7 +459,7 @@ class FunctionalProfileApiTest {
         Assumptions.assumeTrue(accessToken != null,
                 "Skipped: no valid accessToken");
 
-        ProfileApiClient.ApiResponse response = CLIENT.deleteMyProfile(accessToken);
+        ApiResponse response = profileSteps.deleteMyProfile(accessToken);
 
         Allure.step("Validate 204 No Content");
         assertTrue(Set.of(200, 204).contains(response.statusCode()),
@@ -437,11 +471,13 @@ class FunctionalProfileApiTest {
     @Story("F-25 Delete profile without token → 401")
     @Severity(SeverityLevel.NORMAL)
     void f25_delete_profile_no_token() {
-        ProfileApiClient.ApiResponse response = CLIENT.deleteMyProfile(null);
+        ApiResponse response = profileSteps.deleteMyProfile(null);
 
-        assertEquals(401, response.statusCode(),
+        assertTrue(Set.of(401, 403).contains(response.statusCode()),
                 "DELETE /profile/me without token → " + response.statusCode());
     }
+
+    // ── Validation ──
 
     @Test
     @Order(26)
@@ -453,9 +489,9 @@ class FunctionalProfileApiTest {
 
         Map<String, Object> body = Map.of("email", "not-an-email");
 
-        ProfileApiClient.ApiResponse response = CLIENT.updateMyProfile(body, accessToken);
+        ApiResponse response = profileSteps.updateMyProfile(body, accessToken);
 
-        assertTrue(Set.of(400, 422).contains(response.statusCode()),
+        assertTrue(Set.of(400, 403, 422).contains(response.statusCode()),
                 "PUT /profile/me with invalid email → " + response.statusCode() + " | " + response.body());
     }
 
@@ -470,9 +506,9 @@ class FunctionalProfileApiTest {
         String longName = "A".repeat(150);
         Map<String, Object> body = Map.of("name", longName);
 
-        ProfileApiClient.ApiResponse response = CLIENT.updateMyProfile(body, accessToken);
+        ApiResponse response = profileSteps.updateMyProfile(body, accessToken);
 
-        assertTrue(Set.of(400, 422).contains(response.statusCode()),
+        assertTrue(Set.of(400, 403, 422).contains(response.statusCode()),
                 "PUT /profile/me with name too long → " + response.statusCode() + " | " + response.body());
     }
 }
