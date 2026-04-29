@@ -6,6 +6,7 @@
 	},
 	"validation": {
 		"invalidEmail": "Введите корректный email",
+		"invalidPhone": "Введите корректный номер телефона",
 		"minPassword": "Пароль должен содержать минимум 8 символов",
 		"minPasswordShort": "Минимум 8 символов",
 		"passwordsMismatch": "Пароли не совпадают",
@@ -28,12 +29,28 @@
 	"register": {
 		"titleStep1": "Создать аккаунт",
 		"titleStep2": "Придумайте пароль",
-		"step": "Шаг {{step}} из 2",
+		"titlePhone": "Введите номер телефона",
+		"titleCode": "Введите код",
+		"titleCredentials": "Создайте учётные данные",
+		"step": "Шаг {{step}} из {{total}}",
 		"next": "Далее",
 		"submit": "Зарегистрироваться",
 		"submitting": "Регистрация...",
 		"haveAccount": "Уже есть аккаунт?",
-		"login": "Войти"
+		"login": "Войти",
+		"phoneLabel": "Номер телефона",
+		"phonePlaceholder": "+7 999 123 45 67",
+		"sendingCode": "Отправка кода...",
+		"codeSent": "Мы отправили код подтверждения на",
+		"codeLabel": "Код подтверждения",
+		"submitCode": "Подтвердить код",
+		"submittingCode": "Проверка...",
+		"noCode": "Не получили код?",
+		"resendCode": "Отправить повторно",
+		"errors": {
+			"unknown": "Что-то пошло не так, попробуйте ещё раз",
+			"invalidCode": "Неверный код подтверждения"
+		}
 	},
 	"forgotPassword": {
 		"titleStep1": "Восстановить пароль",

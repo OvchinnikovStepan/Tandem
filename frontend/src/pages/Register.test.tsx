@@ -12,18 +12,29 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+vi.mock("@/api/auth", () => ({
+  registerPhone: vi.fn(async () => ({ verificationId: "vid-1" })),
+  verifyPhone: vi.fn(async () => ({ verified: true })),
+  registerEmail: vi.fn(async () => ({
+    userId: "uid-1",
+    accessToken: "access",
+    refreshToken: "refresh",
+    passwordStrength: "GOOD",
+  })),
+}));
+
 describe("Register Page", () => {
   beforeEach(() => {
     mockNavigate.mockClear();
+    window.localStorage.clear();
   });
 
-  const renderPage = () => {
-    return render(
+  const renderPage = () =>
+    render(
       <MemoryRouter>
         <Register />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
-  };
 
   it("рендерит Header", () => {
     renderPage();
@@ -35,24 +46,19 @@ describe("Register Page", () => {
     expect(screen.getByAltText("Illustration")).toBeInTheDocument();
   });
 
-  it("рендерит заголовок первого шага", () => {
+  it("рендерит заголовок первого шага (телефон)", () => {
     renderPage();
-    expect(screen.getByText("Создать аккаунт")).toBeInTheDocument();
+    expect(screen.getByText("Введите номер телефона")).toBeInTheDocument();
   });
 
-  it("показывает 'Шаг 1 из 2' на первом шаге", () => {
+  it("показывает 'Шаг 1 из 3' на первом шаге", () => {
     renderPage();
-    expect(screen.getByText("Шаг 1 из 2")).toBeInTheDocument();
+    expect(screen.getByText("Шаг 1 из 3")).toBeInTheDocument();
   });
 
-  it("рендерит поле email на первом шаге", () => {
+  it("рендерит поле phoneNumber на первом шаге", () => {
     renderPage();
-    expect(screen.getByLabelText("Email")).toBeInTheDocument();
-  });
-
-  it("рендерит кнопку 'Далее'", () => {
-    renderPage();
-    expect(screen.getByRole("button", { name: "Далее" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Номер телефона")).toBeInTheDocument();
   });
 
   it("рендерит ссылку на вход", () => {
@@ -68,33 +74,14 @@ describe("Register Page", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/login");
   });
 
-  it("переходит ко второму шагу после валидации email", async () => {
+  it("переходит ко второму шагу после ввода телефона", async () => {
     const user = userEvent.setup();
     renderPage();
-    
-    const emailInput = screen.getByLabelText("Email");
-    await user.type(emailInput, "test@example.com");
-    await user.click(screen.getByRole("button", { name: "Далее" }));
-    
-    expect(await screen.findByText("Придумайте пароль")).toBeInTheDocument();
-    expect(screen.getByText("Шаг 2 из 2")).toBeInTheDocument();
-  });
 
-  it("показывает поля пароля на втором шаге", async () => {
-    const user = userEvent.setup();
-    renderPage();
-    
-    const emailInput = screen.getByLabelText("Email");
-    await user.type(emailInput, "test@example.com");
+    await user.type(screen.getByLabelText("Номер телефона"), "+79991234567");
     await user.click(screen.getByRole("button", { name: "Далее" }));
-    
-    expect(await screen.findByPlaceholderText("Пароль")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Повторите пароль")).toBeInTheDocument();
-  });
 
-  it("прогресс-бар отображается правильно", () => {
-    const { container } = renderPage();
-    const progressBars = container.querySelectorAll('[class*="h-1"]');
-    expect(progressBars.length).toBeGreaterThan(0);
+    expect(await screen.findByText("Введите код")).toBeInTheDocument();
+    expect(screen.getByText("Шаг 2 из 3")).toBeInTheDocument();
   });
 });

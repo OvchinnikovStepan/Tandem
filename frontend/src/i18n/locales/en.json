@@ -6,6 +6,7 @@
 	},
 	"validation": {
 		"invalidEmail": "Enter a valid email",
+		"invalidPhone": "Enter a valid phone number",
 		"minPassword": "Password must be at least 8 characters",
 		"minPasswordShort": "At least 8 characters",
 		"passwordsMismatch": "Passwords do not match",
@@ -28,12 +29,28 @@
 	"register": {
 		"titleStep1": "Create account",
 		"titleStep2": "Create a password",
-		"step": "Step {{step}} of 2",
+		"titlePhone": "Enter phone number",
+		"titleCode": "Enter code",
+		"titleCredentials": "Create credentials",
+		"step": "Step {{step}} of {{total}}",
 		"next": "Next",
 		"submit": "Register",
 		"submitting": "Registering...",
 		"haveAccount": "Already have an account?",
-		"login": "Sign in"
+		"login": "Sign in",
+		"phoneLabel": "Phone number",
+		"phonePlaceholder": "+1 555 123 4567",
+		"sendingCode": "Sending code...",
+		"codeSent": "We sent a verification code to",
+		"codeLabel": "Verification code",
+		"submitCode": "Confirm code",
+		"submittingCode": "Verifying...",
+		"noCode": "Didn't get a code?",
+		"resendCode": "Resend",
+		"errors": {
+			"unknown": "Something went wrong, please try again",
+			"invalidCode": "Invalid verification code"
+		}
 	},
 	"forgotPassword": {
 		"titleStep1": "Reset password",
