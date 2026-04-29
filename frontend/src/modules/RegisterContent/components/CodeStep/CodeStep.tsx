@@ -1,7 +1,7 @@
 import { AuthButton as Button } from "@/ui/auth/AuthButton";
 import { LinkButton } from "@/ui/auth/LinkButton";
 import { useRef, useState, useEffect } from "react";
-import { UseFormSetValue, FieldErrors } from "react-hook-form";
+import type { UseFormSetValue, FieldErrors } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 interface CodeFormData {

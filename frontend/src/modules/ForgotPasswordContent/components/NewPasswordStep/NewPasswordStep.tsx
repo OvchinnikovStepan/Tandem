@@ -3,7 +3,7 @@ import { AuthInput as Input } from "@/ui/auth/AuthInput";
 import { PasswordToggle } from "@/ui/auth/PasswordToggle";
 import { Lock } from "lucide-react";
 import { useState, useMemo } from "react";
-import { UseFormRegister, FieldErrors } from "react-hook-form";
+import type { UseFormRegister, FieldErrors } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 interface NewPasswordFormData {

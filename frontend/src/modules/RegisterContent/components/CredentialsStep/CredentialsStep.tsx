@@ -1,7 +1,7 @@
 import { AuthButton as Button } from "@/ui/auth/AuthButton";
 import { AuthInput as Input } from "@/ui/auth/AuthInput";
 import { Mail, Lock } from "lucide-react";
-import { UseFormRegister, FieldErrors } from "react-hook-form";
+import type { UseFormRegister, FieldErrors } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 interface CredentialsFormData {
