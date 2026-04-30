@@ -1,0 +1,10 @@
+target/
+.allure/
+.idea/
+*.iml
+*.log
+test-output*.log
+allure-output.log
+
+# Local override compose (содержит локальные пароли/порты)
+docker-compose.override.yml

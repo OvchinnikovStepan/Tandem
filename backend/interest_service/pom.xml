@@ -20,6 +20,7 @@
 		<java.version>17</java.version>
 		<flyway.version>9.22.3</flyway.version>
 		<jacoco.version>0.8.11</jacoco.version>
+		<allure.version>2.30.0</allure.version>
 		<db.url>jdbc:postgresql://localhost:5432/InterestService</db.url>
 		<db.user>postgres</db.user>
 		<db.password>koroleva</db.password>
@@ -111,6 +112,20 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Allure Reports -->
+		<dependency>
+			<groupId>io.qameta.allure</groupId>
+			<artifactId>allure-junit5</artifactId>
+			<version>${allure.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.9.21</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 
@@ -127,6 +142,39 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+				</configuration>
+			</plugin>
+
+			<!-- Surefire: подключаем allure-aspect agent -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>
+						-javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/1.9.21/aspectjweaver-1.9.21.jar"
+					</argLine>
+					<systemPropertyVariables>
+						<allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+					</systemPropertyVariables>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.aspectj</groupId>
+						<artifactId>aspectjweaver</artifactId>
+						<version>1.9.21</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+			<!-- Allure HTML report generator -->
+			<plugin>
+				<groupId>io.qameta.allure</groupId>
+				<artifactId>allure-maven</artifactId>
+				<version>2.12.0</version>
+				<configuration>
+					<reportVersion>2.30.0</reportVersion>
+					<resultsDirectory>${project.build.directory}/allure-results</resultsDirectory>
+					<reportDirectory>${project.build.directory}/site/allure-maven-plugin</reportDirectory>
 				</configuration>
 			</plugin>
 
