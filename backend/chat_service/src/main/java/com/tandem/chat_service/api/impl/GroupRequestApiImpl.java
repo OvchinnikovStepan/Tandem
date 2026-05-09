@@ -4,6 +4,7 @@ import com.tandem.chat_service.api.GroupRequestApi;
 import com.tandem.chat_service.api.mapper.GroupRequestApiMapper;
 import com.tandem.chat_service.api.model.request.CreateJoinGroupRequestJson;
 import com.tandem.chat_service.api.model.response.JoinGroupResponseJson;
+import com.tandem.chat_service.security.SecurityUtils;
 import com.tandem.chat_service.service.GroupRequestService;
 import com.tandem.chat_service.service.model.response.GroupRequestDto;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class GroupRequestApiImpl implements GroupRequestApi {
 
     @Override
     public ResponseEntity<JoinGroupResponseJson> requestToJoin(UUID groupId, CreateJoinGroupRequestJson request) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
         String message = request != null ? request.getMessage() : null;
 
         GroupRequestDto created = requestService.createRequest(groupId, currentUserId, message);
@@ -32,28 +33,28 @@ public class GroupRequestApiImpl implements GroupRequestApi {
 
     @Override
     public ResponseEntity<String> approveRequest(UUID requestId) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
         requestService.approveRequest(requestId, currentUserId);
         return ResponseEntity.ok("Заявка одобрена, пользователь добавлен в чат");
     }
 
     @Override
     public ResponseEntity<String> rejectRequest(UUID requestId) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
         requestService.rejectRequest(requestId, currentUserId);
         return ResponseEntity.ok("Заявка отклонена");
     }
 
     @Override
     public ResponseEntity<String> cancelRequest(UUID requestId) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
         requestService.cancelRequest(requestId, currentUserId);
         return ResponseEntity.ok("Заявка отменена");
     }
 
     @Override
     public ResponseEntity<List<JoinGroupResponseJson>> getPendingRequests(UUID groupId) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
         List<GroupRequestDto> requests = requestService.getPendingRequestsForGroup(groupId, currentUserId);
 
         List<JoinGroupResponseJson> response = requests.stream()
@@ -64,17 +65,12 @@ public class GroupRequestApiImpl implements GroupRequestApi {
 
     @Override
     public ResponseEntity<List<JoinGroupResponseJson>> getMyRequests() {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
         List<GroupRequestDto> requests = requestService.getMyRequests(currentUserId);
 
         List<JoinGroupResponseJson> response = requests.stream()
                 .map(GroupRequestApiMapper::toJson)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
-    }
-
-    private UUID getCurrentUserId() {
-        // Для тестирования (будет заменено на извлечение токена через Security)
-        return UUID.fromString("123e4567-e89b-12d3-a456-426614174002");
     }
 }

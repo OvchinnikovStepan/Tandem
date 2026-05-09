@@ -7,6 +7,7 @@ import com.tandem.chat_service.api.model.request.CreatePersonalChatRequestJson;
 import com.tandem.chat_service.api.model.request.UpdateGroupRequestJson;
 import com.tandem.chat_service.api.model.response.ChatResponseJson;
 import com.tandem.chat_service.api.model.response.GroupDtoJson;
+import com.tandem.chat_service.security.SecurityUtils;
 import com.tandem.chat_service.service.ChatService;
 import com.tandem.chat_service.service.model.request.CreateGroupChatRequest;
 import com.tandem.chat_service.service.model.request.UpdateGroupRequest;
@@ -29,7 +30,7 @@ public class ChatApiImpl implements ChatApi {
 
     @Override
     public ResponseEntity<List<ChatResponseJson>> getMyChats() {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
 
         List<ChatResponse> chats = chatService.getUserChats(currentUserId);
         List<ChatResponseJson> response = chats.stream()
@@ -53,7 +54,7 @@ public class ChatApiImpl implements ChatApi {
 
     @Override
     public ResponseEntity<ChatResponseJson> createPersonalChat(CreatePersonalChatRequestJson request) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
 
         ChatResponse createdChat = chatService.createPersonalChat(currentUserId, request.getTargetUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(ChatApiMapper.toJson(createdChat));
@@ -61,7 +62,7 @@ public class ChatApiImpl implements ChatApi {
 
     @Override
     public ResponseEntity<ChatResponseJson> createGroupChat(CreateGroupChatRequestJson request) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
 
         CreateGroupChatRequest serviceRequest = ChatApiMapper.toServiceModel(currentUserId, request);
         ChatResponse createdChat = chatService.createGroupChat(serviceRequest);
@@ -71,7 +72,7 @@ public class ChatApiImpl implements ChatApi {
 
     @Override
     public ResponseEntity<String> leaveGroupChat(UUID id) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
 
         chatService.leaveGroupChat(id, currentUserId);
 
@@ -89,7 +90,7 @@ public class ChatApiImpl implements ChatApi {
 
     @Override
     public ResponseEntity<String> muteChat(UUID id) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
         chatService.muteChat(id, currentUserId);
         String message = String.format("Чат %s переведен в беззвучный режим", id);
         return ResponseEntity.ok(message);
@@ -97,7 +98,7 @@ public class ChatApiImpl implements ChatApi {
 
     @Override
     public ResponseEntity<String> kickParticipant(UUID chatId, UUID userId) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
         chatService.kickUserFromGroupChat(chatId, userId, currentUserId);
         String message = String.format("Пользователь %s исключен из чата %s",userId, chatId);
         return ResponseEntity.ok(message);
@@ -105,7 +106,7 @@ public class ChatApiImpl implements ChatApi {
 
     @Override
     public ResponseEntity<GroupDtoJson> updateGroupSettings(UUID chatId, UpdateGroupRequestJson request) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
 
         UpdateGroupRequest serviceRequest = ChatApiMapper.toUpdateServiceModel(request);
         GroupDto updatedGroup = chatService.updateGroupSettings(chatId, currentUserId, serviceRequest);
@@ -124,14 +125,9 @@ public class ChatApiImpl implements ChatApi {
 
     @Override
     public ResponseEntity<String> joinPublicChat(UUID id) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
         chatService.joinPublicGroupChat(id, currentUserId);
         String message = String.format("Пользователь %s вступил в чат %s", currentUserId, id);
         return ResponseEntity.ok(message);
-    }
-
-    private UUID getCurrentUserId() {
-        // Для тестирования (будет заменено на извлечение токена через Security)
-        return UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
     }
 }
