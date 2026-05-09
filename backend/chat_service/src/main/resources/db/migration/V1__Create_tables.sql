@@ -47,8 +47,6 @@ CREATE TABLE messages (
     message_type VARCHAR(20) NOT NULL, -- 'text', 'file', 'link', 'code', 'emoji', 'sticker'
     metadata JSONB,
     sent_at TIMESTAMP NOT NULL, -- время отправки
-    delivered_at TIMESTAMP, -- время доставки получателю
-    is_read BOOLEAN DEFAULT FALSE,  -- прочитано/не прочитано
     deleted_at TIMESTAMP -- Soft delete
 );
 
