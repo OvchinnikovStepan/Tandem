@@ -82,6 +82,8 @@ public class ChatDalImpl implements ChatDal {
         ChatParticipantEntity participant2 = ChatEntityMapper.mapToAdminParticipantEntity(chat.getId(), targetUserId);
         participantDao.insert(participant2);
 
+        publisher.publishChatCreated(chat.getId(), List.of(initiatorId, targetUserId));
+
         log.debug("Created personal chat with id {} between {} and {}", chat.getId(), initiatorId, targetUserId);
         return getChatById(chat.getId());
     }
@@ -215,6 +217,9 @@ public class ChatDalImpl implements ChatDal {
         ChatParticipantEntity participant = ChatEntityMapper.mapToMemberParticipantEntity(chatId, userId);
 
         participantDao.insert(participant);
+
+        publisher.publishUserJoinedGroup(group.getId(), group.getCreatorId(), userId);
+
         log.debug("User {} joined public chat {}", userId, chatId);
     }
 

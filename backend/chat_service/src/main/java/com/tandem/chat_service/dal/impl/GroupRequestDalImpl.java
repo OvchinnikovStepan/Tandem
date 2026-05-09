@@ -12,6 +12,7 @@ import com.tandem.chat_service.dao.model.ChatEntity;
 import com.tandem.chat_service.dao.model.ChatParticipantEntity;
 import com.tandem.chat_service.dao.model.GroupEntity;
 import com.tandem.chat_service.dao.model.GroupRequestEntity;
+import com.tandem.chat_service.integration.InterestEventPublisher;
 import com.tandem.chat_service.service.model.response.GroupRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -30,6 +31,7 @@ public class GroupRequestDalImpl implements GroupRequestDal {
     private final GroupDao groupDao;
     private final ChatDao chatDao;
     private final ChatParticipantDao participantDao;
+    private final InterestEventPublisher publisher;
 
     @Override
     @Transactional
@@ -51,6 +53,9 @@ public class GroupRequestDalImpl implements GroupRequestDal {
         GroupRequestEntity entity = GroupRequestEntityMapper.toEntity(groupId, userId, group.getCreatorId(), message);
 
         requestDao.insert(entity);
+
+        publisher.publishGroupRequestEvent(entity.getId(), groupId, group.getCreatorId(), GroupRequestStatus.PENDING);
+
         return GroupRequestEntityMapper.toDto(entity);
     }
 
@@ -83,6 +88,7 @@ public class GroupRequestDalImpl implements GroupRequestDal {
         ChatParticipantEntity participant = GroupRequestEntityMapper.toParticipantEntity(
                 chat.getId(), request.getUserId());
         participantDao.insert(participant);
+        publisher.publishGroupRequestEvent(requestId, request.getGroupId(), request.getUserId(), GroupRequestStatus.APPROVED);
     }
 
     @Override
@@ -92,6 +98,7 @@ public class GroupRequestDalImpl implements GroupRequestDal {
 
         verifyReviewerIsGroupCreator(request.getGroupId(), reviewerId);
         requestDao.updateStatus(requestId, GroupRequestStatus.REJECTED, LocalDateTime.now(), reviewerId);
+        publisher.publishGroupRequestEvent(requestId, request.getGroupId(), request.getUserId(), GroupRequestStatus.REJECTED);
     }
 
     @Override
