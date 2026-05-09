@@ -35,6 +35,9 @@ public class TandemKafkaConfig {
     private String applicationName;
 
     public static final String TOPIC_GROUP_CREATED = "group.created";
+    public static final String TOPIC_MESSAGE_SENT = "message.sent";
+    public static final String TOPIC_CHAT_CREATED = "chat.created";
+    public static final String TOPIC_GROUP_REQUEST = "group.request.updated";
 
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
