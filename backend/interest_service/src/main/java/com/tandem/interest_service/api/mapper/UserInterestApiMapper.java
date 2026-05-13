@@ -52,19 +52,4 @@ public class UserInterestApiMapper {
                 .createdAt(response.getCreatedAt())
                 .build();
     }
-
-    /**
-     * Маппит ответ сервиса о метчинге в JSON для API
-     */
-    public UserMatchingResponseJson toUserMatchingResponseJson(UserMatchingResponse response) {
-        if (response == null) {
-            return null;
-        }
-
-        return UserMatchingResponseJson.builder()
-                .userId(response.getUserId())
-                .matchingInterests(response.getMatchingInterests())
-                .matchScore(response.getMatchScore())
-                .build();
-    }
 }

@@ -35,6 +35,7 @@ public class TandemKafkaConfig {
     private String applicationName;
 
     public static final String TOPIC_ONBOARDING_COMPLETED = "profile.onboarding.completed";
+    public static final String TOPIC_GROUP_CREATED = "group.created";
     public static final String TOPIC_TAG_CREATED = "tag.created";
     public static final String TOPIC_INTERESTS_UPDATED = "interests.updated";
 
