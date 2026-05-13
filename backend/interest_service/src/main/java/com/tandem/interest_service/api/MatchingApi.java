@@ -1,5 +1,6 @@
 package com.tandem.interest_service.api;
 
+import com.tandem.interest_service.api.model.response.GroupMatchingResponseJson;
 import com.tandem.interest_service.api.model.response.UserMatchingResponseJson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +19,16 @@ public interface MatchingApi {
     @GetMapping("/matching-users")
     ResponseEntity<List<UserMatchingResponseJson>> getMatchUsers(
             @Parameter(description = "Максимальное количество пользователей в результате", example = "10")
+            @RequestParam(value = "limit", required = false) Integer limit,
+
+            @Parameter(description = "Минимальное количество общих интересов", example = "2")
+            @RequestParam(value = "minMatchCount", required = false) Integer minMatchCount
+    );
+
+    @Operation(summary = "Получить группы по интересам")
+    @GetMapping("/matching-groups")
+    ResponseEntity<List<GroupMatchingResponseJson>> getMatchGroups(
+            @Parameter(description = "Максимальное количество групп в результате", example = "10")
             @RequestParam(value = "limit", required = false) Integer limit,
 
             @Parameter(description = "Минимальное количество общих интересов", example = "2")

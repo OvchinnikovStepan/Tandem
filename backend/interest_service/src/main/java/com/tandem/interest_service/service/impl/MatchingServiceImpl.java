@@ -1,8 +1,9 @@
 package com.tandem.interest_service.service.impl;
 
-import com.tandem.interest_service.dal.UserInterestDal;
+import com.tandem.interest_service.dal.MatchingDal;
 import com.tandem.interest_service.service.MatchingService;
 import com.tandem.interest_service.service.model.response.UserMatchingResponse;
+import com.tandem.interest_service.service.model.response.GroupMatchingResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,23 +19,35 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class MatchingServiceImpl implements MatchingService {
-    private final UserInterestDal userInterestDal;
+    private final MatchingDal matchingDal ;
 
     @Override
     public List<UserMatchingResponse> getMatchingUsers(
             UUID userId, int limit, int minMatchCount){
 
-        Map<UUID, Integer> matchingData = userInterestDal.getUsersWithCommonTagsCount(userId, minMatchCount);
+        Map<UUID, Integer> matchingData = matchingDal.getUsersWithCommonTagsCount(userId, minMatchCount);
 
         if (matchingData.isEmpty()) {
             return List.of();
         }
 
-        int countCurrentUser = userInterestDal.getCountUserInterests(userId);
+        int countCurrentUser = matchingDal.getCountUserInterests(userId);
 
-        PriorityQueue<Map.Entry<UUID, Double>> heap = buildMatchingHeap(matchingData, countCurrentUser, limit);
+        PriorityQueue<Map.Entry<UUID, Double>> heap = buildMatchingHeap(matchingData, countCurrentUser, limit, true);
 
-        return buildResponsesFromHeap(heap, userId);
+        return buildUserResponsesFromHeap(heap, userId);
+    }
+
+    @Override
+    public List<GroupMatchingResponse> getMatchingGroups(UUID userId, int limit, int minMatchCount) {
+        Map<UUID, Integer> matchingData = matchingDal.getGroupsWithCommonTagsCount(userId, minMatchCount);
+        if (matchingData.isEmpty()) return List.of();
+
+        int countCurrentUser = matchingDal.getCountUserInterests(userId);
+        // Передаем false, чтобы указать, что мы мэтчим с группами
+        PriorityQueue<Map.Entry<UUID, Double>> heap = buildMatchingHeap(matchingData, countCurrentUser, limit, false);
+
+        return buildGroupResponsesFromHeap(heap, userId);
     }
 
     /**
@@ -43,21 +56,27 @@ public class MatchingServiceImpl implements MatchingService {
     private PriorityQueue<Map.Entry<UUID, Double>> buildMatchingHeap(
             Map<UUID, Integer> matchingData,
             int countCurrentUser,
-            int limit) {
+            int limit,
+            boolean isUserMatch) {
 
         PriorityQueue<Map.Entry<UUID, Double>> heap = new PriorityQueue<>(
                 limit + 1,
                 (a, b) -> Double.compare(a.getValue(), b.getValue()));
 
-        for (UUID otherUserId : matchingData.keySet()) {
-            int commonCount = matchingData.get(otherUserId);
-            int countOtherUser = userInterestDal.getCountUserInterests(otherUserId);
-
+        for (UUID otherId : matchingData.keySet()) {
+            int commonCount = matchingData.get(otherId);
+            int countOther;
+            if (isUserMatch) {
+                countOther = matchingDal.getCountUserInterests(otherId);
+            }
+            else{
+                countOther = matchingDal.getCountGroupTags(otherId);
+            }
             // Коэффициент Жаккара:
             // % = (общие теги × 100) / (теги_текущего + теги_другого - общие)
-            double matchScore = (double) (commonCount * 100) / (countCurrentUser + countOtherUser - commonCount);
+            double matchScore = (double) (commonCount * 100) / (countCurrentUser + countOther - commonCount);
 
-            Map.Entry<UUID, Double> entry = new AbstractMap.SimpleEntry<>(otherUserId, matchScore);
+            Map.Entry<UUID, Double> entry = new AbstractMap.SimpleEntry<>(otherId, matchScore);
             heap.offer(entry);
 
             // Если превысили лимит - удаляем элемент с наименьшим matchScore
@@ -72,7 +91,7 @@ public class MatchingServiceImpl implements MatchingService {
     /**
      * Преобразует очередь в response
      */
-    private List<UserMatchingResponse> buildResponsesFromHeap(
+    private List<UserMatchingResponse> buildUserResponsesFromHeap(
             PriorityQueue<Map.Entry<UUID, Double>> heap,
             UUID userId) {
 
@@ -82,11 +101,11 @@ public class MatchingServiceImpl implements MatchingService {
             UUID otherUserId = entry.getKey();
             Double matchScore = entry.getValue();
 
-            List<UUID> commonTagIds = userInterestDal.getCommonTagIds(userId, otherUserId);
+            List<UUID> commonTagIds = matchingDal.getCommonTagIds(userId, otherUserId);
             List<String> matchingInterests = new ArrayList<>();
 
             for (UUID tagId : commonTagIds) {
-                String name = userInterestDal.findTagById(tagId).getName();
+                String name = matchingDal.findTagById(tagId).getName();
                 matchingInterests.add(name);
             }
 
@@ -101,5 +120,43 @@ public class MatchingServiceImpl implements MatchingService {
         }
 
         return usersMatchingResponses;
+    }
+
+    /**
+     * Преобразует очередь в response для групп
+     */
+    private List<GroupMatchingResponse> buildGroupResponsesFromHeap(
+            PriorityQueue<Map.Entry<UUID, Double>> heap,
+            UUID userId) {
+
+        List<GroupMatchingResponse> groupMatchingResponses = new ArrayList<>();
+
+        for (Map.Entry<UUID, Double> entry : heap) {
+            UUID groupId = entry.getKey();
+            Double matchScore = entry.getValue();
+
+            // Используем метод для поиска общих тегов между юзером и группой
+            List<UUID> commonTagIds = matchingDal.getCommonTagIdsUserGroup(userId, groupId);
+            List<String> matchingInterests = new ArrayList<>();
+
+            for (UUID tagId : commonTagIds) {
+                String name = matchingDal.findTagById(tagId).getName();
+                matchingInterests.add(name);
+            }
+
+            GroupMatchingResponse groupMatchingResponse =
+                    GroupMatchingResponse.builder()
+                            .groupId(groupId)
+                            .matchingInterests(matchingInterests)
+                            .matchScore(matchScore)
+                            .build();
+
+            groupMatchingResponses.add(groupMatchingResponse);
+        }
+
+        // Сортируем итоговый список по убыванию процента совпадения (от лучших к худшим)
+        groupMatchingResponses.sort((a, b) -> Double.compare(b.getMatchScore(), a.getMatchScore()));
+
+        return groupMatchingResponses;
     }
 }
