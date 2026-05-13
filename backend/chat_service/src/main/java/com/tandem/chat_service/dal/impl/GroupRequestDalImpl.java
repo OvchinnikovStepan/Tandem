@@ -12,6 +12,7 @@ import com.tandem.chat_service.dao.model.ChatEntity;
 import com.tandem.chat_service.dao.model.ChatParticipantEntity;
 import com.tandem.chat_service.dao.model.GroupEntity;
 import com.tandem.chat_service.dao.model.GroupRequestEntity;
+import com.tandem.chat_service.integration.InterestEventPublisher;
 import com.tandem.chat_service.service.model.response.GroupRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -30,6 +31,7 @@ public class GroupRequestDalImpl implements GroupRequestDal {
     private final GroupDao groupDao;
     private final ChatDao chatDao;
     private final ChatParticipantDao participantDao;
+    private final InterestEventPublisher publisher;
 
     @Override
     @Transactional
@@ -51,7 +53,17 @@ public class GroupRequestDalImpl implements GroupRequestDal {
         GroupRequestEntity entity = GroupRequestEntityMapper.toEntity(groupId, userId, group.getCreatorId(), message);
 
         requestDao.insert(entity);
+
         return GroupRequestEntityMapper.toDto(entity);
+    }
+
+    @Override
+    public void publishRequestCreatedEvent(UUID requestId) {
+        GroupRequestEntity request = requestDao.findById(requestId).orElseThrow();
+        GroupEntity group = groupDao.findById(request.getGroupId()).orElseThrow();
+
+        publisher.publishGroupRequestEvent(
+                requestId, request.getGroupId(), group.getCreatorId(), GroupRequestStatus.PENDING);
     }
 
     @Override
@@ -92,6 +104,13 @@ public class GroupRequestDalImpl implements GroupRequestDal {
 
         verifyReviewerIsGroupCreator(request.getGroupId(), reviewerId);
         requestDao.updateStatus(requestId, GroupRequestStatus.REJECTED, LocalDateTime.now(), reviewerId);
+    }
+
+    @Override
+    public void publishRequestProcessedEvent(UUID requestId, GroupRequestStatus status) {
+        GroupRequestEntity request = requestDao.findById(requestId).orElseThrow();
+
+        publisher.publishGroupRequestEvent(requestId, request.getGroupId(), request.getUserId(), status);
     }
 
     @Override

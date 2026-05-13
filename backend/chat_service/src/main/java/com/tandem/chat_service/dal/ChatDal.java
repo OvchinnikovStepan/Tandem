@@ -21,4 +21,7 @@ public interface ChatDal {
     GroupDto updateGroupSettings(UUID chatId, UUID requesterId, UpdateGroupRequest request);
     List<ChatResponse> searchGroupChatsByPrefix(String prefix, int limit);
     void joinPublicGroupChat(UUID chatId, UUID userId);
+    void publishPersonalChatCreatedEvent(UUID chatId, List<UUID> participantIds);
+    void publishGroupCreatedEvent(UUID groupId, List<String> groupInterests);
+    void publishUserJoinedGroupEvent(UUID chatId, UUID joinedUserId);
 }

@@ -1,5 +1,6 @@
 package com.tandem.chat_service.dal;
 
+import com.tandem.chat_service.dao.enums.GroupRequestStatus;
 import com.tandem.chat_service.service.model.response.GroupRequestDto;
 
 import java.util.List;
@@ -12,4 +13,6 @@ public interface GroupRequestDal {
     void cancelRequest(UUID requestId, UUID userId);
     List<GroupRequestDto> getPendingRequestsForGroup(UUID groupId, UUID requesterId);
     List<GroupRequestDto> getMyRequests(UUID userId);
+    void publishRequestCreatedEvent(UUID requestId);
+    void publishRequestProcessedEvent(UUID requestId, GroupRequestStatus status);
 }

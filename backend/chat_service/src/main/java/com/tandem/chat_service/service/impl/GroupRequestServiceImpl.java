@@ -1,6 +1,7 @@
 package com.tandem.chat_service.service.impl;
 
 import com.tandem.chat_service.dal.GroupRequestDal;
+import com.tandem.chat_service.dao.enums.GroupRequestStatus;
 import com.tandem.chat_service.service.GroupRequestService;
 import com.tandem.chat_service.service.exception.ChatAccessDeniedException;
 import com.tandem.chat_service.service.exception.GroupNotFoundException;
@@ -25,7 +26,9 @@ public class GroupRequestServiceImpl implements GroupRequestService {
     public GroupRequestDto createRequest(UUID groupId, UUID userId, String message) {
         log.info("User {} requesting to join group {}", userId, groupId);
         try {
-            return requestDal.createRequest(groupId, userId, message);
+            GroupRequestDto request = requestDal.createRequest(groupId, userId, message);
+            requestDal.publishRequestCreatedEvent(request.getId());
+            return request;
         } catch (RuntimeException e) {
             if (e.getMessage().contains("Group not found")) {
                 throw new GroupNotFoundException(groupId);
@@ -39,6 +42,7 @@ public class GroupRequestServiceImpl implements GroupRequestService {
         log.info("Reviewer {} is approving request {}", reviewerId, requestId);
         try {
             requestDal.approveRequest(requestId, reviewerId);
+            requestDal.publishRequestProcessedEvent(requestId, GroupRequestStatus.APPROVED);
         } catch (RuntimeException e) {
             String msg = e.getMessage() != null ? e.getMessage() : "";
             if (e.getMessage().contains("Request not found")) {
@@ -53,6 +57,7 @@ public class GroupRequestServiceImpl implements GroupRequestService {
         log.info("Reviewer {} is rejecting request {}", reviewerId, requestId);
         try {
             requestDal.rejectRequest(requestId, reviewerId);
+            requestDal.publishRequestProcessedEvent(requestId, GroupRequestStatus.REJECTED);
         } catch (RuntimeException e) {
             throw new GroupRequestNotFoundException(requestId);
         }

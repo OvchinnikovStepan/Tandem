@@ -87,6 +87,11 @@ public class ChatDalImpl implements ChatDal {
     }
 
     @Override
+    public void publishPersonalChatCreatedEvent(UUID chatId, List<UUID> participantIds) {
+        publisher.publishChatCreated(chatId, participantIds);
+    }
+
+    @Override
     @Transactional
     public ChatResponse createGroupChat(CreateGroupChatRequest request) {
         GroupEntity group = ChatEntityMapper.mapToGroupEntity(request);
@@ -98,10 +103,14 @@ public class ChatDalImpl implements ChatDal {
         ChatParticipantEntity participant = ChatEntityMapper.mapToAdminParticipantEntity(chat.getId(), request.getCreatorId());
         participantDao.insert(participant);
 
-        publisher.publishGroupCreated(group, request.getGroupInterests());
-
         log.debug("Created group chat with id {} for group {}", chat.getId(), group.getId());
         return getChatById(chat.getId());
+    }
+
+    @Override
+    public void publishGroupCreatedEvent(UUID groupId, List<String> groupInterests) {
+        GroupEntity group = groupDao.findById(groupId).orElseThrow();
+        publisher.publishGroupCreated(group, groupInterests);
     }
 
     @Override
@@ -215,7 +224,15 @@ public class ChatDalImpl implements ChatDal {
         ChatParticipantEntity participant = ChatEntityMapper.mapToMemberParticipantEntity(chatId, userId);
 
         participantDao.insert(participant);
+
         log.debug("User {} joined public chat {}", userId, chatId);
+    }
+
+    @Override
+    public void publishUserJoinedGroupEvent(UUID chatId, UUID joinedUserId) {
+        ChatEntity chat = chatDao.findById(chatId).orElseThrow();
+        GroupEntity group = groupDao.findById(chat.getGroupId()).orElseThrow();
+        publisher.publishUserJoinedGroup(group.getId(), group.getCreatorId(), joinedUserId);
     }
 
     /**
