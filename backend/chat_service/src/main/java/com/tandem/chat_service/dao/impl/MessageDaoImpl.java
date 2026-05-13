@@ -1,5 +1,6 @@
 package com.tandem.chat_service.dao.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tandem.chat_service.dao.MessageDao;
 import com.tandem.chat_service.dao.mapper.MessageDaoRowMapper;
 import com.tandem.chat_service.dao.mapper.MessageJdbcMapper;
@@ -21,10 +22,11 @@ public class MessageDaoImpl implements MessageDao {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final MessageDaoRowMapper rowMapper;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void insert(MessageEntity entity) {
-        jdbcTemplate.update(MessageQueries.INSERT, MessageJdbcMapper.mapInsertParams(entity));
+        jdbcTemplate.update(MessageQueries.INSERT, MessageJdbcMapper.mapInsertParams(entity, objectMapper));
     }
 
     @Override

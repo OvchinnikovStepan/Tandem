@@ -7,22 +7,22 @@ import com.tandem.chat_service.api.model.request.UpdateMessageRequestJson;
 import com.tandem.chat_service.api.model.response.MessageResponseJson;
 import com.tandem.chat_service.api.model.response.PaginatedMessagesResponseJson;
 import com.tandem.chat_service.service.model.dto.MessageMetadata;
+import com.tandem.chat_service.service.model.request.GetMessagesFilter;
 import com.tandem.chat_service.service.model.request.SendMessageRequest;
 import com.tandem.chat_service.service.model.request.UpdateMessageRequest;
 import com.tandem.chat_service.service.model.response.MessageResponse;
 import com.tandem.chat_service.service.model.response.PaginatedMessagesResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Component
-@RequiredArgsConstructor
+@UtilityClass
 public class MessageApiMapper {
 
-    private final ObjectMapper objectMapper;
-
-    public SendMessageRequest toServiceModel(SendMessageRequestJson json) {
+    public SendMessageRequest toServiceModel(SendMessageRequestJson json, ObjectMapper objectMapper) {
         return SendMessageRequest.builder()
                 .content(json.getContent())
                 .type(json.getType())
@@ -37,7 +37,18 @@ public class MessageApiMapper {
                 .build();
     }
 
-    public MessageResponseJson toJson(MessageResponse response) {
+    public GetMessagesFilter toGetMessagesFilter(
+            UUID chatId, UUID currentUserId, int limit, LocalDateTime beforeDateTime, LocalDateTime afterDateTime) {
+        return GetMessagesFilter.builder()
+                .chatId(chatId)
+                .requesterId(currentUserId)
+                .before(beforeDateTime)
+                .after(afterDateTime)
+                .limit(limit)
+                .build();
+    }
+
+    public MessageResponseJson toJson(MessageResponse response, ObjectMapper objectMapper) {
         if (response == null) return null;
 
         return MessageResponseJson.builder()
@@ -54,10 +65,10 @@ public class MessageApiMapper {
                 .build();
     }
 
-    public PaginatedMessagesResponseJson toPaginatedJson(PaginatedMessagesResponse response) {
+    public static PaginatedMessagesResponseJson toPaginatedJson(PaginatedMessagesResponse response, ObjectMapper objectMapper) {
         return PaginatedMessagesResponseJson.builder()
                 .messages(response.getMessages().stream()
-                        .map(this::toJson)
+                        .map(msg -> toJson(msg, objectMapper))
                         .collect(Collectors.toList()))
                 .hasMore(response.isHasMore())
                 .build();

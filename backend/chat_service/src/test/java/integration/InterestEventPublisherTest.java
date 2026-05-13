@@ -176,7 +176,7 @@ class InterestEventPublisherTest {
         verify(kafkaTemplate).send(messageCaptor.capture());
         Map<String, Object> payload = messageCaptor.getValue().getPayload();
 
-        assertThat(messageCaptor.getValue().getHeaders().get(KafkaHeaders.TOPIC)).isEqualTo("group.events");
+        assertThat(messageCaptor.getValue().getHeaders().get(KafkaHeaders.TOPIC)).isEqualTo("group.user.joined");
         assertThat(payload.get("eventType")).isEqualTo("group.user.joined");
         assertThat(payload.get("ownerId")).isEqualTo(creatorId.toString());
         assertThat(payload.get("joinedUserId")).isEqualTo(joinedUserId.toString());

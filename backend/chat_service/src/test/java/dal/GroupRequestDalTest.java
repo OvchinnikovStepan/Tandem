@@ -85,7 +85,6 @@ class GroupRequestDalTest {
 
         assertThat(result).isNotNull();
         verify(requestDao).insert(any(GroupRequestEntity.class));
-        verify(publisher).publishGroupRequestEvent(any(), eq(groupId), eq(creatorId), eq(GroupRequestStatus.PENDING));
     }
 
     @Test
@@ -169,7 +168,6 @@ class GroupRequestDalTest {
         requestDal.rejectRequest(requestId, creatorId);
 
         verify(requestDao).updateStatus(eq(requestId), eq(GroupRequestStatus.REJECTED), any(), eq(creatorId));
-        verify(publisher).publishGroupRequestEvent(eq(requestId), eq(groupId), eq(userId), eq(GroupRequestStatus.REJECTED));
     }
 
     @Test

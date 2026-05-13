@@ -72,7 +72,6 @@ class ChatDalTest {
         assertThat(result).isNotNull();
         verify(chatDao).insert(any(ChatEntity.class));
         verify(participantDao, times(2)).insert(any());
-        verify(publisher).publishChatCreated(any(), anyList());
     }
 
     // createGroupChat
@@ -91,7 +90,6 @@ class ChatDalTest {
         assertThat(result).isNotNull();
         verify(groupDao).insert(any(GroupEntity.class));
         verify(chatDao).insert(any(ChatEntity.class));
-        verify(publisher).publishGroupCreated(any(), eq(request.getGroupInterests()));
     }
 
     // joinPublicGroupChat
@@ -104,7 +102,6 @@ class ChatDalTest {
         chatDal.joinPublicGroupChat(chatId, targetId);
 
         verify(participantDao).insert(any());
-        verify(publisher).publishUserJoinedGroup(eq(groupId), eq(userId), eq(targetId));
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.tandem.chat_service.dal.MessageDal;
 import com.tandem.chat_service.service.MessageService;
 import com.tandem.chat_service.service.exception.ChatAccessDeniedException;
 import com.tandem.chat_service.service.exception.MessageNotFoundException;
+import com.tandem.chat_service.service.model.request.GetMessagesFilter;
 import com.tandem.chat_service.service.model.request.SendMessageRequest;
 import com.tandem.chat_service.service.model.request.UpdateMessageRequest;
 import com.tandem.chat_service.service.model.response.MessageResponse;
@@ -23,10 +24,10 @@ public class MessageServiceImpl implements MessageService {
     private final MessageDal messageDal;
 
     @Override
-    public PaginatedMessagesResponse getMessages(UUID chatId, UUID requesterId, LocalDateTime before, LocalDateTime after, int limit) {
-        log.info("Fetching messages for chat {} by user {}", chatId, requesterId);
+    public PaginatedMessagesResponse getMessages(GetMessagesFilter filter) {
+        log.info("Fetching messages for chat {} by user {}", filter.getChatId(), filter.getRequesterId());
         try {
-            return messageDal.getMessagesByChatId(chatId, requesterId, before, after, limit);
+            return messageDal.getMessagesByChatId(filter);
         } catch (RuntimeException e) {
             if (e.getMessage().contains("participant")) {
                 throw new ChatAccessDeniedException(e.getMessage());
@@ -38,7 +39,10 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public MessageResponse sendMessage(UUID chatId, UUID senderId, SendMessageRequest request) {
         log.info("User {} sending message to chat {}", senderId, chatId);
-        return messageDal.sendMessage(chatId, senderId, request);
+        MessageResponse response = messageDal.sendMessage(chatId, senderId, request);
+        messageDal.publishMessageSentEvent(response.getMessageId());
+
+        return response;
     }
 
     @Override

@@ -54,9 +54,16 @@ public class GroupRequestDalImpl implements GroupRequestDal {
 
         requestDao.insert(entity);
 
-        publisher.publishGroupRequestEvent(entity.getId(), groupId, group.getCreatorId(), GroupRequestStatus.PENDING);
-
         return GroupRequestEntityMapper.toDto(entity);
+    }
+
+    @Override
+    public void publishRequestCreatedEvent(UUID requestId) {
+        GroupRequestEntity request = requestDao.findById(requestId).orElseThrow();
+        GroupEntity group = groupDao.findById(request.getGroupId()).orElseThrow();
+
+        publisher.publishGroupRequestEvent(
+                requestId, request.getGroupId(), group.getCreatorId(), GroupRequestStatus.PENDING);
     }
 
     @Override
@@ -88,7 +95,6 @@ public class GroupRequestDalImpl implements GroupRequestDal {
         ChatParticipantEntity participant = GroupRequestEntityMapper.toParticipantEntity(
                 chat.getId(), request.getUserId());
         participantDao.insert(participant);
-        publisher.publishGroupRequestEvent(requestId, request.getGroupId(), request.getUserId(), GroupRequestStatus.APPROVED);
     }
 
     @Override
@@ -98,7 +104,13 @@ public class GroupRequestDalImpl implements GroupRequestDal {
 
         verifyReviewerIsGroupCreator(request.getGroupId(), reviewerId);
         requestDao.updateStatus(requestId, GroupRequestStatus.REJECTED, LocalDateTime.now(), reviewerId);
-        publisher.publishGroupRequestEvent(requestId, request.getGroupId(), request.getUserId(), GroupRequestStatus.REJECTED);
+    }
+
+    @Override
+    public void publishRequestProcessedEvent(UUID requestId, GroupRequestStatus status) {
+        GroupRequestEntity request = requestDao.findById(requestId).orElseThrow();
+
+        publisher.publishGroupRequestEvent(requestId, request.getGroupId(), request.getUserId(), status);
     }
 
     @Override

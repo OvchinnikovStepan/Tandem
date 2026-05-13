@@ -23,20 +23,30 @@ public class InterestEventPublisher {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
+    private static final String KEY_EVENT_TYPE = "eventType";
+    private static final String KEY_TIMESTAMP = "timestamp";
+
+    // Названия топиков и событий
+    public static final String EVENT_MESSAGE_SENT = "message.sent";
+    public static final String EVENT_CHAT_CREATED = "chat.created";
+    public static final String EVENT_GROUP_REQUEST_UPDATED = "group.request.updated";
+    public static final String EVENT_GROUP_CREATED = "group.created";
+    public static final String EVENT_GROUP_USER_JOINED = "group.user.joined";
+
     /**
      * Событие отправки сообщения
      */
     public void publishMessageSent(MessageEntity message, List<UUID> recipientIds) {
         for (UUID recipientId : recipientIds) {
             Map<String, Object> event = Map.of(
-                    "eventType", "message.sent",
+                    KEY_EVENT_TYPE, EVENT_MESSAGE_SENT,
                     "messageId", message.getId().toString(),
                     "chatId", message.getChatId().toString(),
                     "senderId", message.getSenderId().toString(),
                     "recipientId", recipientId.toString(),
-                    "timestamp", Instant.now().toString()
+                    KEY_TIMESTAMP, Instant.now().toString()
             );
-            publishEvent("message.sent", event);
+            publishEvent(EVENT_MESSAGE_SENT, event);
         }
     }
 
@@ -45,12 +55,12 @@ public class InterestEventPublisher {
      */
     public void publishChatCreated(UUID chatId, List<UUID> participantIds) {
         Map<String, Object> event = Map.of(
-                "eventType", "chat.created",
+                KEY_EVENT_TYPE, EVENT_CHAT_CREATED,
                 "chatId", chatId.toString(),
                 "participantIds", participantIds.stream().map(UUID::toString).toList(),
-                "timestamp", Instant.now().toString()
+                KEY_TIMESTAMP, Instant.now().toString()
         );
-        publishEvent("chat.created", event);
+        publishEvent(EVENT_CHAT_CREATED, event);
     }
 
     /**
@@ -58,14 +68,14 @@ public class InterestEventPublisher {
      */
     public void publishGroupRequestEvent(UUID requestId, UUID groupId, UUID targetUserId, GroupRequestStatus status) {
         Map<String, Object> event = Map.of(
-                "eventType", "group.request.updated",
+                KEY_EVENT_TYPE, EVENT_GROUP_REQUEST_UPDATED,
                 "requestId", requestId.toString(),
                 "groupId", groupId.toString(),
                 "targetUserId", targetUserId.toString(),
                 "status", status.getValue(),
-                "timestamp", Instant.now().toString()
+                KEY_TIMESTAMP, Instant.now().toString()
         );
-        publishEvent("group.request.updated", event);
+        publishEvent(EVENT_GROUP_REQUEST_UPDATED, event);
     }
 
     /**
@@ -73,13 +83,13 @@ public class InterestEventPublisher {
      */
     public void publishUserJoinedGroup(UUID groupId, UUID ownerId, UUID joinedUserId) {
         Map<String, Object> event = Map.of(
-                "eventType", "group.user.joined",
+                KEY_EVENT_TYPE, EVENT_GROUP_USER_JOINED,
                 "groupId", groupId.toString(),
                 "ownerId", ownerId.toString(),
                 "joinedUserId", joinedUserId.toString(),
-                "timestamp", Instant.now().toString()
+                KEY_TIMESTAMP, Instant.now().toString()
         );
-        publishEvent("group.events", event);
+        publishEvent(EVENT_GROUP_USER_JOINED, event);
     }
 
     /**
@@ -87,16 +97,16 @@ public class InterestEventPublisher {
      */
     public void publishGroupCreated(GroupEntity group, List<String> groupInterests) {
         Map<String, Object> event = Map.of(
-                "eventType", "group.created",
+                KEY_EVENT_TYPE, EVENT_GROUP_CREATED,
                 "groupId", group.getId().toString(),
                 "groupName", group.getName(),
                 "creatorId", group.getCreatorId().toString(),
                 "interestTags", groupInterests.toString(),
                 "visibility", group.getVisibility().toString(),
-                "timestamp", Instant.now().toString()
+                KEY_TIMESTAMP, Instant.now().toString()
         );
 
-        publishEvent("group.created", event);
+        publishEvent(EVENT_GROUP_CREATED, event);
         log.info("Published group.created event for group: {} with name: {}", group.getId(), group.getName());
     }
 

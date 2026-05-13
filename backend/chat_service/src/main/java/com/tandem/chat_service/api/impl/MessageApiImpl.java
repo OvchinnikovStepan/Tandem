@@ -1,5 +1,6 @@
 package com.tandem.chat_service.api.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tandem.chat_service.api.MessageApi;
 import com.tandem.chat_service.api.mapper.MessageApiMapper;
 import com.tandem.chat_service.api.model.request.SendMessageRequestJson;
@@ -8,6 +9,7 @@ import com.tandem.chat_service.api.model.response.MessageResponseJson;
 import com.tandem.chat_service.api.model.response.PaginatedMessagesResponseJson;
 import com.tandem.chat_service.security.SecurityUtils;
 import com.tandem.chat_service.service.MessageService;
+import com.tandem.chat_service.service.model.request.GetMessagesFilter;
 import com.tandem.chat_service.service.model.response.MessageResponse;
 import com.tandem.chat_service.service.model.response.PaginatedMessagesResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +26,7 @@ import java.util.UUID;
 public class MessageApiImpl implements MessageApi {
 
     private final MessageService messageService;
-    private final MessageApiMapper apiMapper;
+    private final ObjectMapper objectMapper;
 
     @Override
     public ResponseEntity<PaginatedMessagesResponseJson> getMessages(UUID chatId, int limit, LocalDate before, LocalDate after) {
@@ -33,29 +35,26 @@ public class MessageApiImpl implements MessageApi {
         LocalDateTime beforeDateTime = (before != null) ? before.atStartOfDay() : null;
         LocalDateTime afterDateTime = (after != null) ? after.atStartOfDay() : null;
 
-        PaginatedMessagesResponse result = messageService.getMessages(
-                chatId,
-                currentUserId,
-                beforeDateTime,
-                afterDateTime,
-                limit
-        );
+        GetMessagesFilter filter = MessageApiMapper.toGetMessagesFilter(
+                chatId, currentUserId, limit, beforeDateTime, afterDateTime);
 
-        return ResponseEntity.ok(apiMapper.toPaginatedJson(result));
+        PaginatedMessagesResponse result = messageService.getMessages(filter);
+
+        return ResponseEntity.ok(MessageApiMapper.toPaginatedJson(result, objectMapper));
     }
 
     @Override
     public ResponseEntity<MessageResponseJson> sendMessage(UUID chatId, SendMessageRequestJson request) {
         UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
-        MessageResponse response = messageService.sendMessage(chatId, currentUserId, apiMapper.toServiceModel(request));
-        return ResponseEntity.status(HttpStatus.CREATED).body(apiMapper.toJson(response));
+        MessageResponse response = messageService.sendMessage(chatId, currentUserId, MessageApiMapper.toServiceModel(request, objectMapper));
+        return ResponseEntity.status(HttpStatus.CREATED).body(MessageApiMapper.toJson(response, objectMapper));
     }
 
     @Override
     public ResponseEntity<MessageResponseJson> updateMessage(UUID messageId, UpdateMessageRequestJson request) {
         UUID currentUserId = SecurityUtils.getCurrentUserIdOrThrow();
-        MessageResponse response = messageService.updateMessage(messageId, currentUserId, apiMapper.toUpdateServiceModel(request));
-        return ResponseEntity.ok(apiMapper.toJson(response));
+        MessageResponse response = messageService.updateMessage(messageId, currentUserId, MessageApiMapper.toUpdateServiceModel(request));
+        return ResponseEntity.ok(MessageApiMapper.toJson(response, objectMapper));
     }
 
     @Override

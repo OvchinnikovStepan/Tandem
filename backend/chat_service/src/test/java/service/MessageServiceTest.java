@@ -5,6 +5,7 @@ import com.tandem.chat_service.service.MessageService;
 import com.tandem.chat_service.service.exception.ChatAccessDeniedException;
 import com.tandem.chat_service.service.exception.MessageNotFoundException;
 import com.tandem.chat_service.service.impl.MessageServiceImpl;
+import com.tandem.chat_service.service.model.request.GetMessagesFilter;
 import com.tandem.chat_service.service.model.request.SendMessageRequest;
 import com.tandem.chat_service.service.model.request.UpdateMessageRequest;
 import com.tandem.chat_service.service.model.response.MessageResponse;
@@ -86,65 +87,87 @@ class MessageServiceTest {
     @Test
     void getMessages_Success() {
         int limit = 20;
+        GetMessagesFilter filter = GetMessagesFilter.builder()
+                .chatId(chatId)
+                .requesterId(requesterId)
+                .before(before)
+                .after(after)
+                .limit(limit)
+                .build();
 
-        when(messageDal.getMessagesByChatId(chatId, requesterId, before, after, limit))
-                .thenReturn(paginatedMessagesResponse);
+        when(messageDal.getMessagesByChatId(filter)).thenReturn(paginatedMessagesResponse);
 
-        PaginatedMessagesResponse result = messageService.getMessages(chatId, requesterId, before, after, limit);
+        PaginatedMessagesResponse result = messageService.getMessages(filter);
 
         assertThat(result).isNotNull();
         assertThat(result.getMessages()).hasSize(1);
         assertThat(result.isHasMore()).isFalse();
         assertThat(result.getMessages().get(0).getMessageId()).isEqualTo(messageId);
 
-        verify(messageDal).getMessagesByChatId(chatId, requesterId, before, after, limit);
+        verify(messageDal).getMessagesByChatId(filter);
     }
 
     @Test
     void getMessages_ThrowsChatAccessDeniedException_WhenNotParticipant() {
         int limit = 20;
         String errorMessage = "User is not a participant of this chat";
+        GetMessagesFilter filter = GetMessagesFilter.builder()
+                .chatId(chatId)
+                .requesterId(requesterId)
+                .before(before)
+                .after(after)
+                .limit(limit)
+                .build();
 
-        when(messageDal.getMessagesByChatId(chatId, requesterId, before, after, limit))
-                .thenThrow(new RuntimeException(errorMessage));
+        when(messageDal.getMessagesByChatId(filter)).thenThrow(new RuntimeException(errorMessage));
 
         ChatAccessDeniedException exception = assertThrows(
                 ChatAccessDeniedException.class,
-                () -> messageService.getMessages(chatId, requesterId, before, after, limit)
+                () -> messageService.getMessages(filter)
         );
 
         assertThat(exception.getMessage()).contains(errorMessage);
-        verify(messageDal).getMessagesByChatId(chatId, requesterId, before, after, limit);
+        verify(messageDal).getMessagesByChatId(filter);
     }
 
     @Test
     void getMessages_ThrowsOriginalException_WhenNotParticipantRelated() {
         int limit = 20;
         String errorMessage = "Database connection error";
+        GetMessagesFilter filter = GetMessagesFilter.builder()
+                .chatId(chatId)
+                .requesterId(requesterId)
+                .before(before)
+                .after(after)
+                .limit(limit)
+                .build();
 
-        when(messageDal.getMessagesByChatId(chatId, requesterId, before, after, limit))
-                .thenThrow(new RuntimeException(errorMessage));
+        when(messageDal.getMessagesByChatId(filter)).thenThrow(new RuntimeException(errorMessage));
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
-                () -> messageService.getMessages(chatId, requesterId, before, after, limit)
+                () -> messageService.getMessages(filter)
         );
 
         assertThat(exception.getMessage()).contains(errorMessage);
-        verify(messageDal).getMessagesByChatId(chatId, requesterId, before, after, limit);
+        verify(messageDal).getMessagesByChatId(filter);
     }
 
     @Test
     void getMessages_WithNullDateParams() {
         int limit = 10;
+        GetMessagesFilter filter = GetMessagesFilter.builder()
+                .chatId(chatId)
+                .requesterId(requesterId)
+                .limit(limit)
+                .build();
 
-        when(messageDal.getMessagesByChatId(chatId, requesterId, null, null, limit))
-                .thenReturn(paginatedMessagesResponse);
+        when(messageDal.getMessagesByChatId(filter)).thenReturn(paginatedMessagesResponse);
 
-        PaginatedMessagesResponse result = messageService.getMessages(chatId, requesterId, null, null, limit);
+        PaginatedMessagesResponse result = messageService.getMessages(filter);
 
         assertThat(result).isNotNull();
-        verify(messageDal).getMessagesByChatId(chatId, requesterId, null, null, limit);
+        verify(messageDal).getMessagesByChatId(filter);
     }
 
     // sendMessage

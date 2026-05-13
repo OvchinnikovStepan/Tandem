@@ -58,7 +58,10 @@ public class ChatServiceImpl implements ChatService {
             throw new InvalidChatOperationException("Cannot create a personal chat with yourself");
         }
 
-        return chatDal.createPersonalChat(initiatorId, targetUserId);
+        ChatResponse response = chatDal.createPersonalChat(initiatorId, targetUserId);
+        chatDal.publishPersonalChatCreatedEvent(response.getId(), List.of(initiatorId, targetUserId));
+
+        return response;
     }
 
     @Override
@@ -69,7 +72,11 @@ public class ChatServiceImpl implements ChatService {
             throw new InvalidChatOperationException("Group chat name cannot be empty");
         }
 
-        return chatDal.createGroupChat(request);
+        ChatResponse response = chatDal.createGroupChat(request);
+
+        chatDal.publishGroupCreatedEvent(response.getGroup().getId(), request.getGroupInterests());
+
+        return response;
     }
 
     @Override
@@ -153,6 +160,7 @@ public class ChatServiceImpl implements ChatService {
         log.info("User {} is joining public chat {}", userId, chatId);
         try {
             chatDal.joinPublicGroupChat(chatId, userId);
+            chatDal.publishUserJoinedGroupEvent(chatId, userId);
         } catch (RuntimeException e) {
             if (e.getMessage().contains("Chat not found")) {
                 throw new ChatNotFoundException(chatId);

@@ -10,6 +10,7 @@ import com.tandem.chat_service.dao.model.MessageEntity;
 import com.tandem.chat_service.dao.model.ChatParticipantEntity;
 import com.tandem.chat_service.integration.InterestEventPublisher;
 import com.tandem.chat_service.service.model.dto.MessageMetadata;
+import com.tandem.chat_service.service.model.request.GetMessagesFilter;
 import com.tandem.chat_service.service.model.request.SendMessageRequest;
 import com.tandem.chat_service.service.model.request.UpdateMessageRequest;
 import com.tandem.chat_service.service.model.response.MessageResponse;
@@ -35,7 +36,13 @@ public class MessageDalImpl implements MessageDal {
     private final InterestEventPublisher publisher;
 
     @Override
-    public PaginatedMessagesResponse getMessagesByChatId(UUID chatId, UUID requesterId, LocalDateTime before, LocalDateTime after, int limit) {
+    public PaginatedMessagesResponse getMessagesByChatId(GetMessagesFilter filter) {
+        UUID chatId = filter.getChatId();
+        UUID requesterId = filter.getRequesterId();
+        LocalDateTime before = filter.getBefore();
+        LocalDateTime after = filter.getAfter();
+        int limit = filter.getLimit();
+
         if (!participantDao.isParticipant(chatId, requesterId)) {
             throw new RuntimeException("User is not a participant of this chat");
         }
@@ -72,14 +79,20 @@ public class MessageDalImpl implements MessageDal {
         messageDao.insert(entity);
         chatDao.updateLastMessageAt(chatId, entity.getSentAt());
 
-        List<UUID> recipientIds = participantDao.findByChatId(chatId).stream()
+        return mapper.mapToResponse(entity);
+    }
+
+    @Override
+    public void publishMessageSentEvent(UUID messageId) {
+        MessageEntity message = messageDao.findById(messageId)
+                .orElseThrow(() -> new RuntimeException("Message not found"));
+
+        List<UUID> recipientIds = participantDao.findByChatId(message.getChatId()).stream()
                 .map(ChatParticipantEntity::getUserId)
-                .filter(userId -> !userId.equals(senderId))
+                .filter(userId -> !userId.equals(message.getSenderId()))
                 .toList();
 
-        publisher.publishMessageSent(entity, recipientIds);
-
-        return mapper.mapToResponse(entity);
+        publisher.publishMessageSent(message, recipientIds);
     }
 
     @Override

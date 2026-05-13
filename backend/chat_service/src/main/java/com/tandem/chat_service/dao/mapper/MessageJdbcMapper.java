@@ -7,11 +7,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 public final class MessageJdbcMapper {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-
     private MessageJdbcMapper() {}
 
-    public static MapSqlParameterSource mapInsertParams(MessageEntity entity) {
+    public static MapSqlParameterSource mapInsertParams(MessageEntity entity, ObjectMapper objectMapper) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", entity.getId());
         params.addValue("chatId", entity.getChatId());

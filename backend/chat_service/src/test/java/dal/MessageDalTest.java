@@ -11,6 +11,7 @@ import com.tandem.chat_service.dao.model.ChatParticipantEntity;
 import com.tandem.chat_service.dao.model.MessageEntity;
 import com.tandem.chat_service.integration.InterestEventPublisher;
 import com.tandem.chat_service.service.model.dto.MessageMetadata;
+import com.tandem.chat_service.service.model.request.GetMessagesFilter;
 import com.tandem.chat_service.service.model.request.SendMessageRequest;
 import com.tandem.chat_service.service.model.request.UpdateMessageRequest;
 import com.tandem.chat_service.service.model.response.MessageResponse;
@@ -91,6 +92,12 @@ class MessageDalTest {
     // getMessagesByChatId
     @Test
     void getMessagesByChatId_Success() {
+        GetMessagesFilter filter = GetMessagesFilter.builder()
+                .chatId(chatId)
+                .requesterId(requesterId)
+                .limit(20)
+                .build();
+
         when(participantDao.isParticipant(chatId, requesterId)).thenReturn(true);
         when(messageDao.findMessagesByChatIdBefore(eq(chatId), any(LocalDateTime.class), eq(21)))
                 .thenReturn(List.of(messageEntity));
@@ -101,7 +108,7 @@ class MessageDalTest {
                 .build();
         when(mapper.mapToPaginatedResponse(anyList(), eq(false))).thenReturn(mockResponse);
 
-        PaginatedMessagesResponse result = messageDal.getMessagesByChatId(chatId, requesterId, null, null, 20);
+        PaginatedMessagesResponse result = messageDal.getMessagesByChatId(filter);
 
         assertThat(result).isNotNull();
         assertThat(result.getMessages()).hasSize(1);
@@ -109,10 +116,16 @@ class MessageDalTest {
 
     @Test
     void getMessagesByChatId_ThrowsException_WhenNotParticipant() {
+        GetMessagesFilter filter = GetMessagesFilter.builder()
+                .chatId(chatId)
+                .requesterId(requesterId)
+                .limit(20)
+                .build();
+
         when(participantDao.isParticipant(chatId, requesterId)).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> messageDal.getMessagesByChatId(chatId, requesterId, null, null, 20));
+                () -> messageDal.getMessagesByChatId(filter));
 
         assertThat(exception.getMessage()).isEqualTo("User is not a participant of this chat");
         verifyNoInteractions(messageDao);
@@ -130,13 +143,10 @@ class MessageDalTest {
                 .userId(UUID.randomUUID())
                 .build();
 
-        when(participantDao.findByChatId(chatId)).thenReturn(List.of(participant));
-
         MessageResponse result = messageDal.sendMessage(chatId, requesterId, sendRequest);
 
         assertThat(result).isNotNull();
         verify(messageDao).insert(messageEntity);
-        verify(publisher).publishMessageSent(eq(messageEntity), anyList());
     }
 
     @Test
@@ -238,30 +248,49 @@ class MessageDalTest {
     @Test
     void getMessagesByChatId_WithAfterDate_Success() {
         LocalDateTime afterDate = LocalDateTime.now();
+        GetMessagesFilter filter = GetMessagesFilter.builder()
+                .chatId(chatId)
+                .requesterId(requesterId)
+                .after(afterDate)
+                .limit(20)
+                .build();
+
         when(participantDao.isParticipant(chatId, requesterId)).thenReturn(true);
         when(messageDao.findMessagesByChatIdAfter(eq(chatId), eq(afterDate), eq(21)))
                 .thenReturn(List.of(messageEntity));
         when(mapper.mapToPaginatedResponse(anyList(), eq(false))).thenReturn(PaginatedMessagesResponse.builder().build());
 
-        messageDal.getMessagesByChatId(chatId, requesterId, null, afterDate, 20);
+        messageDal.getMessagesByChatId(filter);
 
         verify(messageDao).findMessagesByChatIdAfter(eq(chatId), eq(afterDate), eq(21));
     }
 
     @Test
     void getMessagesByChatId_WithNoDates_Success() {
+        GetMessagesFilter filter = GetMessagesFilter.builder()
+                .chatId(chatId)
+                .requesterId(requesterId)
+                .limit(20)
+                .build();
+
         when(participantDao.isParticipant(chatId, requesterId)).thenReturn(true);
         when(messageDao.findMessagesByChatIdBefore(eq(chatId), any(LocalDateTime.class), eq(21)))
                 .thenReturn(List.of(messageEntity));
         when(mapper.mapToPaginatedResponse(anyList(), eq(false))).thenReturn(PaginatedMessagesResponse.builder().build());
 
-        messageDal.getMessagesByChatId(chatId, requesterId, null, null, 20);
+        messageDal.getMessagesByChatId(filter);
 
         verify(messageDao).findMessagesByChatIdBefore(eq(chatId), any(LocalDateTime.class), eq(21));
     }
 
     @Test
     void getMessagesByChatId_HasMore_Success() {
+        GetMessagesFilter filter = GetMessagesFilter.builder()
+                .chatId(chatId)
+                .requesterId(requesterId)
+                .limit(2)
+                .build();
+
         when(participantDao.isParticipant(chatId, requesterId)).thenReturn(true);
         List<MessageEntity> threeMessages = List.of(messageEntity, messageEntity, messageEntity);
         when(messageDao.findMessagesByChatIdBefore(eq(chatId), any(LocalDateTime.class), eq(3)))
@@ -269,7 +298,7 @@ class MessageDalTest {
 
         when(mapper.mapToPaginatedResponse(anyList(), eq(true))).thenReturn(PaginatedMessagesResponse.builder().hasMore(true).build());
 
-        PaginatedMessagesResponse result = messageDal.getMessagesByChatId(chatId, requesterId, null, null, 2);
+        PaginatedMessagesResponse result = messageDal.getMessagesByChatId(filter);
 
         assertThat(result.isHasMore()).isTrue();
     }
