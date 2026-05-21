@@ -183,5 +183,59 @@
   },
   "hero": {
     "illustrationAlt": "Illustration"
+  },
+  "settings": {
+    "title": "Настройки",
+    "save": "Сохранить",
+    "privacy": {
+      "title": "Приватность",
+      "showPhoneNumber": "Показывать номер телефона",
+      "showEmail": "Показывать email",
+      "showBirthday": "Показывать дату рождения",
+      "showCity": "Показывать город",
+      "showPlaceOfWork": "Показывать место работы",
+      "showJobTitle": "Показывать должность",
+      "showPersonalInterests": "Показывать интересы"
+    },
+    "notifications": {
+      "title": "Уведомления",
+      "push": "Push-уведомления",
+      "email": "Email-уведомления"
+    },
+    "account": {
+      "title": "Аккаунт",
+      "email": "Email",
+      "phone": "Номер телефона",
+      "password": "Пароль",
+      "change": "Изменить",
+      "changePassword": "Сменить пароль",
+      "oldPassword": "Старый пароль",
+      "newPassword": "Новый пароль",
+      "newEmail": "Новый email",
+      "newPhone": "Новый номер телефона",
+      "currentPassword": "Текущий пароль",
+      "changeEmailNote": "Введите новый email и подтвердите текущим паролем. Мы отправим код подтверждения на новый адрес.",
+      "changePhoneNote": "Введите новый номер телефона. Мы отправим SMS-код для подтверждения.",
+      "sendCode": "Отправить код",
+      "repeatPassword": "Повторите пароль",
+      "confirmChange": "Подтвердить",
+      "cancel": "Отмена",
+      "danger": "Опасная зона",
+      "deleteAccount": "Удалить аккаунт",
+      "deleteWarning": "Это действие необратимо. Все ваши данные, посты и подписки будут удалены навсегда.",
+      "confirmDelete": "Удалить навсегда",
+      "errors": {
+        "passwordRequired": "Введите старый и новый пароль",
+        "passwordMismatch": "Пароли не совпадают",
+        "fieldRequired": "Заполните все поля"
+      }
+    },
+    "sessions": {
+      "title": "Активные сессии",
+      "current": "текущая",
+      "noSessions": "Нет активных сессий",
+      "terminate": "Завершить",
+      "terminateAll": "Завершить все остальные"
+    }
   }
 }

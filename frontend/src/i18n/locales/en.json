@@ -182,5 +182,59 @@
   },
   "hero": {
     "illustrationAlt": "Illustration"
+  },
+  "settings": {
+    "title": "Settings",
+    "save": "Save",
+    "privacy": {
+      "title": "Privacy",
+      "showPhoneNumber": "Show phone number",
+      "showEmail": "Show email",
+      "showBirthday": "Show birth date",
+      "showCity": "Show city",
+      "showPlaceOfWork": "Show workplace",
+      "showJobTitle": "Show job title",
+      "showPersonalInterests": "Show interests"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "push": "Push notifications",
+      "email": "Email notifications"
+    },
+    "account": {
+      "title": "Account",
+      "email": "Email",
+      "phone": "Phone number",
+      "password": "Password",
+      "change": "Change",
+      "changePassword": "Change password",
+      "oldPassword": "Old password",
+      "newPassword": "New password",
+      "newEmail": "New email",
+      "newPhone": "New phone number",
+      "currentPassword": "Current password",
+      "changeEmailNote": "Enter your new email and confirm with your current password. We will send a verification code to the new address.",
+      "changePhoneNote": "Enter your new phone number. We will send an SMS code for verification.",
+      "sendCode": "Send code",
+      "repeatPassword": "Repeat password",
+      "confirmChange": "Confirm",
+      "cancel": "Cancel",
+      "danger": "Danger zone",
+      "deleteAccount": "Delete account",
+      "deleteWarning": "This action is irreversible. All your data, posts and follows will be deleted permanently.",
+      "confirmDelete": "Delete permanently",
+      "errors": {
+        "passwordRequired": "Enter old and new password",
+        "passwordMismatch": "Passwords do not match",
+        "fieldRequired": "Please fill in all fields"
+      }
+    },
+    "sessions": {
+      "title": "Active sessions",
+      "current": "current",
+      "noSessions": "No active sessions",
+      "terminate": "Terminate",
+      "terminateAll": "Terminate all others"
+    }
   }
 }
