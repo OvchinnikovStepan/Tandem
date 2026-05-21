@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Builder
@@ -35,5 +36,20 @@ public class OnboardingCompletedEvent {
 
     public UUID getUserIdAsUUID() {
         return UUID.fromString(userId);
+    }
+
+    /**
+     * Username из {@code data.username} (единственное поддерживаемое поле для имени в каталоге).
+     */
+    public Optional<String> resolveUsername() {
+        if (data == null) {
+            return Optional.empty();
+        }
+        Object value = data.get("username");
+        if (value == null) {
+            return Optional.empty();
+        }
+        String s = String.valueOf(value).trim();
+        return s.isEmpty() ? Optional.empty() : Optional.of(s);
     }
 }

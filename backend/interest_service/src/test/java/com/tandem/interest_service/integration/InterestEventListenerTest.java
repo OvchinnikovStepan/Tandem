@@ -1,6 +1,10 @@
 package com.tandem.interest_service.integration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tandem.interest_service.service.DirectoryService;
+import com.tandem.interest_service.service.GroupInterestService;
 import com.tandem.interest_service.service.UserInterestService;
+import com.tandem.interest_service.service.model.request.GroupInterestRequest;
 import com.tandem.interest_service.service.model.request.UserInterestRequest;
 import com.tandem.interest_service.service.model.response.TagResponse;
 import com.tandem.interest_service.service.model.response.UserInterestResponse;
@@ -19,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -31,15 +36,24 @@ class InterestEventListenerTest {
     private UserInterestService userInterestService;
 
     @Mock
+    private GroupInterestService groupInterestService;
+
+    @Mock
+    private DirectoryService directoryService;
+
+    @Mock
     private Acknowledgment acknowledgment;
 
     private InterestEventListener interestEventListener;
 
     private UUID userId;
+    private UUID groupId;
     private UUID tagId1;
     private UUID tagId2;
     private UserInterestRequest request1;
     private UserInterestRequest request2;
+    private GroupInterestRequest groupRequest1;
+    private GroupInterestRequest groupRequest2;
     private UserInterestResponse response1;
     private UserInterestResponse response2;
     private TagResponse tagResponse1;
@@ -48,12 +62,18 @@ class InterestEventListenerTest {
 
     @BeforeEach
     void setUp() {
-        interestEventListener = new InterestEventListener(userInterestService);
+        interestEventListener = new InterestEventListener(
+                new ObjectMapper(),
+                userInterestService,
+                groupInterestService,
+                directoryService
+        );
         initializeTestData();
     }
 
     private void initializeTestData() {
         userId = UUID.randomUUID();
+        groupId = UUID.randomUUID();
         tagId1 = UUID.randomUUID();
         tagId2 = UUID.randomUUID();
         now = LocalDateTime.now();
@@ -77,6 +97,16 @@ class InterestEventListenerTest {
 
         request2 = UserInterestRequest.builder()
                 .userId(userId)
+                .tagId(tagId2)
+                .build();
+
+        groupRequest1 = GroupInterestRequest.builder()
+                .groupId(groupId)
+                .tagId(tagId1)
+                .build();
+
+        groupRequest2 = GroupInterestRequest.builder()
+                .groupId(groupId)
                 .tagId(tagId2)
                 .build();
 
@@ -108,6 +138,7 @@ class InterestEventListenerTest {
 
         interestEventListener.handleOnboardingCompleted(record, acknowledgment);
 
+        verify(directoryService).syncUserFromOnboarding(any());
         verify(userInterestService).parseToUserInterestRequests(message);
         verify(userInterestService).addUserInterest(requests);
         verify(acknowledgment).acknowledge();
@@ -122,6 +153,7 @@ class InterestEventListenerTest {
 
         interestEventListener.handleOnboardingCompleted(record, acknowledgment);
 
+        verify(directoryService).syncUserFromOnboarding(any());
         verify(userInterestService).parseToUserInterestRequests(message);
         verify(userInterestService, never()).addUserInterest(anyList());
         verify(acknowledgment).acknowledge();
@@ -141,10 +173,59 @@ class InterestEventListenerTest {
         interestEventListener.handleOnboardingCompleted(record, acknowledgment);
 
         ArgumentCaptor<List<UserInterestRequest>> captor = ArgumentCaptor.forClass(List.class);
+        verify(directoryService).syncUserFromOnboarding(any());
         verify(userInterestService).addUserInterest(captor.capture());
 
         List<UserInterestRequest> capturedRequests = captor.getValue();
         assertThat(capturedRequests).hasSize(2);
         verify(acknowledgment).acknowledge();
+    }
+
+    // handleGroupCreated
+    @Test
+    void handleGroupCreated_Success() {
+        String message = "{\"groupId\":\"" + groupId + "\",\"interestTags\":\"[gaming, reading]\"}";
+        ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "key", message);
+
+        List<GroupInterestRequest> requests = Arrays.asList(groupRequest1, groupRequest2);
+
+        when(groupInterestService.parseToGroupInterestRequest(message)).thenReturn(requests);
+
+        interestEventListener.handleGroupCreated(record, acknowledgment);
+
+        verify(directoryService).syncGroupFromEvent(any());
+        verify(groupInterestService).parseToGroupInterestRequest(message);
+        verify(groupInterestService).addGroupInterest(requests);
+        verify(acknowledgment).acknowledge();
+    }
+
+    @Test
+    void handleGroupCreated_WhenNoValidInterests_ShouldAcknowledge() {
+        String message = "{\"groupId\":\"" + groupId + "\",\"interestTags\":\"[]\"}";
+        ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "key", message);
+
+        when(groupInterestService.parseToGroupInterestRequest(message)).thenReturn(List.of());
+
+        interestEventListener.handleGroupCreated(record, acknowledgment);
+
+        verify(directoryService).syncGroupFromEvent(any());
+        verify(groupInterestService).parseToGroupInterestRequest(message);
+        verify(groupInterestService, never()).addGroupInterest(anyList());
+        verify(acknowledgment).acknowledge();
+    }
+
+    @Test
+    void handleGroupCreated_WhenExceptionThrown_ShouldNotAcknowledge() {
+        String message = "{\"groupId\":\"" + groupId + "\",\"groupName\":\"G\",\"interestTags\":\"[]\"}";
+        ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "key", message);
+
+        when(groupInterestService.parseToGroupInterestRequest(message)).thenThrow(new RuntimeException("Parsing failed"));
+
+        interestEventListener.handleGroupCreated(record, acknowledgment);
+
+        verify(directoryService).syncGroupFromEvent(any());
+        verify(groupInterestService).parseToGroupInterestRequest(message);
+        verify(groupInterestService, never()).addGroupInterest(anyList());
+        verify(acknowledgment, never()).acknowledge();
     }
 }

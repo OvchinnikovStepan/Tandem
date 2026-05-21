@@ -13,6 +13,16 @@ CREATE TABLE user_interests (
 CREATE INDEX idx_user_interests_user_id ON user_interests(user_id);
 CREATE INDEX idx_user_interests_tag_id ON user_interests(tag_id);
 
+CREATE TABLE group_tags (
+    id UUID PRIMARY KEY,
+    group_id UUID NOT NULL,
+    tag_id UUID REFERENCES tags(id),
+    created_at TIMESTAMP NOT NULL,
+    UNIQUE(group_id, tag_id)
+);
+
+CREATE INDEX idx_group_tags_group_id ON group_tags(group_id);
+
 -- Статистика использования тегов
 CREATE MATERIALIZED VIEW tag_usage_stats AS
 SELECT

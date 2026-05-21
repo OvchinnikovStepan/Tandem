@@ -163,52 +163,7 @@ public class UserInterestDalImpl implements UserInterestDal {
         return UserInterestEntityMapper.toResponse(entity, tagResponse);
     }
 
-    @Override
-    public Map<UUID, Integer> getUsersWithCommonTagsCount(UUID currentUserId, int minMatchCount) {
-        log.debug("Getting matching with users for user: {} ", currentUserId);
 
-        List<Map<String, Object>> rows =
-                userInterestDao.findUsersWithCommonTagsCount(currentUserId, minMatchCount);
-
-        Map<UUID, Integer> result = new HashMap<>();
-
-        for (Map<String, Object> row : rows) {
-            Object userIdObj = row.get("user_id");
-            UUID userId = (UUID) userIdObj;
-            Integer commonCount = ((Number) row.get("common_count")).intValue();
-            result.put(userId, commonCount);
-        }
-        return result;
-    }
-
-    @Override
-    public int getCountUserInterests(UUID userId) {
-        log.debug("Getting interests count for user: {}", userId);
-        try {
-            int count = userInterestDao.countUserInterests(userId);
-            log.debug("User {} has {} interests", userId, count);
-            return count;
-        } catch (Exception e) {
-            log.error("Failed to get interests count for user: {}", userId, e);
-            return 0;
-        }
-    }
-
-    @Override
-    public List<UUID> getCommonTagIds(UUID userId1, UUID userId2) {
-        log.debug("Getting common tag IDs between user: {} and user: {}", userId1, userId2);
-
-        try {
-            List<UUID> commonTagIds = userInterestDao.findCommonTagIds(userId1, userId2);
-            log.debug("Found {} common tags between user: {} and user: {}",
-                    commonTagIds.size(), userId1, userId2);
-            return commonTagIds;
-        } catch (Exception e) {
-            log.error("Failed to get common tags between user: {} and user: {}",
-                    userId1, userId2, e);
-            return List.of();
-        }
-    }
 
     @Override
     public TagResponse findTagByName(String name) {
@@ -218,19 +173,6 @@ public class UserInterestDalImpl implements UserInterestDal {
                 .orElseThrow(() -> new RuntimeException("Tag not found with name: " + name));
 
         TagStatsEntity stats = tagStatsDao.findByTagId(entity.getId())
-                .orElse(null);
-
-        return TagEntityMapper.mapToResponse(entity, stats);
-    }
-
-    @Override
-    public TagResponse findTagById(UUID tagId) {
-        log.debug("Finding tag by id: {}", tagId);
-
-        TagEntity entity = tagDao.findById(tagId)
-                .orElseThrow(() -> new RuntimeException("Tag not found with id: " + tagId));
-
-        TagStatsEntity stats = tagStatsDao.findByTagId(tagId)
                 .orElse(null);
 
         return TagEntityMapper.mapToResponse(entity, stats);
