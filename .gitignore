@@ -1,0 +1,26 @@
+# Maven
+**/target/
+
+# Compiled / archives (на случай вне target)
+*.class
+
+# Logs
+*.log
+
+# JVM crash dumps
+hs_err_pid*
+replay_pid*
+
+# IDE — при необходимости раскомментируй то, что не хотите версионировать
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (если появится фронт в репозитории)
+node_modules/
