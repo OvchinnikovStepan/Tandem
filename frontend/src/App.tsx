@@ -5,6 +5,7 @@ import Questionnaire from "@/pages/QuestionnairePage/components/QuestionnairePag
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import ForgotPassword from "@/pages/ForgotPassword";
+import Settings from "@/pages/Settings";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
@@ -28,6 +29,7 @@ const App = () => {
                             path="/forgot-password"
                             element={<ForgotPassword />}
                         />
+                        <Route path="/settings" element={<Settings />} />
                     </Routes>
                 </BrowserRouter>
             </Provider>
