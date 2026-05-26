@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { IconButton } from "@/ui/auth/IconButton";
-import { LanguageSwitcher } from "../LanguageSwitcher/LanguageSwitcher";
+import { LanguageSwitcher } from "@/modules/LandingContent/components/LanguageSwitcher/LanguageSwitcher";
 
 interface HeaderProps {
     onBack?: () => void;

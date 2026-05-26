@@ -1,186 +1,264 @@
 {
-  "landing": {
-    "header": {
-      "login": "Log in"
+    "landing": {
+        "header": {
+            "login": "Log in"
+        },
+        "hero": {
+            "title": "Tandem: your corporate messenger for engaging communication",
+            "description": "Work is more than just tasks.\nIt’s the people you want to communicate with, learn from, grow with, and have fun together.",
+            "cta": "Try for free"
+        },
+        "features": {
+            "secure": {
+                "title": "Secure communication",
+                "description": "End-to-end encryption for all your chats."
+            },
+            "interests": {
+                "title": "Interest-based groups",
+                "description": "Create, join, organize events — all in one app."
+            },
+            "questionnaire": {
+                "title": "Interactive profile",
+                "description": "Fill out a short profile and meet people who share your interests."
+            },
+            "interface": {
+                "title": "Nothing extra",
+                "description": "Easy to learn from the first launch — a simple and intuitive interface."
+            }
+        },
+        "qtb": {
+            "title": "Ready to get started with Tandem?",
+            "description": "Fill out the profile, and Tandem will match you with people and groups that fit you and your interests!",
+            "button": "Try for free"
+        },
+        "footer": {
+            "contact": "For any questions, contact us at ",
+            "email": "tandem@t-bang.ru",
+            "links": {
+                "email": "Email",
+                "vk": "VK",
+                "telegram": "Telegram",
+                "offer": "Offer",
+                "organization": "Organization details",
+                "privacy": "Privacy Policy"
+            },
+            "company": "2025, T-Bang"
+        }
+    },
+    "questionnaire": {
+        "header": {
+            "title": "Questionnaire",
+            "description": {
+                "default": "Please tell us about your interests so we can find the best matches for you with other users and groups!\nBelow you can choose from various categories.",
+                "edit": "Please describe your other interests below!",
+                "profile": "Please provide information about yourself below!"
+            }
+        },
+        "default": {
+            "loading": "Loading interests..."
+        },
+        "edit": {
+            "no-interests": "You must select at least 1 interest!",
+            "add-button": "Add",
+            "search-placeholder": "Please enter the name of your interest...",
+            "search-not-found": "Sorry, this interest was not found in the system or you have already selected it...\n\nIf you did not find the interest you were looking for, you can add it in the future when editing your profile!"
+        },
+        "profile": {
+            "first-name": {
+                "title": "First Name",
+                "placeholder": "Your first name"
+            },
+            "last-name": {
+                "title": "Last Name",
+                "placeholder": "Your last name"
+            },
+            "city": {
+                "title": "City",
+                "placeholder": "Enter your city"
+            },
+            "birth-date": {
+                "title": "Date of Birth",
+                "placeholder": "DD/MM/YYYY"
+            },
+            "gender": {
+                "title": "Gender",
+                "options": {
+                    "no-select": "Not selected",
+                    "male": "Male",
+                    "female": "Female"
+                }
+            },
+            "errors": {
+                "first-name": {
+                    "required": "Please enter your first name.",
+                    "too-long": "First name must not exceed 50 characters."
+                },
+                "last-name": {
+                    "required": "Please enter your last name.",
+                    "too-long": "Last name must not exceed 50 characters."
+                },
+                "birth-date": {
+                    "invalid-date": "Please enter a valid date (e.g., 22/05/2001)."
+                },
+                "save-error": "Something went wrong. Please try saving again."
+            }
+        },
+        "buttons": {
+            "next": "Next",
+            "back": "Back",
+            "finish": "Finish",
+            "saving": "Saving..."
+        }
+    },
+    "common": {
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm password"
+    },
+    "validation": {
+        "invalidEmail": "Enter a valid email",
+        "invalidPhone": "Enter a valid phone number",
+        "minPassword": "Password must be at least 8 characters",
+        "minPasswordShort": "At least 8 characters",
+        "passwordsMismatch": "Passwords do not match",
+        "codeLength": "Code must contain 6 digits"
+    },
+    "login": {
+        "title": "Sign in to Tandem",
+        "subtitle": "Enter your details to access your account",
+        "forgotPassword": "Forgot password?",
+        "submit": "Sign in",
+        "submitting": "Signing in...",
+        "noAccount": "No account yet?",
+        "register": "Register",
+        "terms": "By signing in, you agree to the Terms of Use and Privacy Policy",
+        "error": "Could not sign in. Check your email and password."
+    },
+    "register": {
+        "titlePhone": "Enter phone number",
+        "titleCode": "Enter code",
+        "titleCredentials": "Create credentials",
+        "step": "Step {{step}} of {{total}}",
+        "next": "Next",
+        "submit": "Register",
+        "submitting": "Registering...",
+        "haveAccount": "Already have an account?",
+        "login": "Sign in",
+        "phoneLabel": "Phone number",
+        "phonePlaceholder": "+1 555 123 4567",
+        "sendingCode": "Sending code...",
+        "codeSent": "We sent a verification code to",
+        "codeLabel": "Verification code",
+        "submitCode": "Confirm code",
+        "submittingCode": "Verifying...",
+        "noCode": "Didn't get a code?",
+        "resendCode": "Resend",
+        "errors": {
+            "unknown": "Something went wrong, please try again",
+            "invalidCode": "Invalid verification code"
+        }
+    },
+    "forgotPassword": {
+        "titleStep1": "Reset password",
+        "titleStep2": "Enter code",
+        "titleStep3": "Create new password",
+        "subtitleStep1": "Enter your email to continue",
+        "emailPlaceholder": "email",
+        "submitEmail": "Confirm email",
+        "submittingEmail": "Sending...",
+        "codeSent": "We sent a verification code to",
+        "codeLabel": "Verification code",
+        "submitCode": "Confirm code",
+        "submittingCode": "Verifying...",
+        "noCode": "Didn't get a code?",
+        "resendCode": "Resend",
+        "submitNewPassword": "Set new password",
+        "submittingNewPassword": "Saving...",
+        "errors": {
+            "send": "Could not send the email. Please try again later.",
+            "reset": "Could not set a new password. Check the code and try again."
+        }
     },
     "hero": {
-      "title": "Tandem: your corporate messenger for engaging communication",
-      "description": "Work is more than just tasks.\nIt’s the people you want to communicate with, learn from, grow with, and have fun together.",
-      "cta": "Try for free"
-    },
-    "features": {
-      "secure": {
-        "title": "Secure communication",
-        "description": "End-to-end encryption for all your chats."
-      },
-      "interests": {
-        "title": "Interest-based groups",
-        "description": "Create, join, organize events — all in one app."
-      },
-      "questionnaire": {
-        "title": "Interactive profile",
-        "description": "Fill out a short profile and meet people who share your interests."
-      },
-      "interface": {
-        "title": "Nothing extra",
-        "description": "Easy to learn from the first launch — a simple and intuitive interface."
-      }
-    },
-    "qtb": {
-      "title": "Ready to get started with Tandem?",
-      "description": "Fill out the profile, and Tandem will match you with people and groups that fit you and your interests!",
-      "button": "Try for free"
-    },
-    "footer": {
-      "contact": "For any questions, contact us at ",
-      "email": "tandem@t-bang.ru",
-      "links": {
-        "email": "Email",
-        "vk": "VK",
-        "telegram": "Telegram",
-        "offer": "Offer",
-        "organization": "Organization details",
-        "privacy": "Privacy Policy"
-      },
-      "company": "2025, T-Bang"
-    }
-  },
-  "questionnaire": {
-    "header": {
-      "title": "Questionnaire",
-      "description": {
-        "default": "Please tell us about your interests so we can find the best matches for you with other users and groups!\nBelow you can choose from various categories.",
-        "edit": "Please describe your other interests below!",
-        "profile": "Please provide information about yourself below!"
-      }
-    },
-    "default": {
-      "loading": "Loading interests..."
-    },
-    "edit": {
-      "no-interests": "You must select at least 1 interest!",
-      "add-button": "Add",
-      "search-placeholder": "Please enter the name of your interest...",
-      "search-not-found": "Sorry, this interest was not found in the system or you have already selected it...\n\nIf you did not find the interest you were looking for, you can add it in the future when editing your profile!"
+        "illustrationAlt": "Illustration"
     },
     "profile": {
-      "first-name": {
-        "title": "First Name",
-        "placeholder": "Your first name"
-      },
-      "last-name": {
-        "title": "Last Name",
-        "placeholder": "Your last name"
-      },
-      "city": {
-        "title": "City",
-        "placeholder": "Enter your city"
-      },
-      "birth-date": {
-        "title": "Date of Birth",
-        "placeholder": "DD/MM/YYYY"
-      },
-      "gender": {
-        "title": "Gender",
-        "options": {
-          "no-select": "Not selected",
-          "male": "Male",
-          "female": "Female"
+        "rightSidebar": {
+            "suggestedFriends": "Suggested friends",
+            "view": "View",
+            "profileActivity": "Profile activity",
+            "followers": "Followers",
+            "period": "this month",
+            "message": "This month you significantly increased your follower count!"
+        },
+        "rightSidebarEdit": {
+            "title": "Edit profile",
+            "menu": {
+                "profile": "Profile",
+                "interests": "Interests",
+                "career": "Career"
+            }
+        },
+        "info": {
+            "editProfile": "Edit profile",
+            "posts": "posts",
+            "followers": "followers",
+            "friends": "friends",
+            "more": "More..."
+        },
+        "tabs": {
+            "posts": "posts",
+            "saved": "saved"
+        },
+        "posts": {
+            "emptyTitle": "No posts yet",
+            "emptyDescription": "Create your first post!",
+            "loading": "Loading..."
+        },
+        "edit": {
+            "title": "Profile",
+            "firstName": "First name:",
+            "lastName": "Last name:",
+            "gender": "Gender:",
+            "male": "Male",
+            "female": "Female",
+            "other": "Other",
+            "birthDate": "Date of birth:",
+            "birthDatePlaceholder": "00 / 00 / 0000",
+            "username": "Username:",
+            "bio": "About:",
+            "bioPlaceholder": "Tell us about yourself...",
+            "city": "City:",
+            "save": "Save"
+        },
+        "career": {
+            "title": "Career",
+            "workplace": "Workplace:",
+            "workplacePlaceholder": "Enter company",
+            "startYear": "Start year:",
+            "endYear": "End year:",
+            "position": "Position:",
+            "notSelected": "Not selected",
+            "save": "Save"
+        },
+        "interests": {
+            "title": "Interests",
+            "searchPlaceholder": "Enter your interest...",
+            "add": "Add",
+            "save": "Save",
+            "defaults": {
+                "basketball": "Basketball",
+                "movies": "Movies",
+                "football": "Football",
+                "games": "Games",
+                "development": "Development",
+                "music": "Music"
+            }
+        },
+        "mock": {
+            "location": "Omsk",
+            "bio": "I love traveling the world 🌍",
+            "city": "Omsk"
         }
-      },
-      "errors": {
-        "first-name": {
-          "required": "Please enter your first name.",
-          "too-long": "First name must not exceed 50 characters."
-        },
-        "last-name": {
-          "required": "Please enter your last name.",
-          "too-long": "Last name must not exceed 50 characters."
-        },
-        "birth-date": {
-          "invalid-date": "Please enter a valid date (e.g., 22/05/2001)."
-        },
-        "save-error": "Something went wrong. Please try saving again."
-      }
-    },
-    "buttons": {
-      "next": "Next",
-      "back": "Back",
-      "finish": "Finish",
-      "saving": "Saving..."
     }
-  },
-  "common": {
-    "email": "Email",
-    "password": "Password",
-    "confirmPassword": "Confirm password"
-  },
-  "validation": {
-    "invalidEmail": "Enter a valid email",
-    "invalidPhone": "Enter a valid phone number",
-    "minPassword": "Password must be at least 8 characters",
-    "minPasswordShort": "At least 8 characters",
-    "passwordsMismatch": "Passwords do not match",
-    "codeLength": "Code must contain 6 digits"
-  },
-  "header": {
-    "switchToRu": "Switch to Russian",
-    "switchToEn": "Switch to English"
-  },
-  "login": {
-    "title": "Sign in to Tandem",
-    "subtitle": "Enter your details to access your account",
-    "forgotPassword": "Forgot password?",
-    "submit": "Sign in",
-    "submitting": "Signing in...",
-    "noAccount": "No account yet?",
-    "register": "Register",
-    "terms": "By signing in, you agree to the Terms of Use and Privacy Policy"
-  },
-  "register": {
-    "titleStep1": "Create account",
-    "titleStep2": "Create a password",
-    "titlePhone": "Enter phone number",
-    "titleCode": "Enter code",
-    "titleCredentials": "Create credentials",
-    "step": "Step {{step}} of {{total}}",
-    "next": "Next",
-    "submit": "Register",
-    "submitting": "Registering...",
-    "haveAccount": "Already have an account?",
-    "login": "Sign in",
-    "phoneLabel": "Phone number",
-    "phonePlaceholder": "+1 555 123 4567",
-    "sendingCode": "Sending code...",
-    "codeSent": "We sent a verification code to",
-    "codeLabel": "Verification code",
-    "submitCode": "Confirm code",
-    "submittingCode": "Verifying...",
-    "noCode": "Didn't get a code?",
-    "resendCode": "Resend",
-    "errors": {
-      "unknown": "Something went wrong, please try again",
-      "invalidCode": "Invalid verification code"
-    }
-  },
-  "forgotPassword": {
-    "titleStep1": "Reset password",
-    "titleStep2": "Enter code",
-    "titleStep3": "Create new password",
-    "subtitleStep1": "Enter your email to continue",
-    "emailPlaceholder": "email",
-    "submitEmail": "Confirm email",
-    "submittingEmail": "Sending...",
-    "codeSent": "We sent a verification code to",
-    "codeLabel": "Verification code",
-    "submitCode": "Confirm code",
-    "submittingCode": "Verifying...",
-    "noCode": "Didn't get a code?",
-    "resendCode": "Resend",
-    "submitNewPassword": "Set new password",
-    "submittingNewPassword": "Saving..."
-  },
-  "hero": {
-    "illustrationAlt": "Illustration"
-  }
 }

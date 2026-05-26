@@ -1,8 +1,13 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useNavigate } from "react-router";
 import { selectedInterestsAtom } from "./../atoms/interestsAtoms";
 import { completeOnboarding } from "./../api/completeOnbording.ts";
+import {
+    completeMockOnboarding,
+    updateMockAuthProfile,
+} from "@/modules/Auth/api/authApi";
+import { authAtom } from "@/modules/Auth/atoms/authAtom";
 import { QUESTION_IDS } from "./../constants/constants";
 import type { ProfileFormValues } from "@/modules/Questionnaire/schemas/profileSchema";
 import { RESET } from "jotai/utils";
@@ -43,15 +48,49 @@ export function useSubmitQuestionnaire() {
     const navigate = useNavigate();
     const selectedInterests = useAtomValue(selectedInterestsAtom);
     const resetInterests = useSetAtom(selectedInterestsAtom);
+    const setAuth = useSetAtom(authAtom);
+    const queryClient = useQueryClient();
 
     const { mutate, isPending, error } = useMutation({
         mutationFn: (profileData: ProfileFormValues) => {
             const payload = mapProfileToPayload(profileData, selectedInterests);
             return completeOnboarding(payload);
         },
-        onSuccess: () => {
+        onSuccess: (_, profileData) => {
+            updateMockAuthProfile({
+                firstName: profileData.firstName,
+                lastName: profileData.lastName,
+                city: profileData.city,
+                birthDate: profileData.birthDate,
+                gender:
+                    profileData.gender && profileData.gender !== "no-select"
+                        ? profileData.gender
+                        : "",
+            });
+            completeMockOnboarding();
+            setAuth((prev) => ({
+                ...prev,
+                user: prev.user
+                    ? {
+                        ...prev.user,
+                        firstName: profileData.firstName,
+                        lastName: profileData.lastName,
+                        city: profileData.city,
+                        birthDate: profileData.birthDate,
+                        gender:
+                            profileData.gender &&
+                            profileData.gender !== "no-select"
+                                ? profileData.gender
+                                : "",
+                        name: `${profileData.lastName} ${profileData.firstName}`.trim(),
+                        onboardingCompleted: true,
+                    }
+                    : prev.user,
+            }));
             resetInterests(RESET);
-            navigate("/profile", { replace: true });
+            queryClient.removeQueries({ queryKey: ["defaultInterests"] });
+            queryClient.removeQueries({ queryKey: ["interests", "search"] });
+            navigate("/feed", { replace: true });
         },
     });
 

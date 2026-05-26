@@ -9,6 +9,7 @@ const linkVariants = cva(
                 default:
                     "text-heading-black decoration-decoration-color hover:decoration-heading-black",
                 footer: "text-accent-white decoration-decoration-color hover:decoration-accent-white",
+                action: "text-action-button-text decoration-action-button-text hover:decoration-action-button-text",
             },
         },
         defaultVariants: {

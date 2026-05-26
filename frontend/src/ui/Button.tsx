@@ -19,6 +19,7 @@ const buttonVariants = cva(
                 ghost: "hover:bg-accent-gray duration-500 dark:hover:bg-accent/50",
                 link: "text-action-button-text hover:text-blue-700 underline-offset-4 hover:underline",
                 action: "bg-action-button hover:bg-action-button-hover text-action-button-text font-[400] leading-4 transform",
+                custom: "",
             },
             size: {
                 default: "h-14 px-6 rounded-default has-[>svg]:px-3",
